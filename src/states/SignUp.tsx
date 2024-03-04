@@ -1,23 +1,30 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { signUp } from "../utils/api.ts";
 import { motion } from "framer-motion";
 import { TiMessages } from "react-icons/ti";
+import Validator from "../utils/validator.ts";
 
 const SignUp = (): JSX.Element => {
-  const [loading, setLoading] = useState(false);
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
 
   const navigate = useNavigate();
+  const validator = new Validator();
 
   const signUpNewUser = (e) => {
     e.preventDefault();
+    const isValidUsername = validator.valUsername(username);
+    const isValidEmail = validator.valEmail(email);
+    const isValidPhone = validator.valPhoneNumber(phone);
+    const isValidPass = validator.valPassword(password);
     try {
       signUp({ username, email, phone, password })
-        .then((res) => {})
+        .then((res) => {
+          console.log(res);
+        })
         .catch((err) => {
           console.log(err);
         });
@@ -33,29 +40,33 @@ const SignUp = (): JSX.Element => {
       <p className="text-[#aaa] text-center px-2">
         Welcome to Txt Me, this should only take a few seconds
       </p>
-      <form className="mt-20" onSubmit={(e) => signUpNewUser(e)}>
+      <form className="mt-20" onSubmit={signUpNewUser}>
         <input
           autoFocus={true}
           type="text"
           onChange={(e) => setUsername(e.target.value)}
+          value={username}
           className="focus:outline-none py-2 my-1 bg-[transparent] w-full"
           placeholder="Username"
         />
         <input
           type="email"
           onChange={(e) => setEmail(e.target.value)}
+          value={email}
           className="focus:outline-none py-2 my-1 bg-[transparent] w-full"
           placeholder="Email"
         />
         <input
           type="phone"
           onChange={(e) => setPhone(e.target.value)}
+          value={phone}
           className="focus:outline-none py-2 my-1 bg-[transparent] w-full"
           placeholder="(702)-981-1370"
         />
         <input
           type="password"
           onChange={(e) => setPassword(e.target.value)}
+          value={password}
           className="focus:outline-none py-2 my-1 bg-[transparent] w-full"
           placeholder="Password"
         />
