@@ -1,13 +1,27 @@
-import { createContext, useState, useEffect, ReactNode } from "react";
+import React, { createContext, useState, ReactNode } from "react";
+import { ContextProps } from "../types/contextTypes";
 
-const UserContext = createContext({});
+const UserCtxt = createContext({} as ContextProps);
 
 export const UserProvider = ({
- children
+  children,
 }: {
- children: ReactNode;
+  children: ReactNode;
 }): JSX.Element => {
- return <UserContext.Provider value={{}}>{children}</UserContext.Provider>;
+  const [sysNotif, setSysNotif] = useState({
+    show: false,
+    title: "",
+    text: "",
+    color: "",
+    hasCancel: false,
+    actions: [{ text: "", func: () => {} }],
+  });
+
+  return (
+    <UserCtxt.Provider value={{ sysNotif, setSysNotif }}>
+      {children}
+    </UserCtxt.Provider>
+  );
 };
 
-export default UserContext;
+export default UserCtxt;

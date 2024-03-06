@@ -1,18 +1,17 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import UserContext from "@renderer/contexxt/UserContext";
+import UserContext from "../context/userCtxt";
 
-const SystemNotif = (): JSX.Element => {
-  const { systemNotif, setSystemNotif, userPreferences } =
-    useContext(UserContext);
+const SysNotif = (): JSX.Element => {
+  const { sysNotif, setSysNotif } = useContext(UserContext);
 
-  const notifTimeoutRef = useRef(null);
+  const notifTimeoutRef = useRef(null || 0);
 
   const handleDrag = (e): void => {
     const end = e.clientX;
     const minDistance = window.innerWidth / 1.4;
     if (end > minDistance) {
-      setSystemNotif({
+      setSysNotif({
         show: false,
         title: "",
         text: "",
@@ -24,9 +23,9 @@ const SystemNotif = (): JSX.Element => {
   };
 
   useEffect(() => {
-    if (systemNotif.show === true && systemNotif.hasCancel === false) {
+    if (sysNotif.show === true && sysNotif.hasCancel === false) {
       notifTimeoutRef.current = setTimeout(() => {
-        setSystemNotif({
+        setSysNotif({
           show: false,
           title: "",
           text: "",
@@ -38,15 +37,14 @@ const SystemNotif = (): JSX.Element => {
     } else {
       clearTimeout(notifTimeoutRef.current);
     }
-
     return () => {
       clearTimeout(notifTimeoutRef.current);
     };
-  }, [systemNotif, setSystemNotif]);
+  }, [sysNotif, setSysNotif]);
 
   return (
     <AnimatePresence>
-      {systemNotif.show && (
+      {sysNotif.show && (
         <>
           <motion.div
             drag="x"
@@ -55,32 +53,30 @@ const SystemNotif = (): JSX.Element => {
             initial={{ y: -50, opacity: 0 }}
             exit={{ x: 50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            className={`fixed top-10 z-[999] p-3  pb-0 rounded-md shadow-md ${
-              userPreferences.darkMode ? "bg-slate-700" : "bg-slate-300"
-            } w-[90vw] left-[5vw] max-w-[400px]`}
+            className={`fixed top-10 z-40 p-3 pl-5 pb-0 rounded-sm shadow-lg w-[90vw] text-[#fff] bg-[#0a0a0a] left-[5vw] max-w-[400px]`}
             onPointerDown={() =>
-              !systemNotif.hasCancel
-                ? setSystemNotif({ ...systemNotif, hasCancel: true })
+              !sysNotif.hasCancel
+                ? setSysNotif({ ...sysNotif, hasCancel: true })
                 : null
             }
           >
-            {!systemNotif.hasCancel && (
+            {!sysNotif.hasCancel && (
               <motion.div
                 initial={{ width: 0 }}
                 animate={{
                   width: "100%",
                   transition: { duration: 5 },
                 }}
-                className={`absolute top-0 left-0 min-h-[4px] ${systemNotif.color} rounded-full`}
+                className={`absolute top-0 left-0 min-h-[4px] ${sysNotif.color} rounded-l-full`}
               ></motion.div>
             )}
             <div
-              className={`absolute top-0 left-0 bottom-0 ${systemNotif.color} w-[5px] rounded-md`}
+              className={`absolute top-0 left-0 bottom-0 ${sysNotif.color} w-[5px] rounded-md`}
             ></div>
-            <p className="text-lg font-semibold">{systemNotif.title}</p>
-            <p className="text-xs whitespace-pre-line">{systemNotif.text}</p>
+            <p className="text-lg font-semibold">{sysNotif.title}</p>
+            <p className="text-xs whitespace-pre-line">{sysNotif.text}</p>
             <div className="mt-3 p-1 border-t flex justify-between items-center">
-              {systemNotif.actions?.map((action, index: number) => (
+              {sysNotif.actions?.map((action, index: number) => (
                 <button
                   key={index}
                   onClick={() => action.func()}
@@ -97,4 +93,4 @@ const SystemNotif = (): JSX.Element => {
   );
 };
 
-export default SystemNotif;
+export default SysNotif;

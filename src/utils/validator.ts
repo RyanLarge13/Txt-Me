@@ -9,7 +9,7 @@ class Validator {
     string: string,
     maxLength: number = 10,
     minLength: number = 3,
-    customRegex: RegExp = /^[a-zA-Z0-9!@#$%^&*()_+{}[\]:;<>,.?/~`\-\\s]*$/,
+    customRegex: RegExp = /^[a-zA-Z0-9!@#$%^&*()_+{}[\]:;<>,.?/~`\-\\s ]*$/,
     customEscapeMap: EscapeMap = {
       "&": "&amp;",
       "<": "&lt;",
