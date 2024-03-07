@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { TiMessages } from "react-icons/ti";
 import Validator from "../utils/validator.ts";
 import UserCtxt from "../context/userCtxt.tsx";
+import { ClipLoader } from "react-spinners";
 
 const SignUp = (): JSX.Element => {
  const { notifHdlr } = useContext(UserCtxt);
@@ -13,6 +14,7 @@ const SignUp = (): JSX.Element => {
  const [email, setEmail] = useState("");
  const [phone, setPhone] = useState("");
  const [password, setPassword] = useState("");
+ const [loading, setLoading] = useState(false);
 
  const navigate = useNavigate();
  const validator = new Validator();
@@ -26,6 +28,7 @@ const SignUp = (): JSX.Element => {
 
  const signUpNewUser = e => {
   e.preventDefault();
+  setLoading(true);
   const isValidUsername = validator.valUsername(username);
   const isValidEmail = validator.valEmail(email);
   const isValidPhone = validator.valPhoneNumber(phone);
@@ -34,15 +37,21 @@ const SignUp = (): JSX.Element => {
    signUp({ username, email, phone, password })
     .then(res => {
      notifHdlr.setNotif("New Account", res.data.data.message, true, []);
+     setLoading(false);
+     navigate("/verify/phone/verify")
     })
     .catch(err => {
-     notifHdlr.setNotif("Error", err.response.data.message, true, [
-      { text: "try login", func: (): void => tryingLogin() }, {text: "forgot creds", func: (): void => forgotCreds()} 
-     ]);
      console.log(err);
+     setLoading(false);
+     notifHdlr.setNotif("Error", err.response.data.message, true, [
+      { text: "try login", func: (): void => tryingLogin() },
+      { text: "forgot creds", func: (): void => forgotCreds() }
+     ]);
     });
   } catch (err) {
    console.log(err);
+   notifHdlr.setNotif("Error", err.response.data.message, true, []);
+   setLoading(false);
   }
  };
 
@@ -88,7 +97,7 @@ const SignUp = (): JSX.Element => {
      className="p-3 text-[#000] mt-2 rounded-sm shadow-lg bg-primary w-full"
      type="submit"
     >
-     Sign Up
+     {loading ? <ClipLoader size={17} color="#fff" /> : "Sign Up"}
     </motion.button>
    </form>
    <button
