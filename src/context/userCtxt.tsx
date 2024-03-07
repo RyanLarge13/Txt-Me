@@ -1,27 +1,30 @@
 import React, { createContext, useState, ReactNode } from "react";
 import { ContextProps } from "../types/contextTypes";
+import NotifHdlr from "../utils/NotifHdlr.ts";
 
 const UserCtxt = createContext({} as ContextProps);
 
 export const UserProvider = ({
-  children,
+ children
 }: {
-  children: ReactNode;
+ children: ReactNode;
 }): JSX.Element => {
-  const [sysNotif, setSysNotif] = useState({
-    show: false,
-    title: "",
-    text: "",
-    color: "",
-    hasCancel: false,
-    actions: [{ text: "", func: () => {} }],
-  });
+ const [sysNotif, setSysNotif] = useState({
+  show: false,
+  title: "",
+  text: "",
+  color: "",
+  hasCancel: false,
+  actions: [{ text: "", func: () => {} }]
+ });
 
-  return (
-    <UserCtxt.Provider value={{ sysNotif, setSysNotif }}>
-      {children}
-    </UserCtxt.Provider>
-  );
+ const notifHdlr = new NotifHdlr(setSysNotif);
+
+ return (
+  <UserCtxt.Provider value={{ sysNotif, setSysNotif, notifHdlr }}>
+   {children}
+  </UserCtxt.Provider>
+ );
 };
 
 export default UserCtxt;
