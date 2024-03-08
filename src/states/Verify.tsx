@@ -1,14 +1,32 @@
-import React from "react";
+import React, { useState, useContext } from "react";
 import { motion } from "framer-motion";
 import { useParams, useNavigate } from "react-router-dom";
 import { MdMarkEmailRead, MdOutlinePermPhoneMsg } from "react-icons/md";
+import { verifyPhone } from "../utils/api";
+import UserCtxt from "../context/userCtxt.tsx";
 
 const Verify = (): JSX.Element => {
+ const { notifHdlr, token } = useContext(UserCtxt);
+ const { type, method } = useParams();
  const navigate = useNavigate();
- const { type, method} = useParams();
+
+ const [pin, setPin] = useState("");
 
  const handlePhoneVerify = e => {
   e.preventDefault();
+  verifyPhone(token, pin)
+   .then(res => {
+    console.log(res);
+    notifHdlr.setNotif("Verified", res.data.message, true, []);
+    navigate("/profile");
+   })
+   .catch(err => {
+    console.log(err);
+    notifHdlr.setNotif("Error", err.response.data.message, true, [
+      { text: "try login", func: (): void => tryingLogin() },
+      { text: "forgot creds", func: (): void => forgotCreds() }
+     ]);
+   });
  };
 
  const handleEmailVerify = e => {
@@ -27,11 +45,16 @@ const Verify = (): JSX.Element => {
      <p className="text-[#aaa] text-center px-2">
       Verify your phone number with the pin sent to your phone via sms
      </p>
-     <form className="mt-20 w-full" onSubmit={handlePhoneVerify}>
+     <form
+      className="mt-20 w-full"
+      onSubmit={method === "verify" ? handlePhoneVerify : null}
+     >
       <input
        autoFocus={true}
+       value={pin}
+       onChange={e => setPin(e.target.value)}
        className="focus:outline-none py-2 my-1 bg-[transparent] w-full"
-       placeholder="pin"
+       placeholder="6 digit pin"
       />
       <motion.button
        whileTap={{ backgroundColor: "#fff" }}

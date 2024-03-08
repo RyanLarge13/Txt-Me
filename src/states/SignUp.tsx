@@ -8,7 +8,7 @@ import UserCtxt from "../context/userCtxt.tsx";
 import { ClipLoader } from "react-spinners";
 
 const SignUp = (): JSX.Element => {
- const { notifHdlr } = useContext(UserCtxt);
+ const { notifHdlr, setToken} = useContext(UserCtxt);
 
  const [username, setUsername] = useState("");
  const [email, setEmail] = useState("");
@@ -36,9 +36,10 @@ const SignUp = (): JSX.Element => {
   try {
    signUp({ username, email, phone, password })
     .then(res => {
-     notifHdlr.setNotif("New Account", res.data.data.message, true, []);
+     notifHdlr.setNotif("New Account", res.data.message, true, []);
+     setToken(res.data.data.token)
      setLoading(false);
-     navigate("/verify/phone/verify")
+     navigate("/verify/phone/verify");
     })
     .catch(err => {
      console.log(err);

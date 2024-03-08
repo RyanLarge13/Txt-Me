@@ -18,10 +18,12 @@ export const UserProvider = ({
   actions: [{ text: "", func: () => {} }]
  });
 
+ const [token, setToken] = useState("");
+
  const notifHdlr = new NotifHdlr(setSysNotif);
 
  return (
-  <UserCtxt.Provider value={{ sysNotif, setSysNotif, notifHdlr }}>
+  <UserCtxt.Provider value={{ sysNotif, setSysNotif, notifHdlr, token, setToken}}>
    {children}
   </UserCtxt.Provider>
  );
