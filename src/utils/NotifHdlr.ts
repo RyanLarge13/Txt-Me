@@ -1,35 +1,39 @@
+import { Dispatch, SetStateAction } from "react";
+import { SysNotif } from "../types/contextTypes";
+
 class NotifHdlr {
- constructor(setState) {
-  this.setState = setState;
- }
+  private setState;
+  constructor(setState: Dispatch<SetStateAction<SysNotif>>) {
+    this.setState = setState;
+  }
 
- closeNotif() {
-  this.setState({
-   show: false,
-   title: "",
-   text: "",
-   color: "",
-   hasCancel: false,
-   actions: []
-  });
- }
+  closeNotif(): void {
+    this.setState({
+      show: false,
+      title: "",
+      text: "",
+      color: "",
+      hasCancel: false,
+      actions: [],
+    });
+  }
 
- setNotif(title, text, hasCancel, actions) {
-  this.setState({
-   show: true,
-   title,
-   text,
-   color: "bg-tri",
-   hasCancel,
-   actions: [
-    {
-     text: "close",
-     func: (): void => this.closeNotif()
-    },
-    ...actions
-   ]
-  });
- }
+  setNotif(title: string, text: string, hasCancel: boolean, actions: []): void {
+    this.setState({
+      show: true,
+      title,
+      text,
+      color: "bg-tri",
+      hasCancel,
+      actions: [
+        {
+          text: "close",
+          func: (): void => this.closeNotif(),
+        },
+        ...actions,
+      ],
+    });
+  }
 }
 
 export default NotifHdlr;
