@@ -2,7 +2,7 @@ import React, { useState, useContext } from "react";
 import { motion } from "framer-motion";
 import { useParams, useNavigate } from "react-router-dom";
 import { MdMarkEmailRead, MdOutlinePermPhoneMsg } from "react-icons/md";
-import { verifyPhone } from "../utils/api";
+import { verifyPhone, verifyEmail } from "../utils/api";
 import UserCtxt from "../context/userCtxt.tsx";
 
 const Verify = (): JSX.Element => {
@@ -11,10 +11,28 @@ const Verify = (): JSX.Element => {
  const navigate = useNavigate();
 
  const [pin, setPin] = useState("");
+ const [emailPin, setEmailPin] = useState("");
 
  const handlePhoneVerify = e => {
   e.preventDefault();
   verifyPhone(token, pin)
+   .then(res => {
+    console.log(res);
+    notifHdlr.setNotif("Verified", res.data.message, true, []);
+    navigate("/verify/email/verify");
+   })
+   .catch(err => {
+    console.log(err);
+    notifHdlr.setNotif("Error", err.response.data.message, true, [
+     { text: "try login", func: (): void => tryingLogin() },
+     { text: "forgot creds", func: (): void => forgotCreds() }
+    ]);
+   });
+ };
+
+ const handleEmailVerify = e => {
+  e.preventDefault();
+  verifyEmail(token, emailPin)
    .then(res => {
     console.log(res);
     notifHdlr.setNotif("Verified", res.data.message, true, []);
@@ -23,14 +41,10 @@ const Verify = (): JSX.Element => {
    .catch(err => {
     console.log(err);
     notifHdlr.setNotif("Error", err.response.data.message, true, [
-      { text: "try login", func: (): void => tryingLogin() },
-      { text: "forgot creds", func: (): void => forgotCreds() }
-     ]);
+     { text: "try login", func: (): void => tryingLogin() },
+     { text: "forgot creds", func: (): void => forgotCreds() }
+    ]);
    });
- };
-
- const handleEmailVerify = e => {
-  e.preventDefault();
  };
 
  return (
@@ -67,17 +81,19 @@ const Verify = (): JSX.Element => {
     </>
    ) : (
     <>
-     {" "}
      <MdMarkEmailRead className="text-6xl text-secondary" />
      <p className="font-semibold text-[#fff]">One Time Passcode</p>
      <p className="text-[#aaa] text-center px-2">
       Verify your account by inserting the pin sent to your email address
      </p>
-     <form className="mt-20 w-full" onSubmit={handleEmailVerify}>
+     <form className="mt-20 w-full" onSubmit={method === "verify"?
+     handleEmailVerify : null}>
       <input
        autoFocus={true}
        className="focus:outline-none py-2 my-1 bg-[transparent] w-full"
        placeholder="pin"
+       value={emailPin}
+       onChange={e => setEmailPin(e.target.value)}
       />
       <motion.button
        whileTap={{ backgroundColor: "#fff" }}
@@ -88,7 +104,7 @@ const Verify = (): JSX.Element => {
       </motion.button>
      </form>
     </>
-   )}{" "}
+   )}
   </main>
  );
 };

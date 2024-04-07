@@ -27,13 +27,14 @@ export const UserProvider = ({
  });
 
  useEffect(() => {
-  const storedToken = localStorage.getItem("authToken");
+  localStorage.removeItem("authToken")
+  /*const storedToken = localStorage.getItem("authToken");
   if (storedToken !== null && typeof token === "string") {
    setToken(storedToken);
-  }
+  }*/
  }, []);
 
- useEffect(() => {
+ /* useEffect(() => {
   if (token) {
    fetchUserData(token)
     .then(res => {
@@ -42,16 +43,17 @@ export const UserProvider = ({
     .catch(err => {
      console.log(err);
      setToken("");
-     localStorage.removeItem("authToken")
+     localStorage.removeItem("authToken");
      notifHdlr.setNotif(
       "Error",
-      "Please login to access your account",
+      "Please login again to access your account",
       false,
       []
      );
     });
   }
- }, [token]);
+ }, [token]); 
+ */
 
  const notifHdlr = new NotifHdlr(setSysNotif);
 
