@@ -6,7 +6,7 @@ interface Notifhdlr {
     title: string,
     text: string,
     hasCancel: boolean,
-    actions: []
+    actions: Actions[]
   ) => void;
 }
 

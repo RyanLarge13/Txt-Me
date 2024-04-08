@@ -17,7 +17,7 @@ const App = () => {
       <Nav />
       <SysNotif />
       <Routes>
-        {user.userId ? (
+        {user?.userId ? (
           <Route path="/" element={<Navigate to="/profile" />} />
         ) : (
           <Route path="/" element={<Home />} />

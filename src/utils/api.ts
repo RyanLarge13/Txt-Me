@@ -27,10 +27,17 @@ export const verifyPhone = (
   return res;
 };
 
-export const verifyEmail = (token:string, pin: string): Promise<AxiosResponse> => {
- const res = Axios.post(`${devUrl}/verify/email`, {pin},
- {headers:{Authorization: `Bearer ${token} `}})
-}
+export const verifyEmail = (
+  token: string,
+  pin: string
+): Promise<AxiosResponse> => {
+  const res = Axios.post(
+    `${devUrl}/verify/email`,
+    { pin },
+    { headers: { Authorization: `Bearer ${token} ` } }
+  );
+  return res;
+};
 
 export const fetchUserData = (token: string): Promise<AxiosResponse> => {
   const res = Axios.get(`${devUrl}/user`, {
