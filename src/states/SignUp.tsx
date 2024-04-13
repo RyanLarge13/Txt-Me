@@ -19,8 +19,6 @@ const SignUp = (): JSX.Element => {
   const navigate = useNavigate();
   const validator = new Validator();
 
-  const forgotCreds = () => {};
-
   const tryingLogin = () => {
     navigate("/login/email");
     notifHdlr.closeNotif();
@@ -82,7 +80,6 @@ const SignUp = (): JSX.Element => {
           setLoading(false);
           notifHdlr.setNotif("Error", err.response.data.message, true, [
             { text: "try login", func: (): void => tryingLogin() },
-            { text: "forgot creds", func: (): void => forgotCreds() },
           ]);
         });
     } catch (err) {
@@ -130,6 +127,7 @@ const SignUp = (): JSX.Element => {
           placeholder="Password"
         />
         <motion.button
+        disabled={loading} 
           whileTap={{ backgroundColor: "#fff" }}
           className="p-3 text-[#000] mt-2 rounded-sm shadow-lg bg-primary w-full"
           type="submit"
