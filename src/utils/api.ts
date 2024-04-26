@@ -47,7 +47,7 @@ export const fetchUserData = (token: string): Promise<AxiosResponse> => {
 };
 
 export const pinEmail = (email: string): Promise<AxiosResponse> => {
- const res = Axios.post(`${devUrl}/verify/email/newpin`, { email });
+ const res = Axios.post(`${devUrl}/verify/email/newpin`, { email: email });
  return res;
 };
 

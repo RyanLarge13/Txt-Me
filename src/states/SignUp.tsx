@@ -72,6 +72,7 @@ const SignUp = (): JSX.Element => {
         .then((res) => {
           notifHdlr.setNotif("New Account", res.data.message, true, []);
           setToken(res.data.data.token);
+          localStorage.setItem("authToken", res.data.data.token)
           setLoading(false);
           navigate("/verify/phone/verify");
         })

@@ -6,35 +6,34 @@ import NotifHdlr from "../utils/NotifHdlr.ts";
 const UserCtxt = createContext({} as ContextProps);
 
 export const UserProvider = ({
-  children,
+ children
 }: {
-  children: ReactNode;
+ children: ReactNode;
 }): JSX.Element => {
-  const [token, setToken] = useState("");
-  const [sysNotif, setSysNotif] = useState({
-    show: false,
-    title: "",
-    text: "",
-    color: "",
-    hasCancel: false,
-    actions: [{ text: "", func: () => {} }],
-  });
-  const [user, setUser] = useState({
-    username: "",
-    userId: 0,
-    email: "",
-    phoneNumber: "",
-  });
+ const [token, setToken] = useState("");
+ const [sysNotif, setSysNotif] = useState({
+  show: false,
+  title: "",
+  text: "",
+  color: "",
+  hasCancel: false,
+  actions: [{ text: "", func: () => {} }]
+ });
+ const [user, setUser] = useState({
+  username: "",
+  userId: 0,
+  email: "",
+  phoneNumber: ""
+ });
 
-  useEffect(() => {
-    const storedToken = localStorage.getItem("authToken");
-    if (storedToken !== null && typeof token === "string") {
-      setToken(storedToken);
-      console.log(storedToken);
-    }
-  }, []);
+ useEffect(() => {
+  const storedToken = localStorage.getItem("authToken");
+  if (storedToken !== null && typeof token === "string") {
+   setToken(storedToken);
+  }
+ }, []);
 
-  /* useEffect(() => {
+ useEffect(() => {
   if (token) {
    fetchUserData(token)
     .then(res => {
@@ -53,25 +52,24 @@ export const UserProvider = ({
     });
   }
  }, [token]); 
- */
 
-  const notifHdlr = new NotifHdlr(setSysNotif);
+ const notifHdlr = new NotifHdlr(setSysNotif);
 
-  return (
-    <UserCtxt.Provider
-      value={{
-        sysNotif,
-        setSysNotif,
-        notifHdlr,
-        token,
-        setToken,
-        user,
-        setUser,
-      }}
-    >
-      {children}
-    </UserCtxt.Provider>
-  );
+ return (
+  <UserCtxt.Provider
+   value={{
+    sysNotif,
+    setSysNotif,
+    notifHdlr,
+    token,
+    setToken,
+    user,
+    setUser
+   }}
+  >
+   {children}
+  </UserCtxt.Provider>
+ );
 };
 
 export default UserCtxt;
