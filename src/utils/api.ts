@@ -62,7 +62,7 @@ export const verifyEmailLogin = (
 };
 
 export const fetchUserData = (token: string): Promise<AxiosResponse> => {
-  const res = Axios.get(`${devUrl}/user`, {
+  const res = Axios.get(`${devUrl}/login/user`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   return res;

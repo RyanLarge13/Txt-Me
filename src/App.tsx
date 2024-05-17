@@ -10,25 +10,29 @@ import Profile from "./states/Profile.tsx";
 import SysNotif from "./components/SysNotif.tsx";
 
 const App = () => {
-  const { user } = useContext(UserCtxt);
+ const { user } = useContext(UserCtxt);
 
-  return (
-    <main>
-      <Nav />
-      <SysNotif />
-      <Routes>
-        {user?.userId ? (
-          <Route path="/" element={<Navigate to="/profile" />} />
-        ) : (
-          <Route path="/" element={<Home />} />
-        )}
-        <Route path="/login/:type" element={<Login />} />
-        <Route path="/signup" element={<SignUp />} />
-        <Route path="/verify/:type/:method" element={<Verify />} />
-        <Route path="/profile" element={<Profile />} />
-      </Routes>
-    </main>
-  );
+ return (
+  <main>
+   <Nav />
+   <SysNotif />
+   <Routes>
+    {user?.userId ? (
+     <Route path="/" element={<Navigate to="/profile" />} />
+    ) : (
+     <Route path="/" element={<Home />} />
+    )}
+    <Route path="/login/:type" element={<Login />} />
+    <Route path="/signup" element={<SignUp />} />
+    <Route path="/verify/:type/:method" element={<Verify />} />
+    <Route
+     path="/profile"
+     element={user?.userId ? <Profile /> : <Navigate to="/" />}
+    />
+    <Route path="*" element={user?.userId ? <Navigate to="/profile" /> : <Navigate to="/" />} />
+   </Routes>
+  </main>
+ );
 };
 
 export default App;

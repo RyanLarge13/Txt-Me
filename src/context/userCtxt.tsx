@@ -1,6 +1,6 @@
 import React, { createContext, useState, ReactNode, useEffect } from "react";
 import { ContextProps } from "../types/contextTypes";
-// import { fetchUserData } from "../utils/api.ts";
+import { fetchUserData } from "../utils/api.ts";
 import NotifHdlr from "../utils/NotifHdlr.ts";
 
 const UserCtxt = createContext({} as ContextProps);
@@ -38,6 +38,7 @@ export const UserProvider = ({
    fetchUserData(token)
     .then(res => {
      console.log(res);
+     setUser(res.data.user)
     })
     .catch(err => {
      console.log(err);
@@ -51,7 +52,7 @@ export const UserProvider = ({
      );
     });
   }
- }, [token]); 
+ }, [token]);
 
  const notifHdlr = new NotifHdlr(setSysNotif);
 
