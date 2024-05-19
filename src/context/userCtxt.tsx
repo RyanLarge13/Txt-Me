@@ -11,6 +11,8 @@ export const UserProvider = ({
   children: ReactNode;
 }): JSX.Element => {
   const [token, setToken] = useState("");
+  const [openChatsMenu, setOpenChatsMenu] = useState(false);
+  const [openUserMenu, setOpenUserMenu] = useState(false);
   const [sysNotif, setSysNotif] = useState({
     show: false,
     title: "",
@@ -59,11 +61,15 @@ export const UserProvider = ({
     <UserCtxt.Provider
       value={{
         sysNotif,
-        setSysNotif,
         notifHdlr,
         token,
-        setToken,
         user,
+        openChatsMenu,
+        openUserMenu,
+        setOpenUserMenu,
+        setOpenChatsMenu,
+        setSysNotif,
+        setToken,
         setUser,
       }}
     >

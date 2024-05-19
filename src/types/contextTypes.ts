@@ -30,10 +30,15 @@ type User = {
   email: string;
   phoneNumber: string;
 };
+
 export interface ContextProps {
   setSysNotif: Dispatch<SetStateAction<SysNotif>>;
   setUser: Dispatch<SetStateAction<User>>;
   setToken: Dispatch<SetStateAction<string>>;
+  setOpenChatsMenu: Dispatch<SetStateAction<boolean>>;
+  setOpenUserMenu: Dispatch<SetStateAction<boolean>>;
+  openUserMenu: boolean;
+  openChatsMenu: boolean;
   sysNotif: SysNotif;
   user: User | null;
   notifHdlr: Notifhdlr;
