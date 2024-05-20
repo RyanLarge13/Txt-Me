@@ -13,6 +13,7 @@ export const UserProvider = ({
   const [token, setToken] = useState("");
   const [openChatsMenu, setOpenChatsMenu] = useState(false);
   const [openUserMenu, setOpenUserMenu] = useState(false);
+  const [newChat, setNewChat] = useState(true);
   const [sysNotif, setSysNotif] = useState({
     show: false,
     title: "",
@@ -66,6 +67,8 @@ export const UserProvider = ({
         user,
         openChatsMenu,
         openUserMenu,
+        newChat,
+        setNewChat,
         setOpenUserMenu,
         setOpenChatsMenu,
         setSysNotif,

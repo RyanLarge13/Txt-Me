@@ -37,6 +37,8 @@ export interface ContextProps {
   setToken: Dispatch<SetStateAction<string>>;
   setOpenChatsMenu: Dispatch<SetStateAction<boolean>>;
   setOpenUserMenu: Dispatch<SetStateAction<boolean>>;
+  setNewChat: Dispatch<SetStateAction<boolean>>;
+  newChat: boolean;
   openUserMenu: boolean;
   openChatsMenu: boolean;
   sysNotif: SysNotif;
