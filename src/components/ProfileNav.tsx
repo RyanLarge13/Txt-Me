@@ -1,9 +1,13 @@
 import React, { useContext } from "react";
 import { TiMessages } from "react-icons/ti";
+import {useNavigate, useLocation } from "react-router-dom"
 import UserCtxt from "../context/userCtxt";
 
 const ProfileNav = (): JSX.Element => {
   const { setOpenChatsMenu, setOpenUserMenu, user } = useContext(UserCtxt);
+  
+  const navigate = useNavigate()
+  const location = useLocation()
 
   return (
     <header
@@ -11,7 +15,14 @@ const ProfileNav = (): JSX.Element => {
   bg-[#000] z-40"
     >
       <button
-        onClick={() => setOpenChatsMenu((prev): boolean => !prev)}
+        onClick={() => {
+         if (location.pathname === "profile/chatmenu") {
+          navigate("/profile")
+         }
+         else {
+          navigate("/profile/chatsmenu")
+         }
+        }}
         className="text-primary text-xl font-bold flex justify-start items-center gap-x-3"
       >
         Txt Me{" "}
