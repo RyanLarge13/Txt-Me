@@ -11,76 +11,70 @@ import Verify from "./states/Verify.tsx";
 import Profile from "./states/Profile.tsx";
 import SysNotif from "./components/SysNotif.tsx";
 import ProfileNav from "./components/ProfileNav.tsx";
-import ChatsMenu from "./components/ChatsMenu.tsx";
+import NewContact from "./states/NewContact.tsx";
 
 const MainLoad = () => {
- return (
-  <motion.section
-   initial={{ opacity: 1 }}
-   exit={{ opacity: 0, transition: { duration: 0.5 } }}
-   className="z-[999] flex justify-center items-center fixed inset-0 bg-[#000]"
-  >
-   <motion.p
-    initial={{ rotateZ: -360, scale: 0 }}
-    animate={{
-     rotateZ: 0,
-     scale: 1,
-     transition: { duration: 0.75, type: "spring" }
-    }}
-    className="text-9xl text-primary"
-   >
-    <TiMessages />
-   </motion.p>
-  </motion.section>
- );
+  return (
+    <motion.section
+      initial={{ opacity: 1 }}
+      exit={{ opacity: 0, transition: { duration: 0.5 } }}
+      className="z-[999] flex justify-center items-center fixed inset-0 bg-[#000]"
+    >
+      <motion.p
+        initial={{ rotateZ: -360, scale: 0 }}
+        animate={{
+          rotateZ: 0,
+          scale: 1,
+          transition: { delay: 0.25, duration: 0.75, type: "spring" },
+        }}
+        className="text-9xl text-primary"
+      >
+        <TiMessages />
+      </motion.p>
+    </motion.section>
+  );
 };
 
 const App = () => {
- const { user } = useContext(UserCtxt);
+  const { user } = useContext(UserCtxt);
 
- const [mainLoad, setMainLoad] = useState(true);
+  const [mainLoad, setMainLoad] = useState(true);
 
- useEffect(() => {
-  setTimeout(() => {
-   setMainLoad(false);
-  }, 1000);
- }, []);
+  useEffect(() => {
+    setTimeout(() => {
+      setMainLoad(false);
+    }, 1250);
+  }, []);
 
- return (
-  <main>
-   <AnimatePresence>{mainLoad && <MainLoad />}</AnimatePresence>
-   {user?.userId ? <ProfileNav /> : <Nav />}
-   <SysNotif />
-   <Routes>
-    {user?.userId ? (
-     <Route path="/" element={<Navigate to="/profile" />} />
-    ) : (
-     <Route path="/" element={<Home />} />
-    )}
-    <Route path="/login/:type" element={<Login />} />
-    <Route path="/signup" element={<SignUp />} />
-    <Route path="/verify/:type/:method" element={<Verify />} />
-    <Route
-     path="/profile"
-     element={user?.userId ? <Profile /> : <Navigate to="/" />}
-    >
-     <Route
-      path="chatmenu"
-      element={
-       <AnimatePresence>
-        <ChatsMenu />
-       </AnimatePresence>
-      }
-     />
-     {/* <Route path="" element={} />*/}
-    </Route>
-    <Route
-     path="*"
-     element={user?.userId ? <Navigate to="/profile" /> : <Navigate to="/" />}
-    />
-   </Routes>
-  </main>
- );
+  return (
+    <main>
+      <AnimatePresence>{mainLoad && <MainLoad />}</AnimatePresence>
+      {user?.userId ? <ProfileNav /> : <Nav />}
+      <SysNotif />
+      <Routes>
+        {user?.userId ? (
+          <Route path="/" element={<Navigate to="/profile" />} />
+        ) : (
+          <Route path="/" element={<Home />} />
+        )}
+        <Route path="/login/:type" element={<Login />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/verify/:type/:method" element={<Verify />} />
+        <Route
+          path="/profile"
+          element={user?.userId ? <Profile /> : <Navigate to="/" />}
+        >
+          <Route path="newcontact" element={<NewContact />} />
+        </Route>
+        <Route
+          path="*"
+          element={
+            user?.userId ? <Navigate to="/profile" /> : <Navigate to="/" />
+          }
+        />
+      </Routes>
+    </main>
+  );
 };
 
 export default App;
