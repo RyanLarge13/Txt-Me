@@ -8,8 +8,26 @@
 #EF63FF - 239,99,255 */
 
 body {
-background-color: #000;
- font-family: "Madimi One", Georgia;
- font-weight: 400;
- font-style: normal;
+  background-color: #000;
+  font-family: "Madimi One", Georgia;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.small-scrollbar::-webkit-scrollbar {
+  width: 3px;
+  color: #aaa;
+}
+
+.small-scrollbar::-webkit-scrollbar-thumb {
+  width: 3px;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  width: 0px;
+  display: none;
+}
+
+.no-scrollbar::-webkit-scrollbar-thumb {
+  width: 0px;
 }
