@@ -2,12 +2,16 @@
 export default {
  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
  theme: {
-  colors: {
-   primary: "#ff63c1",
-   secondary: "#ff6372",
-   tri: "#ef63ff"
-  },
-  extend: {}
+  extend: {
+   colors: {
+    primary: "#ff63c1",
+    secondary: "#ff6372",
+    tri: "#ef63ff"
+   },
+   backgroundImage: theme => ({
+    primegr: "linear-gradient(#ff63c1, #ff6372)"
+   })
+  }
  },
  plugins: []
 };
