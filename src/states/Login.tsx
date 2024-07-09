@@ -37,14 +37,14 @@ const Login = (): JSX.Element => {
       localStorage.setItem("email", email);
       pinEmail(email)
         .then((res) => {
-          setLoading(false);
           notifHdlr.setNotif("Sent", res.data.message, true, []);
           navigate("/verify/email/login");
         })
         .catch((err) => {
           console.log(err);
-          setLoading(false);
           notifHdlr.setNotif("Error", err.response.data.message, true, []);
+        }).finally(() => {
+          setLoading(false);
         });
     } catch (err) {
       console.log(err);
@@ -68,7 +68,6 @@ const Login = (): JSX.Element => {
     try {
       pinPhone(phone)
         .then((res) => {
-          setLoading(false);
           console.log(res);
           localStorage.setItem("phone", phone);
           notifHdlr.setNotif("Error", res.data.message, true, []);
@@ -77,6 +76,7 @@ const Login = (): JSX.Element => {
         .catch((err) => {
           console.log(err);
           notifHdlr.setNotif("Error", err.response.data.message, true, []);
+        }).finally(() => {
           setLoading(false);
         });
     } catch (err) {

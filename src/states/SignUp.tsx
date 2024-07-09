@@ -38,6 +38,7 @@ const SignUp = (): JSX.Element => {
         true,
         []
       );
+    setLoading(false);
       return;
     }
     if (!isValidPass) {
@@ -47,6 +48,7 @@ const SignUp = (): JSX.Element => {
         true,
         []
       );
+    setLoading(false);
       return;
     }
     if (!isValidUsername) {
@@ -56,6 +58,7 @@ const SignUp = (): JSX.Element => {
         true,
         []
       );
+    setLoading(false);
       return;
     }
     if (!isValidPhone) {
@@ -65,6 +68,7 @@ const SignUp = (): JSX.Element => {
         true,
         []
       );
+    setLoading(false);
       return;
     }
     try {
@@ -73,15 +77,15 @@ const SignUp = (): JSX.Element => {
           notifHdlr.setNotif("New Account", res.data.message, true, []);
           setToken(res.data.data.token);
           localStorage.setItem("authToken", res.data.data.token)
-          setLoading(false);
           navigate("/verify/phone/verify");
         })
         .catch((err) => {
           console.log(err);
-          setLoading(false);
           notifHdlr.setNotif("Error", err.response.data.message, true, [
             { text: "try login", func: (): void => tryingLogin() },
           ]);
+        }).finally(() => {
+          setLoading(false);
         });
     } catch (err) {
       console.log(err);
