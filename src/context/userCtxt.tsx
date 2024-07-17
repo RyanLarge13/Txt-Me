@@ -45,7 +45,6 @@ export const UserProvider = ({
     .catch(err => {
      console.log(err);
      setToken("");
-     localStorage.removeItem("authToken");
      notifHdlr.setNotif(
       "Error",
       "Please login again to access your account",
