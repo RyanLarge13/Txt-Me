@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { TiMessages } from "react-icons/ti";
+import { SocketProvider } from "./context/socketCtxt.tsx";
 import UserCtxt from "./context/userCtxt.tsx";
 import Nav from "./components/Nav.tsx";
 import Home from "./states/Home.tsx";
@@ -62,7 +63,15 @@ const App = () => {
         <Route path="/verify/:type/:method" element={<Verify />} />
         <Route
           path="/profile"
-          element={user?.userId ? <Profile /> : <Navigate to="/" />}
+          element={
+            user?.userId ? (
+              <SocketProvider>
+                <Profile />
+              </SocketProvider>
+            ) : (
+              <Navigate to="/" />
+            )
+          }
         >
           <Route path="newcontact" element={<NewContact />} />
         </Route>
