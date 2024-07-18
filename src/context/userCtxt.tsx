@@ -2,6 +2,7 @@ import React, { createContext, useState, ReactNode, useEffect } from "react";
 import { ContextProps } from "../types/contextTypes";
 import { fetchUserData } from "../utils/api.ts";
 import NotifHdlr from "../utils/NotifHdlr.ts";
+import { io } from "socket.io-client";
 
 const UserCtxt = createContext({} as ContextProps);
 
@@ -14,6 +15,7 @@ export const UserProvider = ({
  const [openChatsMenu, setOpenChatsMenu] = useState(false);
  const [openUserMenu, setOpenUserMenu] = useState(false);
  const [newChat, setNewChat] = useState(false);
+ const [socket, setSocket] = useState(io("ws://localhost:8080/"));
  const [sysNotif, setSysNotif] = useState({
   show: false,
   title: "",
@@ -33,6 +35,15 @@ export const UserProvider = ({
   const storedToken = localStorage.getItem("authToken");
   if (storedToken !== null && typeof token === "string") {
    setToken(storedToken);
+  }
+ }, []);
+
+ useEffect(() => {
+  socket.io.on("error", err => {
+   console.log(err);
+  });
+  return () => {
+   socket.off("error")
   }
  }, []);
 
