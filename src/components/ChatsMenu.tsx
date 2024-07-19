@@ -10,7 +10,7 @@ const ChatsMenu = () => {
       initial={{ opacity: 0, x: -100 }}
       exit={{ opacity: 0, x: -100 }}
       animate={{ opacity: 1, x: 0 }}
-      className="flex fixed top-12 left-0 right-0 md:right-[75%] z-40 bottom-0
+      className="flex fixed top-14 left-0 right-0 md:right-[75%] z-40 bottom-0
       overflow-y-auto bg-[#000]"
     >
       <div className="sticky top-40 mx-5 w-full">

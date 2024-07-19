@@ -35,7 +35,7 @@ const Logout = ({ setSettingsState, setTitle }) => {
       className="fixed z-40 top-40 bottom-[-20px] right-10 left-10 lg:left-[80%] rounded-md bg-[#000] p-5 overflow-y-auto shadow-lg small-scrollbar flex flex-col justify-center items-center"
     >
       <p className="max-w-[500px] text-gray-400">
-        Are you sure you want to logout?
+        Are you sure you want to logout? 😶
       </p>
       <button
         onClick={handleLogout}
