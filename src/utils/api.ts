@@ -1,6 +1,5 @@
 import Axios, { AxiosResponse } from "axios";
-const devUrl = "http://localhost:8080";
-// const devUrl = "https://txt-me-server-production.up.railway.app";
+const devUrl = import.meta.env.VITE_API_URL;
 
 export const signUp = (newUser: {
   username: string;
