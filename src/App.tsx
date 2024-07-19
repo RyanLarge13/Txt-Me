@@ -13,6 +13,8 @@ import Profile from "./states/Profile.tsx";
 import SysNotif from "./components/SysNotif.tsx";
 import ProfileNav from "./components/ProfileNav.tsx";
 import NewContact from "./states/NewContact.tsx";
+import { AccountSettingsProvider } from "./context/accountSettingsCtxt.tsx";
+import UserMenu from "./states/UserMenu.tsx";
 
 const MainLoad = () => {
   return (
@@ -74,6 +76,14 @@ const App = () => {
           }
         >
           <Route path="newcontact" element={<NewContact />} />
+          <Route
+            path="account"
+            element={
+              <AccountSettingsProvider>
+                <UserMenu />
+              </AccountSettingsProvider>
+            }
+          />
         </Route>
         <Route
           path="*"

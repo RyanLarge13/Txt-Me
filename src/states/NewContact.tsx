@@ -28,7 +28,7 @@ const NewContact = (): JSX.Element => {
       <div className="flex justify-center items-center h-40 pt-20">
         <label
           className="rounded-full w-40 h-40 flex justify-center
-     items-center bg-[#111]"
+     items-center bg-[#111] cursor-pointer"
         >
           <input type="file" className="hidden" />
           <FaCamera className="text-2xl text-primary" />

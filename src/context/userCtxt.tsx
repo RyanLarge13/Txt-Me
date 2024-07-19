@@ -13,7 +13,6 @@ export const UserProvider = ({
 }): JSX.Element => {
   const [token, setToken] = useState("");
   const [openChatsMenu, setOpenChatsMenu] = useState(false);
-  const [openUserMenu, setOpenUserMenu] = useState(false);
   const [newChat, setNewChat] = useState(false);
   const [sysNotif, setSysNotif] = useState({
     show: false,
@@ -66,10 +65,8 @@ export const UserProvider = ({
         token,
         user,
         openChatsMenu,
-        openUserMenu,
         newChat,
         setNewChat,
-        setOpenUserMenu,
         setOpenChatsMenu,
         setSysNotif,
         setToken,

@@ -8,48 +8,51 @@ const MainSettings = ({ setSettingsState, setTitle }) => {
 
   return (
     <div>
-      <div className="mb-10 pb-10 pt-5 border-b-gray-400 border-b">
+      <div className="mb-10 pb-10 pt-5 border-b-gray-400 border-b flex justify-start items-center gap-x-5">
+        <p className="rounded-full bg-slate-800 text-4xl text-primary p-3 w-min">
+          RL
+        </p>
         <p>{user?.username}</p>
       </div>
       <div className="p-3">
-        <p className="text-gray-400 mt-5">Account Settings</p>
-        <button className="flex justify-between items-center py-5 w-full">
+        <p className="text-gray-400 mt-5 text-lg">Account Settings</p>
+        <button className="flex justify-between items-center py-5 w-full hover:text-primary duration-500">
           Edit Profile
           <IoIosArrowForward />
         </button>
-        <button className="flex justify-between items-center py-5 w-full">
+        <button className="flex justify-between items-center py-5 w-full hover:text-primary duration-500">
           Change Username
           <IoIosArrowForward />
         </button>
-        <button className="flex justify-between items-center py-5 w-full">
-          Edit Profile
+        <button className="flex justify-between items-center py-5 w-full hover:text-primary duration-500">
+          Change Phone Number
           <IoIosArrowForward />
         </button>
       </div>
       <div className="border-b-gray-400 border-b"></div>
       <div className="p-3">
-        <p className="text-gray-400 mt-5">More</p>
-        <button className="flex justify-between items-center py-5 w-full">
+        <p className="text-gray-400 mt-5 text-lg">More</p>
+        <button className="flex justify-between items-center py-5 w-full hover:text-primary duration-500">
           About Txt Me
           <IoIosArrowForward />
         </button>
-        <button className="flex justify-between items-center py-5 w-full">
+        <button className="flex justify-between items-center py-5 w-full hover:text-primary duration-500">
           Privacy Policy
           <IoIosArrowForward />
         </button>
-        <button className="flex justify-between items-center py-5 w-full">
+        <button className="flex justify-between items-center py-5 w-full hover:text-primary duration-500">
           Terms Of Service
           <IoIosArrowForward />
         </button>
       </div>
       <div className="border-b-gray-400 border-b"></div>
       <div className="p-3">
-        <p className="text-gray-400 mt-5">Manage Account</p>
-        <button className="flex justify-between items-center py-5 w-full">
+        <p className="text-gray-400 mt-5 text-lg">Manage Account</p>
+        <button className="flex justify-between items-center py-5 w-full hover:text-primary duration-500">
           Report A Problem
           <IoIosArrowForward />
         </button>
-        <button className="flex justify-between items-center py-5 w-full">
+        <button className="flex justify-between items-center py-5 w-full hover:text-primary duration-500">
           Incognito
           <IoIosArrowForward />
         </button>
@@ -58,12 +61,12 @@ const MainSettings = ({ setSettingsState, setTitle }) => {
             setTitle({ string: "Logout", icon: <IoMdLogOut /> });
             setSettingsState({ page: "logout" });
           }}
-          className="flex justify-between items-center py-5 w-full text-tri"
+          className="flex justify-between items-center py-5 w-full hover:text-primary duration-500 text-tri"
         >
           Logout
           <IoIosArrowForward />
         </button>
-        <button className="flex justify-between items-center py-5 w-full text-secondary">
+        <button className="flex justify-between items-center py-5 w-full hover:text-primary duration-500 text-secondary">
           Delete Account
           <IoIosArrowForward />
         </button>

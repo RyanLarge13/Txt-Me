@@ -1,22 +1,20 @@
-import React, { useContext, useState } from "react";
+import React, { useContext } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MdAccountCircle } from "react-icons/md";
-import MainSettings from "./MainSettings";
+import MainSettings from "../components/MainSettings";
 import BackDrop from "../components/BackDrop";
-import UserCtxt from "../context/userCtxt";
-import Logout from "./Logout";
+import Logout from "../components/Logout";
+import AccountSettingsCtxt from "../context/accountSettingsCtxt";
+import { useNavigate } from "react-router-dom";
 
 const UserMenu = (): JSX.Element => {
-  const { setOpenUserMenu } = useContext(UserCtxt);
-  const [title, setTitle] = useState({
-    string: "Account",
-    icon: <MdAccountCircle />,
-  });
-  const [settingsState, setSettingsState] = useState({ page: "main" });
+  const { title, setTitle, settingsState, setSettingsState } =
+    useContext(AccountSettingsCtxt);
+
+  const navigate = useNavigate();
 
   return (
     <>
-      <BackDrop close={setOpenUserMenu} />
+      <BackDrop close={() => navigate("/profile")} />
       <motion.div
         initial={{ opacity: 0, y: -100 }}
         exit={{ opacity: 0, y: -100 }}
