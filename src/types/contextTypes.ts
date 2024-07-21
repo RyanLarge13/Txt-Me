@@ -31,6 +31,20 @@ type User = {
   phoneNumber: string;
 };
 
+type Contacts = {
+  address: string;
+  avatar: null | string;
+  contactid: number;
+  createdat: string;
+  email: string;
+  name: string;
+  nickname: string;
+  number: number;
+  space: string;
+  userid: string;
+  website: string;
+};
+
 export interface ContextProps {
   setSysNotif: Dispatch<SetStateAction<SysNotif>>;
   setUser: Dispatch<SetStateAction<User>>;
@@ -38,6 +52,7 @@ export interface ContextProps {
   setOpenChatsMenu: Dispatch<SetStateAction<boolean>>;
   setOpenUserMenu: Dispatch<SetStateAction<boolean>>;
   setNewChat: Dispatch<SetStateAction<boolean>>;
+  setContacts: Dispatch<SetStateAction<Contacts[]>>;
   newChat: boolean;
   openUserMenu: boolean;
   openChatsMenu: boolean;
@@ -45,4 +60,5 @@ export interface ContextProps {
   user: User | null;
   notifHdlr: Notifhdlr;
   token: string;
+  contacts: Contacts[];
 }

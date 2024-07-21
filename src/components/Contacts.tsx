@@ -1,11 +1,21 @@
-import React, { useState } from "react";
+import React, { useContext } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { getInitials } from "../utils/helpers";
+import UserCtxt from "../context/userCtxt";
+import { BsThreeDotsVertical } from "react-icons/bs";
 
 const Contacts = () => {
-  const [contacts, setContacts] = useState([]);
+  const { contacts, setMessageSession } = useContext(UserCtxt);
 
   const navigate = useNavigate();
+  const messagesMap = new Map();
+
+  const startMessage = (contact) => {
+    navigate("/profile");
+    const sessionMessages = messagesMap.get(contact.contactid) || [];
+    setMessageSession({ contact: contact, messages: sessionMessages });
+  };
 
   return (
     <motion.div
@@ -22,8 +32,26 @@ const Contacts = () => {
       </button>
       {contacts.length > 0 ? (
         contacts.map((contact) => (
-          <div key={contact.id}>
+          <div
+            key={contact.contactid}
+            onClick={() => startMessage(contact)}
+            className="flex justify-between items-center py-5 bg-black"
+          >
+            {contact.avatar ? (
+              <img
+                src={contact.avatar}
+                alt="avatar"
+                width={30}
+                height={30}
+                className="w-[30px] h-[30px] rounded-full object-contain"
+              />
+            ) : (
+              <p className="flex justify-center items-center w-[40px] h-[40px] text-black rounded-full bg-slate-400">
+                {getInitials(contact.name)}
+              </p>
+            )}
             <p>{contact.name}</p>
+            <BsThreeDotsVertical />
           </div>
         ))
       ) : (

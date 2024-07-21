@@ -77,3 +77,10 @@ export const pinPhone = (phone: string): Promise<AxiosResponse> => {
   const res = Axios.post(`${devUrl}/verify/phone/newpin`, { phone });
   return res;
 };
+
+export const getContacts = (token: string): Promise<AxiosResponse> => {
+  const res = Axios.get(`${devUrl}/user/contacts`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res;
+};

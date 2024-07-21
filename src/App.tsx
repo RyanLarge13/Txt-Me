@@ -15,6 +15,8 @@ import ProfileNav from "./components/ProfileNav.tsx";
 import NewContact from "./states/NewContact.tsx";
 import { AccountSettingsProvider } from "./context/accountSettingsCtxt.tsx";
 import UserMenu from "./states/UserMenu.tsx";
+import Messages from "./components/Messages.tsx";
+import ChatsMenu from "./components/ChatsMenu.tsx";
 
 const MainLoad = () => {
   return (
@@ -84,6 +86,8 @@ const App = () => {
               </AccountSettingsProvider>
             }
           />
+          <Route path="messages" element={<ChatsMenu />} />
+          <Route path="contacts" element={<Messages />} />
         </Route>
         <Route
           path="*"

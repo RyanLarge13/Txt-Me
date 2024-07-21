@@ -14,7 +14,7 @@ const UserMenu = (): JSX.Element => {
 
   return (
     <>
-      <BackDrop close={() => navigate("/profile")} />
+      <BackDrop close={() => navigate(-1)} />
       <motion.div
         initial={{ opacity: 0, y: -100 }}
         exit={{ opacity: 0, y: -100 }}
@@ -31,7 +31,7 @@ const UserMenu = (): JSX.Element => {
           initial={{ opacity: 0, y: 100 }}
           exit={{ opacity: 0, y: 100 }}
           animate={{ opacity: 1, y: 0 }}
-          className="fixed z-40 top-40 bottom-[-20px] right-10 left-10 lg:left-[80%] rounded-md bg-[#000] p-5 overflow-y-auto shadow-lg small-scrollbar"
+          className="fixed z-40 top-40 bottom-[-20px] right-10 left-10 lg:left-[80%] rounded-md bg-[#000] p-5 overflow-y-auto shadow-lg small-scrollbar pb-20"
         >
           <MainSettings
             setSettingsState={setSettingsState}

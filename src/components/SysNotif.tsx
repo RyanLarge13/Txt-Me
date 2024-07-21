@@ -53,7 +53,7 @@ const SysNotif = (): JSX.Element => {
             initial={{ y: -50, opacity: 0 }}
             exit={{ x: 50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            className={`fixed top-0 z-50 p-3 pl-5 pb-0 rounded-sm shadow-lg text-[#fff] bg-[#0a0a0a] left-0 right-0`}
+            className={`fixed top-10 z-50 p-3 pl-5 pb-0 rounded-lg shadow-lg shadow-slate-950 text-[#fff] bg-[#0a0a0a] left-10 min-w-[200px] max-w-[200px]`}
             onPointerDown={() =>
               !sysNotif.hasCancel
                 ? setSysNotif({ ...sysNotif, hasCancel: true })

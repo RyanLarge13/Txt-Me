@@ -87,7 +87,7 @@ const NewContact = (): JSX.Element => {
       <div className="flex justify-evenly items-center mb-10 mt-20">
         <button
           className="bg-secondary px-10 py-3 flex-[0.25] text-[#000]"
-          onClick={() => navigate("/profile")}
+          onClick={() => navigate("/profile/contacts")}
         >
           Cancel
         </button>

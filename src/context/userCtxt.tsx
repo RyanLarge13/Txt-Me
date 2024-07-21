@@ -1,6 +1,6 @@
 import React, { createContext, useState, ReactNode, useEffect } from "react";
 import { ContextProps } from "../types/contextTypes";
-import { fetchUserData } from "../utils/api.ts";
+import { fetchUserData, getContacts } from "../utils/api.ts";
 import NotifHdlr from "../utils/NotifHdlr.ts";
 import { AxiosResponse } from "axios";
 
@@ -14,6 +14,8 @@ export const UserProvider = ({
   const [token, setToken] = useState("");
   const [openChatsMenu, setOpenChatsMenu] = useState(false);
   const [newChat, setNewChat] = useState(false);
+  const [contacts, setContacts] = useState([]);
+  const [messageSession, setMessageSession] = useState(null);
   const [sysNotif, setSysNotif] = useState({
     show: false,
     title: "",
@@ -38,6 +40,20 @@ export const UserProvider = ({
 
   useEffect(() => {
     if (token) {
+      getContacts(token)
+        .then((res) => {
+          console.log(res);
+          setContacts(res.data.data.contacts);
+        })
+        .catch((err) => {
+          console.log(err);
+          notifHdlr.setNotif(
+            "Error",
+            "We could not update your contacts",
+            false,
+            []
+          );
+        });
       fetchUserData(token)
         .then((res: AxiosResponse): void => {
           setUser(res.data.data.user);
@@ -66,6 +82,10 @@ export const UserProvider = ({
         user,
         openChatsMenu,
         newChat,
+        contacts,
+        messageSession,
+        setMessageSession,
+        setContacts,
         setNewChat,
         setOpenChatsMenu,
         setSysNotif,

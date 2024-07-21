@@ -1,9 +1,12 @@
 import React, { useContext } from "react";
 import { motion } from "framer-motion";
 import UserCtxt from "../context/userCtxt";
+import { useNavigate } from "react-router-dom";
 
 const ChatsMenu = () => {
-  const { setNewChat, setOpenChatsMenu } = useContext(UserCtxt);
+  const { setMessageSession } = useContext(UserCtxt);
+
+  const navigate = useNavigate();
 
   return (
     <motion.nav
@@ -16,8 +19,8 @@ const ChatsMenu = () => {
       <div className="sticky top-40 mx-5 w-full">
         <button
           onClick={() => {
-            setNewChat(true);
-            setOpenChatsMenu(false);
+            setMessageSession(null);
+            navigate("/profile/contacts");
           }}
           className="bg-primary p-3 rounded-sm w-full mt-5 text-[#000]"
         >

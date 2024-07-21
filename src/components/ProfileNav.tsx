@@ -14,7 +14,7 @@ const ProfileNav = (): JSX.Element => {
   bg-[#000] z-40"
     >
       <button
-        onClick={() => setOpenChatsMenu((prev: boolean): boolean => !prev)}
+        onClick={() => navigate("/profile/messages")}
         className="text-primary text-xl font-bold flex justify-start items-center gap-x-3"
       >
         Txt Me{" "}
