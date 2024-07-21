@@ -1,4 +1,4 @@
-export const getInitials = (name) => {
+export const getInitials = (name: string) => {
   name = name.trim();
   const parts = name.split(" ");
   if (parts.length === 1) {
