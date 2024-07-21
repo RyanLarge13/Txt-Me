@@ -1,43 +1,43 @@
-import React, { createContext, useState, ReactNode, useEffect } from "react";
-import { io } from "socket.io-client";
-const SocketCtxt = createContext({} /*as SocketProps*/);
+// SocketContext.js
+import React, { createContext, useContext, useEffect, useRef } from "react";
+import io from "socket.io-client";
 
-export const SocketProvider = ({
-  children,
-}: {
-  children: ReactNode;
-}): JSX.Element => {
-  const [socket, setSocket] = useState(io(import.meta.env.VITE_SOCKET_URL));
-  const [socketEvents, setSocketEvents] = useState([]);
+const SocketContext = createContext({});
+
+export const useSocket = () => {
+  return useContext(SocketContext);
+};
+
+export const SocketProvider = ({ children }) => {
+  const socketRef = useRef();
 
   useEffect(() => {
-    socket.on("text-message", (event): void => {
-      setSocketEvents((prev) => [...prev, event]);
+    socketRef.current = io(import.meta.env.VITE_API_SOCKET_URL, {
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
     });
-    socket.on("connect", (): void => {
-      console.log("Connected");
+    socketRef.current.on("connect", () => {
+      console.log("Connected to the server");
     });
-    socket.io.on("error", (err): void => {
-      console.log(err);
+    socketRef.current.on("disconnect", () => {
+      console.log("Disconnected from the server");
+    });
+    socketRef.current.on("connect_error", (error) => {
+      console.log("Connection error:", error);
+    });
+    socketRef.current.on("text-message", (message) => {
+      console.log(message);
     });
     return () => {
-      socket.off("error");
-      socket.off("connection");
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+      }
     };
   }, []);
 
   return (
-    <SocketCtxt.Provider
-      value={{
-        socket,
-        setSocket,
-        socketEvents,
-        setSocketEvents,
-      }}
-    >
+    <SocketContext.Provider value={socketRef.current}>
       {children}
-    </SocketCtxt.Provider>
+    </SocketContext.Provider>
   );
 };
-
-export default SocketCtxt;

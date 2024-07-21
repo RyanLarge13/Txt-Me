@@ -7,7 +7,7 @@ import BottomNav from "../components/BottomNav.tsx";
 import MessageSession from "../components/MessageSession.tsx";
 
 const Profile = (): JSX.Element => {
-  const { messageSession } = useContext(UserCtxt);
+  const { messageSession, setMessageSession } = useContext(UserCtxt);
 
   return (
     <main className="mt-20 text-[#fff]">
