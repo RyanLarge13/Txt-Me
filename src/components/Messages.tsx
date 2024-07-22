@@ -35,7 +35,7 @@ const Messages = () => {
         left: openChatsMenu ? "25vw" : "0",
         transition: { duration: 0.15 },
       }}
-      className="overflow-y-auto absolute top-12 right-0 bottom-0 z-30 outline-3 outline-[#FFF] p-5 flex justify-center items-center"
+      className="overflow-y-auto absolute top-12 right-0 bottom-0 z-30 outline-3 bg-black outline-[#FFF] p-5 flex justify-center items-center"
     >
       <div className="flex h-full w-full flex-col justify-start items-center">
         <form onSubmit={searchContacts} className="w-full">

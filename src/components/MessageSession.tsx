@@ -23,13 +23,12 @@ const MessageSession = () => {
       };
     });
     console.log(socket);
-    socket.emit("text-message", value);
+    socket.emit("text-message", {
+      recipient: messageSession.contact.number,
+      message: value,
+    });
     setValue("");
   };
-
-  useEffect(() => {
-    console.log(messageSession);
-  }, [messageSession]);
 
   return (
     <div className="h-full w-full overflow-y-auto py-20">

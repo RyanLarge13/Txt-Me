@@ -12,9 +12,13 @@ export const SocketProvider = ({ children }) => {
   const socketRef = useRef();
 
   useEffect(() => {
+    const number = JSON.parse(localStorage.getItem("user")).phoneNumber;
     socketRef.current = io(import.meta.env.VITE_API_SOCKET_URL, {
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
+      query: {
+        number: number,
+      },
     });
     socketRef.current.on("connect", () => {
       console.log("Connected to the server");
