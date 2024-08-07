@@ -1,5 +1,11 @@
 // SocketContext.js
-import React, { createContext, useContext, useEffect, useRef } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import io from "socket.io-client";
 
 const SocketContext = createContext({});
@@ -9,6 +15,7 @@ export const useSocket = () => {
 };
 
 export const SocketProvider = ({ children }) => {
+  const [messages, setMessages] = useState([]);
   const socketRef = useRef();
 
   useEffect(() => {
@@ -30,7 +37,8 @@ export const SocketProvider = ({ children }) => {
       console.log("Connection error:", error);
     });
     socketRef.current.on("text-message", (message) => {
-      console.log(message);
+      console.log("message from socket, updating messages", message);
+      setMessages((prev) => [...prev, message]);
     });
     return () => {
       if (socketRef.current) {
@@ -40,7 +48,7 @@ export const SocketProvider = ({ children }) => {
   }, []);
 
   return (
-    <SocketContext.Provider value={socketRef.current}>
+    <SocketContext.Provider value={{ socket: socketRef.current, messages }}>
       {children}
     </SocketContext.Provider>
   );

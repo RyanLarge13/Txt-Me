@@ -5,7 +5,7 @@ import { useSocket } from "../context/socketCtxt";
 
 const MessageSession = () => {
   const { user, messageSession, setMessageSession } = useContext(UserCtxt);
-  const socket = useSocket();
+  const { socket, messages } = useSocket();
   /*
   TODO:
   1. We need a better way of setting message state in messageSession. the map with probably do us just fine.
@@ -14,16 +14,36 @@ const MessageSession = () => {
 
   const [value, setValue] = useState("");
 
+  useEffect(() => {
+    const newMessage = messages[messages.length - 1];
+    console.log(messages);
+    console.log(`New Message!!!!: ${newMessage}`);
+    if (newMessage) {
+      setMessageSession((prev) => {
+        return {
+          ...prev,
+          messages: [
+            ...prev.messages,
+            { fromid: newMessage.from, message: newMessage.message },
+          ],
+        };
+      });
+    }
+  }, [messages]);
+
   const sendMessage = () => {
     // change this below!!!!
     setMessageSession((prev) => {
       return {
         ...prev,
-        messages: [...prev.messages, { fromid: user?.userId, message: value }],
+        messages: [
+          ...prev.messages,
+          { fromid: user?.phoneNumber, message: value },
+        ],
       };
     });
-    console.log(socket);
     socket.emit("text-message", {
+      sender: user?.phoneNumber,
       recipient: messageSession.contact.number,
       message: value,
     });
@@ -43,7 +63,7 @@ const MessageSession = () => {
             <div
               key={index}
               className={`${
-                message.fromid === user?.userId
+                message.fromid === user?.phoneNumber
                   ? "bg-tri self-end"
                   : "bg-secondary self-start"
               } rounded-lg shadow-lg text-black p-3 outline-red-400 min-w-[50%]`}
