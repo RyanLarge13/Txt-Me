@@ -1,17 +1,25 @@
-import React, { createContext, useState, ReactNode } from "react";
+import { createContext, useState, ReactNode } from "react";
 import { MdAccountCircle } from "react-icons/md";
-const AccountSettingsCtxt = createContext({} /*as SocketProps*/);
+import {
+  AccountSettingsProps,
+  SettingsState,
+  Title,
+} from "../types/accountSettingsProps";
+
+const AccountSettingsCtxt = createContext({} as AccountSettingsProps);
 
 export const AccountSettingsProvider = ({
   children,
 }: {
   children: ReactNode;
 }): JSX.Element => {
-  const [title, setTitle] = useState({
+  const [title, setTitle] = useState<Title>({
     string: "Account",
     icon: <MdAccountCircle />,
   });
-  const [settingsState, setSettingsState] = useState({ page: "main" });
+  const [settingsState, setSettingsState] = useState<SettingsState>({
+    page: "main",
+  });
 
   return (
     <AccountSettingsCtxt.Provider

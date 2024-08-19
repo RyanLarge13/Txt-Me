@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import { useState, useContext, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { signUp } from "../utils/api.ts";
 import { motion } from "framer-motion";
@@ -24,7 +24,7 @@ const SignUp = (): JSX.Element => {
     notifHdlr.closeNotif();
   };
 
-  const signUpNewUser = (e) => {
+  const signUpNewUser = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     const valArr = [
@@ -36,7 +36,7 @@ const SignUp = (): JSX.Element => {
     const showError = valArr.every((validation) => validation === false);
     if (showError) {
       let type;
-      const firstIndex = valArr.firstIndexOf(false);
+      const firstIndex = valArr.indexOf(false);
       switch (firstIndex) {
         case 0:
           type = "username";
@@ -54,6 +54,7 @@ const SignUp = (): JSX.Element => {
           "username";
           break;
       }
+      console.log(type);
       return;
     }
     try {
@@ -75,7 +76,9 @@ const SignUp = (): JSX.Element => {
         });
     } catch (err) {
       console.log(err);
-      notifHdlr.setNotif("Error", err.response.data.message, true, []);
+      if (err instanceof Error) {
+        notifHdlr.setNotif("Error", err.message, true, []);
+      }
       setLoading(false);
     }
   };

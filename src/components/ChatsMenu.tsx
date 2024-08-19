@@ -1,10 +1,10 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
 import { motion } from "framer-motion";
 import UserCtxt from "../context/userCtxt";
 import { useNavigate } from "react-router-dom";
 
 const ChatsMenu = () => {
-  const { setMessageSession } = useContext(UserCtxt);
+  const { setMessageSession, allMessages } = useContext(UserCtxt);
 
   const navigate = useNavigate();
 
@@ -27,6 +27,36 @@ const ChatsMenu = () => {
           New Chat
         </button>
       </div>
+      {allMessages.length > 0
+        ? allMessages.map((messageSession, index) => (
+            <div
+              key={index}
+              onClick={() => {
+                setMessageSession(messageSession);
+                navigate("/profile");
+              }}
+              className="flex justify-between items-center relative"
+            >
+              <div className="rounded-full w-30 h-30 flex justify-center items-center">
+                <p className="text-xl">
+                  {messageSession.contact.name[0].toUpperCase()}
+                </p>
+              </div>
+              <p>{messageSession.contact.nickname}</p>
+              <p className="absolute top-1 right-1">
+                {new Date(
+                  messageSession.messages[
+                    messageSession.messages.length - 1
+                  ].time
+                ).toLocaleTimeString("en-US", {
+                  hour: "numeric",
+                  minute: "numeric",
+                  dayPeriod: "short",
+                })}
+              </p>
+            </div>
+          ))
+        : null}
     </motion.nav>
   );
 };

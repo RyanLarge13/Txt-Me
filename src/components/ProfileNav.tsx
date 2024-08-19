@@ -1,11 +1,8 @@
-import React, { useContext } from "react";
+import React from "react";
 import { TiMessages } from "react-icons/ti";
-import UserCtxt from "../context/userCtxt";
 import { useNavigate } from "react-router-dom";
 
 const ProfileNav = (): JSX.Element => {
-  const { setOpenChatsMenu } = useContext(UserCtxt);
-
   const navigate = useNavigate();
 
   return (

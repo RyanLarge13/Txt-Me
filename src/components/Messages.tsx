@@ -1,20 +1,16 @@
-import React, { useContext, useState } from "react";
+import { ChangeEvent, useContext, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaSearch } from "react-icons/fa";
-import { TiMessages } from "react-icons/ti";
 import SearchIcon from "../assets/search.svg";
 import UserCtxt from "../context/userCtxt";
 import Contacts from "./Contacts.tsx";
 
 const Messages = () => {
-  const { openChatsMenu, setOpenChatsMenu, newChat } = useContext(UserCtxt);
+  const { openChatsMenu } = useContext(UserCtxt);
 
-  const [messages, setMessages] = useState([]);
-  const [userMessaged, setUserMessaged] = useState(null);
   const [noFoundContacts, setNoFoundContact] = useState(false);
 
-  const searchContacts = (e) => {
-    e.preventDefault();
+  const searchContacts = (e: ChangeEvent<HTMLInputElement>): void => {
     const value = e.target.value;
     if (value.length < 1) {
       setNoFoundContact(false);
@@ -38,7 +34,7 @@ const Messages = () => {
       className="overflow-y-auto absolute top-12 right-0 bottom-0 z-30 outline-3 bg-black outline-[#FFF] p-5 flex justify-center items-center"
     >
       <div className="flex h-full w-full flex-col justify-start items-center">
-        <form onSubmit={searchContacts} className="w-full">
+        <form className="w-full">
           <div className="flex gap-x-3 w-full items-center">
             <input
               onChange={searchContacts}

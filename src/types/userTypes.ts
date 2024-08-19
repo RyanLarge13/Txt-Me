@@ -6,7 +6,7 @@ interface Notifhdlr {
     title: string,
     text: string,
     hasCancel: boolean,
-    actions: []
+    actions: Actions[] | []
   ) => void;
 }
 
@@ -31,7 +31,12 @@ type User = {
   phoneNumber: string;
 };
 
-type Contacts = {
+export type AllMessages = {
+  contact: Contacts;
+  messages: Message[];
+};
+
+export type Contacts = {
   address: string;
   avatar: null | string;
   contactid: number;
@@ -45,20 +50,33 @@ type Contacts = {
   website: string;
 };
 
-export interface ContextProps {
+type Message = {
+  fromid: string | undefined;
+  message: string;
+  time: Date;
+};
+
+export type MessageSession = {
+  messages: Message[];
+  contact: Contacts;
+};
+
+export interface UserProps {
   setSysNotif: Dispatch<SetStateAction<SysNotif>>;
   setUser: Dispatch<SetStateAction<User>>;
   setToken: Dispatch<SetStateAction<string>>;
   setOpenChatsMenu: Dispatch<SetStateAction<boolean>>;
-  setOpenUserMenu: Dispatch<SetStateAction<boolean>>;
   setNewChat: Dispatch<SetStateAction<boolean>>;
-  setContacts: Dispatch<SetStateAction<Contacts[]>>;
+  setContacts: Dispatch<SetStateAction<Contacts[] | []>>;
+  setMessageSession: Dispatch<SetStateAction<MessageSession | null>>;
+  setAllMessages: Dispatch<SetStateAction<AllMessages[] | []>>;
   newChat: boolean;
-  openUserMenu: boolean;
   openChatsMenu: boolean;
   sysNotif: SysNotif;
   user: User | null;
   notifHdlr: Notifhdlr;
   token: string;
-  contacts: Contacts[];
+  contacts: Contacts[] | [];
+  messageSession: MessageSession | null;
+  allMessages: AllMessages[] | [];
 }

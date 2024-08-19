@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction } from "react";
-import { SysNotif } from "../types/contextTypes";
+import { SysNotif } from "../types/userTypes";
 
 class NotifHdlr {
   private setState;

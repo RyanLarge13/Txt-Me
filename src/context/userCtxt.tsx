@@ -1,10 +1,15 @@
-import React, { createContext, useState, ReactNode, useEffect } from "react";
-import { ContextProps } from "../types/contextTypes";
+import { createContext, useState, ReactNode, useEffect } from "react";
+import {
+  AllMessages,
+  Contacts,
+  MessageSession,
+  UserProps,
+} from "../types/userTypes.ts";
 import { fetchUserData, getContacts } from "../utils/api.ts";
 import NotifHdlr from "../utils/NotifHdlr.ts";
 import { AxiosResponse } from "axios";
 
-const UserCtxt = createContext({} as ContextProps);
+const UserCtxt = createContext({} as UserProps);
 
 export const UserProvider = ({
   children,
@@ -14,15 +19,18 @@ export const UserProvider = ({
   const [token, setToken] = useState("");
   const [openChatsMenu, setOpenChatsMenu] = useState(false);
   const [newChat, setNewChat] = useState(false);
-  const [contacts, setContacts] = useState([]);
-  const [messageSession, setMessageSession] = useState(null);
+  const [contacts, setContacts] = useState<Contacts[] | []>([]);
+  const [messageSession, setMessageSession] = useState<MessageSession | null>(
+    null
+  );
+  const [allMessages, setAllMessages] = useState<AllMessages[] | []>([]);
   const [sysNotif, setSysNotif] = useState({
     show: false,
     title: "",
     text: "",
     color: "",
     hasCancel: false,
-    actions: [{ text: "", func: () => {} }],
+    actions: [{ text: "", func: (): void => {} }],
   });
   const [user, setUser] = useState({
     username: "",
@@ -34,9 +42,11 @@ export const UserProvider = ({
   useEffect(() => {
     const storedToken = localStorage.getItem("authToken");
     if (storedToken !== null && typeof token === "string") {
-      setToken(storedToken);
+      if (!token) {
+        setToken(storedToken);
+      }
     }
-  }, []);
+  }, [token]);
 
   useEffect(() => {
     if (token) {
@@ -85,6 +95,8 @@ export const UserProvider = ({
         newChat,
         contacts,
         messageSession,
+        allMessages,
+        setAllMessages,
         setMessageSession,
         setContacts,
         setNewChat,

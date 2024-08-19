@@ -1,63 +1,71 @@
-import React, { useContext, useState, useEffect } from "react";
+import { useContext, useState, useEffect } from "react";
 import { IoSend } from "react-icons/io5";
 import UserCtxt from "../context/userCtxt";
 import { useSocket } from "../context/socketCtxt";
 
 const MessageSession = () => {
   const { user, messageSession, setMessageSession } = useContext(UserCtxt);
-  const { socket, messages } = useSocket();
-  /*
-  TODO:
-  1. We need a better way of setting message state in messageSession. the map with probably do us just fine.
-  Need to include message session state as well as message new Map();
-  */
+  const { socket, message } = useSocket();
 
   const [value, setValue] = useState("");
 
   useEffect(() => {
-    const newMessage = messages[messages.length - 1];
-    console.log(messages);
-    console.log(`New Message!!!!: ${newMessage}`);
+    const newMessage = message;
     if (newMessage) {
       setMessageSession((prev) => {
+        if (!prev) {
+          return null;
+        }
         return {
           ...prev,
           messages: [
             ...prev.messages,
-            { fromid: newMessage.from, message: newMessage.message },
+            {
+              fromid: newMessage.from,
+              message: newMessage.message,
+              time: newMessage.time,
+            },
           ],
         };
       });
     }
-  }, [messages]);
+  }, [message, setMessageSession]);
 
   const sendMessage = () => {
-    // change this below!!!!
     setMessageSession((prev) => {
+      if (!prev) {
+        return null;
+      }
       return {
         ...prev,
         messages: [
           ...prev.messages,
-          { fromid: user?.phoneNumber, message: value },
+          {
+            fromid: user?.phoneNumber,
+            message: value,
+            time: new Date(),
+          },
         ],
       };
     });
-    socket.emit("text-message", {
-      sender: user?.phoneNumber,
-      recipient: messageSession.contact.number,
-      message: value,
-    });
-    setValue("");
+    if (socket && messageSession) {
+      socket.emit("text-message", {
+        sender: user?.phoneNumber,
+        recipient: messageSession.contact.number,
+        message: value,
+        time: new Date(),
+      });
+      setValue("");
+    }
   };
 
   return (
     <div className="h-full w-full overflow-y-auto py-20">
-      <div className="p-5 fixed top-20 right-0 left-0">
-        <p>{messageSession.contact.name}</p>
-        {/* <p>{messageSession.contact.number}</p> */}
-        {/* <p>702-981-1370</p> */}
+      <div className="p-5 fixed top-20 right-0 left-0 bg-black">
+        <p>{messageSession?.contact.name}</p>
+        <p>{messageSession?.contact.number}</p>
       </div>
-      {messageSession.messages.length > 0 ? (
+      {messageSession && messageSession.messages.length > 0 ? (
         <div className="flex flex-col justify-start px-10 py-20 gap-y-5 min-h-full">
           {messageSession.messages.map((message, index) => (
             <div
@@ -69,6 +77,13 @@ const MessageSession = () => {
               } rounded-lg shadow-lg text-black p-3 outline-red-400 min-w-[50%]`}
             >
               <p>{message.message}</p>
+              <p>
+                {message.time.toLocaleTimeString("en-US", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  dayPeriod: "short",
+                })}
+              </p>
             </div>
           ))}
         </div>
