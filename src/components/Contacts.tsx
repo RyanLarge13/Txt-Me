@@ -1,20 +1,29 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { getInitials } from "../utils/helpers";
 import UserCtxt from "../context/userCtxt";
 import { BsThreeDotsVertical } from "react-icons/bs";
+import { Contacts, Message } from "../types/userTypes";
 
 const Contacts = () => {
-  const { contacts, setMessageSession } = useContext(UserCtxt);
+  const { contacts, setMessageSession, setAllMessages, allMessages } =
+    useContext(UserCtxt);
 
   const navigate = useNavigate();
   const messagesMap = new Map();
 
-  const startMessage = (contact) => {
+  const startMessage = (contact: Contacts) => {
     navigate("/profile");
     const sessionMessages = messagesMap.get(contact.contactid) || [];
     setMessageSession({ contact: contact, messages: sessionMessages });
+    const newSessions: Map<number, Message[]> = new Map(allMessages);
+    if (newSessions.has(contact.number)) {
+      newSessions.get(contact.number)?.push(sessionMessages);
+    } else {
+      newSessions.set(contact.number, [sessionMessages]);
+    }
+    setAllMessages(newSessions);
   };
 
   return (

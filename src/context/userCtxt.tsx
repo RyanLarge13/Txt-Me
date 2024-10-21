@@ -1,10 +1,5 @@
 import { createContext, useState, ReactNode, useEffect } from "react";
-import {
-  AllMessages,
-  Contacts,
-  MessageSession,
-  UserProps,
-} from "../types/userTypes.ts";
+import { Contacts, MessageSession, UserProps } from "../types/userTypes.ts";
 import { fetchUserData, getContacts } from "../utils/api.ts";
 import NotifHdlr from "../utils/NotifHdlr.ts";
 import { AxiosResponse } from "axios";
@@ -23,7 +18,7 @@ export const UserProvider = ({
   const [messageSession, setMessageSession] = useState<MessageSession | null>(
     null
   );
-  const [allMessages, setAllMessages] = useState<AllMessages[] | []>([]);
+  const [allMessages, setAllMessages] = useState(new Map());
   const [sysNotif, setSysNotif] = useState({
     show: false,
     title: "",
@@ -42,7 +37,7 @@ export const UserProvider = ({
   useEffect(() => {
     const storedToken = localStorage.getItem("authToken");
     if (storedToken !== null && typeof token === "string") {
-      if (!token) {
+      if (!token && !user) {
         setToken(storedToken);
       }
     }
@@ -71,7 +66,6 @@ export const UserProvider = ({
         })
         .catch((err) => {
           console.log(err);
-          setToken("");
           notifHdlr.setNotif(
             "Error",
             "Please login again to access your account",

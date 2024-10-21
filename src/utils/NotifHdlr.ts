@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction } from "react";
-import { SysNotif } from "../types/userTypes";
+import { SysNotif, Actions } from "../types/userTypes";
 
 class NotifHdlr {
   private setState;
@@ -18,7 +18,12 @@ class NotifHdlr {
     });
   }
 
-  setNotif(title: string, text: string, hasCancel: boolean, actions: []): void {
+  setNotif(
+    title: string,
+    text: string,
+    hasCancel: boolean,
+    actions: Actions[] | []
+  ): void {
     this.setState({
       show: true,
       title,
