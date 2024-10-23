@@ -37,14 +37,15 @@ export const UserProvider = ({
   useEffect(() => {
     const storedToken = localStorage.getItem("authToken");
     if (storedToken !== null && typeof token === "string") {
-      if (!token && !user) {
+      if (!token && user.userId === 0) {
         setToken(storedToken);
       }
     }
-  }, [token]);
+  }, []);
 
   useEffect(() => {
     if (token) {
+      console.log("token");
       getContacts(token)
         .then((res) => {
           console.log(res);

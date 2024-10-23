@@ -3,7 +3,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { TiMessages } from "react-icons/ti";
 import { SocketProvider } from "./context/socketCtxt.tsx";
-import UserCtxt from "./context/userCtxt.tsx";
+import UserCtxt, { UserProvider } from "./context/userCtxt.tsx";
 import Nav from "./components/Nav.tsx";
 import Home from "./states/Home.tsx";
 import Login from "./states/Login.tsx";
@@ -41,15 +41,27 @@ const MainLoad = () => {
 };
 
 const App = () => {
-  const { user } = useContext(UserCtxt);
+  const { user, token } = useContext(UserCtxt);
 
   const [mainLoad, setMainLoad] = useState(true);
 
   useEffect(() => {
-    setTimeout(() => {
+    if (token && user?.userId !== 0) {
       setMainLoad(false);
-    }, 1250);
-  }, []);
+    }
+    if (token && user?.userId === 0) {
+      return;
+    }
+    let timeoutId: number;
+    if (!token && user?.userId === 0) {
+      timeoutId = setTimeout(() => {
+        setMainLoad(false);
+      }, 1250);
+    }
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [token, user]);
 
   return (
     <main>

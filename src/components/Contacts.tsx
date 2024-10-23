@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { getInitials } from "../utils/helpers";
 import UserCtxt from "../context/userCtxt";
 import { BsThreeDotsVertical } from "react-icons/bs";
-import { Contacts, Message } from "../types/userTypes";
+import { Contacts as ContactsType, Message } from "../types/userTypes";
 
 const Contacts = () => {
   const { contacts, setMessageSession, setAllMessages, allMessages } =
@@ -13,7 +13,7 @@ const Contacts = () => {
   const navigate = useNavigate();
   const messagesMap = new Map();
 
-  const startMessage = (contact: Contacts) => {
+  const startMessage = (contact: ContactsType) => {
     navigate("/profile");
     const sessionMessages = messagesMap.get(contact.contactid) || [];
     setMessageSession({ contact: contact, messages: sessionMessages });
