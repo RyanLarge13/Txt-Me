@@ -1,9 +1,9 @@
-import { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { TiMessages } from "react-icons/ti";
 import { SocketProvider } from "./context/socketCtxt.tsx";
-import UserCtxt, { UserProvider } from "./context/userCtxt.tsx";
+import UserCtxt from "./context/userCtxt.tsx";
 import Nav from "./components/Nav.tsx";
 import Home from "./states/Home.tsx";
 import Login from "./states/Login.tsx";
