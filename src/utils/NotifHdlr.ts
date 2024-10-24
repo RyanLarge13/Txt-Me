@@ -3,6 +3,7 @@ import { SysNotif, Actions } from "../types/userTypes";
 
 class NotifHdlr {
   private setState;
+
   constructor(setState: Dispatch<SetStateAction<SysNotif>>) {
     this.setState = setState;
   }
