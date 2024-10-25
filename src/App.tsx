@@ -19,6 +19,7 @@ import Messages from "./components/Messages.tsx";
 import ChatsMenu from "./components/ChatsMenu.tsx";
 
 const MainLoad = () => {
+  // Initial loading component for native app-like feel
   return (
     <motion.section
       initial={{ opacity: 1 }}
@@ -46,18 +47,24 @@ const App = () => {
   const [mainLoad, setMainLoad] = useState(true);
 
   useEffect(() => {
+    // Fetch user was successful, Immediately remove load component
     if (token && user?.userId !== 0) {
       setMainLoad(false);
     }
+
+    // Currently fetching user data, return (keep load component)
     if (token && user?.userId === 0) {
       return;
     }
+
+    // No existing user, allow default load component time 1s 250ms
     let timeoutId: number;
     if (!token && user?.userId === 0) {
       timeoutId = setTimeout(() => {
         setMainLoad(false);
       }, 1250);
     }
+
     return () => {
       clearTimeout(timeoutId);
     };
@@ -65,6 +72,7 @@ const App = () => {
 
   return (
     <main>
+      {/* Loading component */}
       <AnimatePresence>{mainLoad && <MainLoad />}</AnimatePresence>
       {user?.userId ? <ProfileNav /> : <Nav />}
       <SysNotif />
@@ -89,6 +97,7 @@ const App = () => {
             )
           }
         >
+          {/* Nested routes for "/profile" */}
           <Route path="newcontact" element={<NewContact />} />
           <Route
             path="account"
@@ -100,6 +109,7 @@ const App = () => {
           />
           <Route path="messages" element={<ChatsMenu />} />
           <Route path="contacts" element={<Messages />} />
+          {/* Nested routes for "/profile" */}
         </Route>
         <Route
           path="*"

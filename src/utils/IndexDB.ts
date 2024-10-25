@@ -12,11 +12,15 @@ class DBManager {
 
     // Handle callbacks in constructor scope
     this.request.onupgradeneeded = (event: IDBVersionChangeEvent) => {
-      this.db = event?.target?.result;
+      console.log(event);
+      return;
+      // this.db = event.target.result;
     };
 
-    this.request.onsuccess = (event: IDBOpenDBRequest) => {
-      this.db = event.target.result;
+    this.request.onsuccess = (event: Event) => {
+      console.log(event);
+      return;
+      // this.db = event.target.result;
     };
 
     this.request.onerror = (event: Event) => {
@@ -25,4 +29,4 @@ class DBManager {
   }
 }
 
-export default new DBManager();
+export default DBManager;

@@ -1,8 +1,9 @@
-import { createContext, useState, ReactNode, useEffect } from "react";
+import React, { createContext, useState, ReactNode, useEffect } from "react";
 import { Contacts, MessageSession, UserProps } from "../types/userTypes.ts";
 import { fetchUserData, getContacts } from "../utils/api.ts";
-import NotifHdlr from "../utils/NotifHdlr.ts";
 import { AxiosResponse } from "axios";
+import DBManager from "../utils/IndexDB.ts";
+import NotifHdlr from "../utils/NotifHdlr.ts";
 
 const UserCtxt = createContext({} as UserProps);
 
@@ -67,6 +68,8 @@ export const UserProvider = ({
         })
         .catch((err) => {
           console.log(err);
+          localStorage.setItem("authToken", "null");
+          setToken("");
           notifHdlr.setNotif(
             "Error",
             "Please login again to access your account",
@@ -78,6 +81,7 @@ export const UserProvider = ({
   }, [token]);
 
   const notifHdlr = new NotifHdlr(setSysNotif);
+  const userDb = new DBManager();
 
   return (
     <UserCtxt.Provider

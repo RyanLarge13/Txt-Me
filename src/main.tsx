@@ -6,6 +6,7 @@ import App from "./App.tsx";
 import "./index.css";
 
 if ("serviceWorker" in navigator) {
+  // Register service worker for "/"
   window.addEventListener("load", () => {
     navigator.serviceWorker
       .register("/sw.js")
