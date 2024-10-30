@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
-type LocalStorageHookReturn<T> = [
+export type LocalStorageHookReturn<T> = [
   T | null,
   { didFail: boolean; message: string },
   (value: T) => void
@@ -16,28 +16,31 @@ const useLocalStorage = <T>(item: string): LocalStorageHookReturn<T> => {
   const errMessage =
     "There were problems loading your data. Please double check your permissions, and contact Txt Me immediately";
 
-  const parseValue = (value: string): T | null => {
-    try {
-      const parsedValue = JSON.parse(value);
-      if (parsedValue === null) {
-        throw new Error(
-          `Could not parse raw value (${item}) from localStorage`
+  const parseValue = useCallback(
+    (value: string): T | null => {
+      try {
+        const parsedValue = JSON.parse(value);
+        if (parsedValue === null) {
+          throw new Error(
+            `Could not parse raw value (${item}) from localStorage`
+          );
+        }
+        return parsedValue;
+      } catch (err) {
+        console.error(
+          `Error parsing local storage return value from ${item}. Error: ${err}`
         );
+        setFailed({
+          didFail: true,
+          message: errMessage,
+        });
+        return null;
       }
-      return parsedValue;
-    } catch (err) {
-      console.error(
-        `Error parsing local storage return value from ${item}. Error: ${err}`
-      );
-      setFailed({
-        didFail: true,
-        message: errMessage,
-      });
-      return null;
-    }
-  };
+    },
+    [setFailed]
+  );
 
-  const getValueFromStorage = (): T | null => {
+  const getValueFromStorage = useCallback((): T | null => {
     try {
       const rawValue = localStorage.getItem(item);
       if (rawValue === null) {
@@ -54,23 +57,26 @@ const useLocalStorage = <T>(item: string): LocalStorageHookReturn<T> => {
       });
       return null;
     }
-  };
+  }, [parseValue, setFailed]);
 
-  const setValueInStorage = (value: T): void => {
-    try {
-      const stringValue = JSON.stringify(value);
-      localStorage.setItem(item, stringValue);
-      setStorageValue(value);
-    } catch (err) {
-      console.error(
-        `Error setting local storage value for ${item}. Error: ${err}`
-      );
-      setFailed({
-        didFail: true,
-        message: errMessage,
-      });
-    }
-  };
+  const setValueInStorage = useCallback(
+    (value: T): void => {
+      try {
+        const stringValue = JSON.stringify(value);
+        localStorage.setItem(item, stringValue);
+        setStorageValue(value);
+      } catch (err) {
+        console.error(
+          `Error setting local storage value for ${item}. Error: ${err}`
+        );
+        setFailed({
+          didFail: true,
+          message: errMessage,
+        });
+      }
+    },
+    [setStorageValue, setFailed]
+  );
 
   useEffect(() => {
     setStorageValue(getValueFromStorage());

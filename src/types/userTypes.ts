@@ -24,7 +24,7 @@ export type SysNotif = {
   actions: Actions[];
 };
 
-type User = {
+export type User = {
   username: string;
   userId: number;
   email: string;
@@ -60,8 +60,8 @@ export type MessageSession = {
 
 export interface UserProps {
   setSysNotif: Dispatch<SetStateAction<SysNotif>>;
-  setUser: Dispatch<SetStateAction<User>>;
-  setToken: Dispatch<SetStateAction<string>>;
+  setUser: (user: User) => void;
+  setToken: (value: string) => void;
   setOpenChatsMenu: Dispatch<SetStateAction<boolean>>;
   setNewChat: Dispatch<SetStateAction<boolean>>;
   setContacts: Dispatch<SetStateAction<Contacts[] | []>>;
@@ -72,7 +72,7 @@ export interface UserProps {
   sysNotif: SysNotif;
   user: User | null;
   notifHdlr: Notifhdlr;
-  token: string;
+  token: string | null;
   contacts: Contacts[] | [];
   messageSession: MessageSession | null;
   allMessages: AllMessages;

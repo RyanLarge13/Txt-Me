@@ -1,9 +1,15 @@
 import React, { createContext, useState, ReactNode, useEffect } from "react";
-import { Contacts, MessageSession, UserProps } from "../types/userTypes.ts";
+import {
+  Contacts,
+  MessageSession,
+  UserProps,
+  User,
+} from "../types/userTypes.ts";
 import { fetchUserData, getContacts } from "../utils/api.ts";
 import { AxiosResponse } from "axios";
 import DBManager from "../utils/IndexDB.ts";
 import NotifHdlr from "../utils/NotifHdlr.ts";
+import useLocalStorage from "../hooks/useLocalStorage.ts";
 
 const UserCtxt = createContext({} as UserProps);
 
@@ -12,7 +18,11 @@ export const UserProvider = ({
 }: {
   children: ReactNode;
 }): JSX.Element => {
-  const [token, setToken] = useState("");
+  const [token, tokenFailed, setToken] = useLocalStorage<string>("authToken");
+  const [user, userFailed, setUser] = useLocalStorage<User>("user");
+  const [preferences, failedPreferences, setPreferences] =
+    useLocalStorage("preferences");
+
   const [openChatsMenu, setOpenChatsMenu] = useState(false);
   const [newChat, setNewChat] = useState(false);
   const [contacts, setContacts] = useState<Contacts[] | []>([]);
@@ -28,25 +38,9 @@ export const UserProvider = ({
     hasCancel: false,
     actions: [{ text: "", func: (): void => {} }],
   });
-  const [user, setUser] = useState({
-    username: "",
-    userId: 0,
-    email: "",
-    phoneNumber: "",
-  });
-
-  useEffect(() => {
-    const storedToken = localStorage.getItem("authToken");
-    if (storedToken !== null && typeof token === "string") {
-      if (!token && user.userId === 0) {
-        setToken(storedToken);
-      }
-    }
-  }, []);
 
   useEffect(() => {
     if (token) {
-      console.log("token");
       getContacts(token)
         .then((res) => {
           console.log(res);
@@ -64,12 +58,10 @@ export const UserProvider = ({
       fetchUserData(token)
         .then((res: AxiosResponse): void => {
           setUser(res.data.data.user);
-          localStorage.setItem("user", JSON.stringify(res.data.data.user));
         })
         .catch((err) => {
           console.log(err);
-          localStorage.setItem("authToken", "null");
-          setToken("");
+          setToken("null");
           notifHdlr.setNotif(
             "Error",
             "Please login again to access your account",
