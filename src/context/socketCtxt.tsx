@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-/// <reference types="vite/types/importMeta.d.ts" />
+
 import React, {
   createContext,
   useContext,
@@ -40,6 +40,11 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         });
         socketRef.current.on("connect_error", (error) => {
           console.log("Connection error:", error);
+          setTimeout(() => {
+            if (socketRef.current) {
+              socketRef.current.connect();
+            }
+          }, 10000);
         });
         socketRef.current.on("text-message", (socketMessage) => {
           console.log("message from socket, updating messages", socketMessage);

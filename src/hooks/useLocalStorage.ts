@@ -20,10 +20,8 @@ const useLocalStorage = <T>(item: string): LocalStorageHookReturn<T> => {
     (value: string): T | null => {
       try {
         const parsedValue = JSON.parse(value);
-        if (parsedValue === null) {
-          throw new Error(
-            `Could not parse raw value (${item}) from localStorage`
-          );
+        if (parsedValue === "null") {
+          return null as T;
         }
         return parsedValue;
       } catch (err) {
@@ -34,7 +32,7 @@ const useLocalStorage = <T>(item: string): LocalStorageHookReturn<T> => {
           didFail: true,
           message: errMessage,
         });
-        return null;
+        return value as T;
       }
     },
     [setFailed]
@@ -44,9 +42,11 @@ const useLocalStorage = <T>(item: string): LocalStorageHookReturn<T> => {
     try {
       const rawValue = localStorage.getItem(item);
       if (rawValue === null) {
-        throw new Error(
-          `No value in local storage exists with this name. Name: ${item}`
-        );
+        setFailed({
+          didFail: true,
+          message: errMessage,
+        });
+        return null as T;
       }
       return parseValue(rawValue);
     } catch (err) {

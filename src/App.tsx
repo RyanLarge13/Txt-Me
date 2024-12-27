@@ -58,11 +58,18 @@ const App = () => {
     }
 
     // No existing user, allow default load component time 1s 250ms
-    let timeoutId: number;
+    let timeoutId: number = 0;
     if (!token && user?.userId === 0) {
       timeoutId = setTimeout(() => {
         setMainLoad(false);
       }, 1250);
+    }
+
+    if (token === null && user === null) {
+      setMainLoad(false);
+      if (timeoutId !== 0) {
+        clearTimeout(timeoutId);
+      }
     }
 
     return () => {

@@ -7,7 +7,6 @@ import {
 } from "../types/userTypes.ts";
 import { fetchUserData, getContacts } from "../utils/api.ts";
 import { AxiosResponse } from "axios";
-import DBManager from "../utils/IndexDB.ts";
 import NotifHdlr from "../utils/NotifHdlr.ts";
 import useLocalStorage from "../hooks/useLocalStorage.ts";
 
@@ -41,9 +40,10 @@ export const UserProvider = ({
 
   useEffect(() => {
     if (token) {
+      console.log("Token, fetching contacts and user");
       getContacts(token)
         .then((res) => {
-          console.log(res);
+          console.log("Fetched Contacts");
           setContacts(res.data.data.contacts);
         })
         .catch((err) => {
@@ -57,6 +57,7 @@ export const UserProvider = ({
         });
       fetchUserData(token)
         .then((res: AxiosResponse): void => {
+          console.log("Fetched User Data");
           setUser(res.data.data.user);
         })
         .catch((err) => {
@@ -73,7 +74,6 @@ export const UserProvider = ({
   }, [token]);
 
   const notifHdlr = new NotifHdlr(setSysNotif);
-  const userDb = new DBManager();
 
   return (
     <UserCtxt.Provider
