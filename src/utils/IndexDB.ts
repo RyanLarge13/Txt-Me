@@ -10,7 +10,7 @@ class DBManager {
     this.db = null;
     this.request = indexedDB.open(dbName, parseInt(dbVersion));
 
-    // Handle callbacks in constructor scope
+    // Handle callbacks in constructor scope -------------------------------------
     this.request.onupgradeneeded = (event: IDBVersionChangeEvent) => {
       console.log(event);
       return;
@@ -26,6 +26,7 @@ class DBManager {
     this.request.onerror = (event: Event) => {
       console.log(`Error opening indexedDB ${event?.target || ""}`);
     };
+    // Handle callbacks in constructor scope -------------------------------------
   }
 }
 

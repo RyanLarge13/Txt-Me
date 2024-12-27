@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import React, { useContext } from "react";
 import { motion } from "framer-motion";
 import UserCtxt from "../context/userCtxt";
 import { useNavigate } from "react-router-dom";
@@ -27,12 +27,15 @@ const ChatsMenu = () => {
           New Chat
         </button>
       </div>
-      {allMessages.length > 0
-        ? allMessages.map((messageSession, index) => (
+      {allMessages
+        ? Array.from(allMessages).map(([_, messageSession], index) => (
             <div
               key={index}
               onClick={() => {
-                setMessageSession(messageSession);
+                setMessageSession({
+                  contact: messageSession.contact,
+                  messages: messageSession.messages,
+                });
                 navigate("/profile");
               }}
               className="flex justify-between items-center relative"

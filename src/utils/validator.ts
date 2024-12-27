@@ -2,9 +2,11 @@ interface EscapeMap {
   [key: string]: string;
 }
 
+// Validator class matches server validation class perfectly
 class Validator {
   constructor() {}
 
+  // Validate a string
   valStr(
     string: string,
     maxLength: number = 10,
@@ -37,6 +39,7 @@ class Validator {
     return true;
   }
 
+  // Validate an integer
   valInt(
     testLen: boolean,
     minSize: number = 0,
@@ -71,6 +74,7 @@ class Validator {
     return true;
   }
 
+  // Validate a username
   valUsername(username: string) {
     const isValidName = this.valStr(username, 20, 3);
     if (!isValidName) {
@@ -79,6 +83,7 @@ class Validator {
     return true;
   }
 
+  // Validate an email
   valEmail(email: string) {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (typeof email !== "string") {
@@ -91,6 +96,7 @@ class Validator {
     return true;
   }
 
+  // Validate a password
   valPassword(password: string) {
     if (typeof password !== "string") {
       return false;
@@ -104,6 +110,7 @@ class Validator {
     return true;
   }
 
+  // Validate a phone number
   valPhoneNumber(phoneNumber: string) {
     if (typeof phoneNumber !== "string") {
       return;

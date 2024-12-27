@@ -3,8 +3,8 @@ import { Socket } from "socket.io-client";
 export interface SocketProps {
   socket: Socket | null;
   message: {
-    from: string;
+    fromid: string;
     message: string;
-    time: Date;
+    time: string;
   } | null;
 }

@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import React, { useContext } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import MainSettings from "../components/MainSettings";
 import BackDrop from "../components/BackDrop";

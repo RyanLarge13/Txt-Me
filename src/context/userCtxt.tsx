@@ -7,7 +7,6 @@ import {
 } from "../types/userTypes.ts";
 import { fetchUserData, getContacts } from "../utils/api.ts";
 import { AxiosResponse } from "axios";
-import NotifHdlr from "../utils/NotifHdlr.ts";
 import useLocalStorage from "../hooks/useLocalStorage.ts";
 
 const UserCtxt = createContext({} as UserProps);
@@ -17,69 +16,73 @@ export const UserProvider = ({
 }: {
   children: ReactNode;
 }): JSX.Element => {
+  // State and state hooks --------------------------------------------------------------
+  // Local storage items and their state
   const [token, tokenFailed, setToken] = useLocalStorage<string>("authToken");
   const [user, userFailed, setUser] = useLocalStorage<User>("user");
-  const [preferences, failedPreferences, setPreferences] =
-    useLocalStorage("preferences");
 
+  // State
   const [openChatsMenu, setOpenChatsMenu] = useState(false);
   const [newChat, setNewChat] = useState(false);
   const [contacts, setContacts] = useState<Contacts[] | []>([]);
+  const [allMessages, setAllMessages] = useState(new Map());
   const [messageSession, setMessageSession] = useState<MessageSession | null>(
     null
   );
-  const [allMessages, setAllMessages] = useState(new Map());
-  const [sysNotif, setSysNotif] = useState({
-    show: false,
-    title: "",
-    text: "",
-    color: "",
-    hasCancel: false,
-    actions: [{ text: "", func: (): void => {} }],
-  });
+  // State and state hooks --------------------------------------------------------------
 
+  // useEffect hooks -------------------------------------------------------------------
   useEffect(() => {
+    // Fetch user data and contacts to update
     if (token) {
-      console.log("Token, fetching contacts and user");
-      getContacts(token)
-        .then((res) => {
-          console.log("Fetched Contacts");
-          setContacts(res.data.data.contacts);
-        })
-        .catch((err) => {
-          console.log(err);
-          notifHdlr.setNotif(
-            "Error",
-            "We could not update your contacts",
-            false,
-            []
-          );
-        });
-      fetchUserData(token)
-        .then((res: AxiosResponse): void => {
-          console.log("Fetched User Data");
-          setUser(res.data.data.user);
-        })
-        .catch((err) => {
-          console.log(err);
-          setToken("null");
-          notifHdlr.setNotif(
-            "Error",
-            "Please login again to access your account",
-            false,
-            []
-          );
-        });
+      getUserContacts(token);
+      getUserData(token);
     }
   }, [token]);
 
-  const notifHdlr = new NotifHdlr(setSysNotif);
+  useEffect(() => {
+    // Listen for local storage parsing or fetching errors
+    if (userFailed || tokenFailed) {
+      console.error(
+        "Failed to grab user or token from storage or no value was present"
+      );
+      console.log(
+        `Error Messages: ${
+          userFailed
+            ? userFailed.message
+            : tokenFailed
+            ? tokenFailed.message
+            : "No errors present"
+        }`
+      );
+    }
+  }, [tokenFailed, userFailed]);
+  // useEffect hooks -------------------------------------------------------------------
+
+  // Local Scope Context Functions ---------------------------------------------------
+  const getUserContacts = async (token: string): Promise<void> => {
+    try {
+      const contactsResponse: AxiosResponse = await getContacts(token);
+      setContacts(contactsResponse.data.data.contacts);
+    } catch (err) {
+      console.log(`Error when fetching users contacts. Error: ${err}`);
+    }
+  };
+
+  const getUserData = async (token: string): Promise<void> => {
+    try {
+      const userDataResponse: AxiosResponse = await fetchUserData(token);
+      setUser(userDataResponse.data.data.user);
+    } catch (err) {
+      console.log(`Error when fetching user data. Error: ${err}`);
+    }
+  };
+  // Local Scope Context Functions --------------------------------------------------
 
   return (
     <UserCtxt.Provider
+      // Please keep static state on top half and set state hooks on lower half
       value={{
-        sysNotif,
-        notifHdlr,
         token,
         user,
         openChatsMenu,
@@ -92,7 +95,6 @@ export const UserProvider = ({
         setContacts,
         setNewChat,
         setOpenChatsMenu,
-        setSysNotif,
         setToken,
         setUser,
       }}

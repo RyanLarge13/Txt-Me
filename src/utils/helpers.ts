@@ -1,3 +1,4 @@
+// Retrieve and return the initials of a username
 export const getInitials = (name: string) => {
   name = name.trim();
   const parts = name.split(" ");

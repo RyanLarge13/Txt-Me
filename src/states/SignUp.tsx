@@ -1,4 +1,4 @@
-import { useState, useContext, FormEvent } from "react";
+import React, { useState, useContext, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { signUp } from "../utils/api.ts";
 import { motion } from "framer-motion";
@@ -6,9 +6,11 @@ import { TiMessages } from "react-icons/ti";
 import Validator from "../utils/validator.ts";
 import UserCtxt from "../context/userCtxt.tsx";
 import { ClipLoader } from "react-spinners";
+import NotifCtxt from "../context/notifCtxt.tsx";
 
 const SignUp = (): JSX.Element => {
-  const { notifHdlr, setToken } = useContext(UserCtxt);
+  const { setToken } = useContext(UserCtxt);
+  const { notifHdlr } = useContext(NotifCtxt);
 
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");

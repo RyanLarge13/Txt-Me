@@ -1,15 +1,5 @@
 import { SetStateAction, Dispatch } from "react";
 
-interface Notifhdlr {
-  closeNotif: () => void;
-  setNotif: (
-    title: string,
-    text: string,
-    hasCancel: boolean,
-    actions: Actions[] | []
-  ) => void;
-}
-
 export type Actions = {
   text: string;
   func: () => void;
@@ -31,7 +21,10 @@ export type User = {
   phoneNumber: string;
 };
 
-export type AllMessages = Map<number, Message[]>;
+export type AllMessages = Map<
+  number,
+  { contact: Contacts; messages: Message[] }
+>;
 
 export type Contacts = {
   address: string;
@@ -58,8 +51,19 @@ export type MessageSession = {
   contact: Contacts;
 };
 
+export interface NotifCtxtProps {
+  notifHdlr: {
+    closeNotif: () => void;
+    setNotif: (
+      title: string,
+      text: string,
+      hasCancel: boolean,
+      actions: Actions[] | []
+    ) => void;
+  };
+}
+
 export interface UserProps {
-  setSysNotif: Dispatch<SetStateAction<SysNotif>>;
   setUser: (user: User) => void;
   setToken: (value: string) => void;
   setOpenChatsMenu: Dispatch<SetStateAction<boolean>>;
@@ -69,9 +73,7 @@ export interface UserProps {
   setAllMessages: Dispatch<SetStateAction<Map<number, Message[]>>>;
   newChat: boolean;
   openChatsMenu: boolean;
-  sysNotif: SysNotif;
   user: User | null;
-  notifHdlr: Notifhdlr;
   token: string | null;
   contacts: Contacts[] | [];
   messageSession: MessageSession | null;

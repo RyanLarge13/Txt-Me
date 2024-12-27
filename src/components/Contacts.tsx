@@ -4,7 +4,11 @@ import { useNavigate } from "react-router-dom";
 import { getInitials } from "../utils/helpers";
 import UserCtxt from "../context/userCtxt";
 import { BsThreeDotsVertical } from "react-icons/bs";
-import { Contacts as ContactsType, Message } from "../types/userTypes";
+import {
+  AllMessages,
+  Contacts as ContactsType,
+  Message,
+} from "../types/userTypes";
 
 const Contacts = () => {
   const { contacts, setMessageSession, setAllMessages, allMessages } =
@@ -14,16 +18,19 @@ const Contacts = () => {
   const messagesMap = new Map();
 
   const startMessage = (contact: ContactsType) => {
-    navigate("/profile");
     const sessionMessages = messagesMap.get(contact.contactid) || [];
+
     setMessageSession({ contact: contact, messages: sessionMessages });
-    const newSessions: Map<number, Message[]> = new Map(allMessages);
-    if (newSessions.has(contact.number)) {
-      newSessions.get(contact.number)?.push(sessionMessages);
-    } else {
-      newSessions.set(contact.number, [sessionMessages]);
-    }
-    setAllMessages(newSessions);
+
+    const newSessionMap: AllMessages = new Map(allMessages);
+
+    const newMessageSession = { contact: contact, messages: sessionMessages };
+
+    newSessionMap.set(contact.number, newMessageSession);
+
+    setAllMessages(newMessageSession.messages);
+
+    navigate("/profile");
   };
 
   return (

@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect } from "react";
+import React, { useContext, useState, useEffect, useRef } from "react";
 import { IoSend } from "react-icons/io5";
 import UserCtxt from "../context/userCtxt";
 import { useSocket } from "../context/socketCtxt";
@@ -9,9 +9,12 @@ const MessageSession = () => {
 
   const [value, setValue] = useState("");
 
+  const messagesRef = useRef<HTMLDivElement | null>(null);
+
   useEffect(() => {
     const newMessage = message;
     if (newMessage) {
+      console.log("New message from me or sender");
       setMessageSession((prev) => {
         if (!prev) {
           return null;
@@ -28,6 +31,11 @@ const MessageSession = () => {
           ],
         };
       });
+      setTimeout(() => {
+        if (messagesRef && messagesRef.current) {
+          messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
+        }
+      }, 0);
     }
   }, [message, setMessageSession]);
 
@@ -48,6 +56,11 @@ const MessageSession = () => {
         ],
       };
     });
+    setTimeout(() => {
+      if (messagesRef && messagesRef.current) {
+        messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
+      }
+    }, 0);
     if (socket && messageSession) {
       socket.emit("text-message", {
         sender: user?.phoneNumber,
@@ -60,8 +73,11 @@ const MessageSession = () => {
   };
 
   return (
-    <div className="h-full w-full overflow-y-auto py-20">
-      <div className="p-5 fixed top-20 right-0 left-0 bg-black">
+    <div
+      ref={messagesRef}
+      className="h-full w-full overflow-y-auto py-20 scroll-smooth"
+    >
+      <div className="p-5 fixed top-0 z-10 right-0 left-0 bg-black">
         <p>{messageSession?.contact.name}</p>
         <p>{messageSession?.contact.number}</p>
       </div>
@@ -78,11 +94,13 @@ const MessageSession = () => {
             >
               <p>{message.message}</p>
               <p>
-                {message.time.toLocaleTimeString("en-US", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  dayPeriod: "short",
-                })}
+                {message.time
+                  ? message.time.toLocaleTimeString("en-US", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      dayPeriod: "short",
+                    })
+                  : "Just Now"}
               </p>
             </div>
           ))}
@@ -93,7 +111,6 @@ const MessageSession = () => {
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          // sendMessage();
         }}
         className="bg-black fixed bottom-[60px] left-0 right-0 py-5 px-2 flex justify-between items-center gap-x-2"
       >

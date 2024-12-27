@@ -1,16 +1,16 @@
-import { useState, useContext, FormEvent } from "react";
+import React, { useState, useContext, FormEvent } from "react";
 import { motion } from "framer-motion";
 import { FaPhone } from "react-icons/fa";
 import { GrMagic } from "react-icons/gr";
 import { MdEmail } from "react-icons/md";
 import { useParams, useNavigate } from "react-router-dom";
 import { pinEmail, pinPhone } from "../utils/api.ts";
-import UserCtxt from "../context/userCtxt.tsx";
 import { ClipLoader } from "react-spinners";
 import Validator from "../utils/validator";
+import NotifCtxt from "../context/notifCtxt.tsx";
 
 const Login = (): JSX.Element => {
-  const { notifHdlr } = useContext(UserCtxt);
+  const { notifHdlr } = useContext(NotifCtxt);
 
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");

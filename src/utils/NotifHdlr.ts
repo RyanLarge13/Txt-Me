@@ -1,6 +1,7 @@
 import { Dispatch, SetStateAction } from "react";
 import { SysNotif, Actions } from "../types/userTypes";
 
+// Create a setState abstraction to handle rerenders appropriately and manage the notification system better
 class NotifHdlr {
   private setState;
 

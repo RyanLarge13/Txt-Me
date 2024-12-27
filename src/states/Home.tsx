@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import React, { motion } from "framer-motion";
 import { FaPhone } from "react-icons/fa";
 import { MdEmail } from "react-icons/md";
 import { useNavigate } from "react-router-dom";

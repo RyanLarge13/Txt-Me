@@ -1,4 +1,4 @@
-import { ChangeEvent, useContext, useState } from "react";
+import React, { ChangeEvent, useContext, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaSearch } from "react-icons/fa";
 import SearchIcon from "../assets/search.svg";

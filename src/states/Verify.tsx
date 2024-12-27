@@ -1,4 +1,4 @@
-import { useState, useContext, FormEvent } from "react";
+import React, { useState, useContext, FormEvent } from "react";
 import Validator from "../utils/validator.ts";
 import { motion } from "framer-motion";
 import { useParams, useNavigate } from "react-router-dom";
@@ -11,13 +11,21 @@ import {
 } from "../utils/api";
 import { ClipLoader } from "react-spinners";
 import UserCtxt from "../context/userCtxt.tsx";
+import NotifCtxt from "../context/notifCtxt.tsx";
 
 const Verify = (): JSX.Element => {
-  const { notifHdlr, token, setUser } = useContext(UserCtxt);
+  // Context
+  const { token, setUser } = useContext(UserCtxt);
+  const { notifHdlr } = useContext(NotifCtxt);
+
+  // Params
   const { type, method } = useParams();
+
+  // Utility functions
   const navigate = useNavigate();
   const Valdtr = new Validator();
 
+  // State
   const [pin, setPin] = useState("");
   const [emailPin, setEmailPin] = useState("");
   const [loading, setLoading] = useState(false);
@@ -30,22 +38,24 @@ const Verify = (): JSX.Element => {
     e.preventDefault();
     setLoading(true);
     try {
-      verifyPhone(token, pin)
-        .then((res) => {
-          console.log(res);
-          notifHdlr.setNotif("Verified", res.data.message, true, []);
-          navigate("/verify/email/verify");
-        })
-        .catch((err) => {
-          console.log(err);
-          notifHdlr.setNotif("Error", err.response.data.message, true, [
-            { text: "try login", func: (): void => tryingLogin() },
-            { text: "forgot creds", func: (): void => forgotCreds() },
-          ]);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
+      if (token) {
+        verifyPhone(token, pin)
+          .then((res) => {
+            console.log(res);
+            notifHdlr.setNotif("Verified", res.data.message, true, []);
+            navigate("/verify/email/verify");
+          })
+          .catch((err) => {
+            console.log(err);
+            notifHdlr.setNotif("Error", err.response.data.message, true, [
+              { text: "try login", func: (): void => tryingLogin() },
+              { text: "forgot creds", func: (): void => forgotCreds() },
+            ]);
+          })
+          .finally(() => {
+            setLoading(false);
+          });
+      }
     } catch (err) {
       console.log(err);
       notifHdlr.setNotif(
@@ -110,20 +120,22 @@ const Verify = (): JSX.Element => {
     e.preventDefault();
     setLoading(true);
     try {
-      verifyEmail(token, emailPin)
-        .then((res) => {
-          console.log(res);
-          notifHdlr.setNotif("Verified", res.data.message, true, []);
-          setLoading(false);
-          navigate("/profile");
-        })
-        .catch((err) => {
-          console.log(err);
-          notifHdlr.setNotif("Error", err.response.data.message, true, [
-            { text: "try login", func: (): void => tryingLogin() },
-          ]);
-          setLoading(false);
-        });
+      if (token) {
+        verifyEmail(token, emailPin)
+          .then((res) => {
+            console.log(res);
+            notifHdlr.setNotif("Verified", res.data.message, true, []);
+            setLoading(false);
+            navigate("/profile");
+          })
+          .catch((err) => {
+            console.log(err);
+            notifHdlr.setNotif("Error", err.response.data.message, true, [
+              { text: "try login", func: (): void => tryingLogin() },
+            ]);
+            setLoading(false);
+          });
+      }
     } catch (err) {
       console.log(err);
       notifHdlr.setNotif(
@@ -193,7 +205,7 @@ const Verify = (): JSX.Element => {
       {type === "phone" ? (
         <>
           <MdOutlinePermPhoneMsg className="text-6xl text-secondary" />
-          <p className="font-semibold text-[#fff]">One Time Passcode</p>
+          <p className="font-semibold text-[#fff]">One Time Pass Code</p>
           <p className="text-[#aaa] text-center px-2">
             Verify your phone number with the pin sent to your phone via sms
           </p>

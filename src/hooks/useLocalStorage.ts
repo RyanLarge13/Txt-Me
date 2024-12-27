@@ -1,21 +1,34 @@
 import { useState, useEffect, useCallback } from "react";
 
+// Hook types ----------------------------------------
 export type LocalStorageHookReturn<T> = [
   T | null,
   { didFail: boolean; message: string },
   (value: T) => void
 ];
+// Hook types ----------------------------------------
 
 const useLocalStorage = <T>(item: string): LocalStorageHookReturn<T> => {
+  // Hook state ------------------------------------------------
   const [failed, setFailed] = useState<{ didFail: boolean; message: string }>({
     didFail: false,
     message: "",
   });
   const [storageValue, setStorageValue] = useState<T | null>(null);
+  // Hook state ------------------------------------------------
 
+  // Static Variable -------------------------------------------
   const errMessage =
     "There were problems loading your data. Please double check your permissions, and contact Txt Me immediately";
+  // Static Variable -------------------------------------------
 
+  // useEffect init --------------------------------------------
+  useEffect(() => {
+    setStorageValue(getValueFromStorage());
+  }, [item]);
+  // useEffect init --------------------------------------------
+
+  // Local scope hook methods ----------------------------------
   const parseValue = useCallback(
     (value: string): T | null => {
       try {
@@ -77,10 +90,7 @@ const useLocalStorage = <T>(item: string): LocalStorageHookReturn<T> => {
     },
     [setStorageValue, setFailed]
   );
-
-  useEffect(() => {
-    setStorageValue(getValueFromStorage());
-  }, [item]);
+  // Local scope hook methods ----------------------------------
 
   return [storageValue, failed, setValueInStorage];
 };

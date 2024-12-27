@@ -9,6 +9,8 @@ import React, {
 } from "react";
 import { SocketProps } from "../types/socketTypes";
 import io, { Socket } from "socket.io-client";
+import useLocalStorage from "../hooks/useLocalStorage";
+import { Message, User } from "../types/userTypes";
 
 const SocketContext = createContext({} as SocketProps);
 
@@ -17,49 +19,134 @@ export const useSocket = () => {
 };
 
 export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
-  const [message, setMessage] = useState(null);
+  // Local Storage State --------------------------------------------
+  const [userJSON, userJSONFailed, _] = useLocalStorage<User | null>("user");
+  // Local Storage State --------------------------------------------
+
+  // State ----------------------------------------------------------
+  const [message, setMessage] = useState<{
+    fromid: string;
+    message: string;
+    time: string;
+  } | null>(null);
+  // State ----------------------------------------------------------
+
+  // UseRef for socket to avoid unwanted rerenders
   const socketRef = useRef<Socket | null>(null);
 
+  // useEffects -----------------------------------------------------
   useEffect(() => {
     try {
-      const userJSON: string | null = localStorage.getItem("user");
       if (userJSON && socketRef) {
-        const number = JSON.parse(userJSON).phoneNumber;
-        socketRef.current = io(import.meta.env.VITE_API_SOCKET_URL, {
-          reconnectionAttempts: 5,
-          reconnectionDelay: 1000,
-          query: {
-            number: number,
-          },
-        });
-        socketRef.current.on("connect", () => {
-          console.log("Connected to the server");
-        });
-        socketRef.current.on("disconnect", () => {
-          console.log("Disconnected from the server");
-        });
-        socketRef.current.on("connect_error", (error) => {
-          console.log("Connection error:", error);
-          setTimeout(() => {
-            if (socketRef.current) {
-              socketRef.current.connect();
-            }
-          }, 10000);
-        });
-        socketRef.current.on("text-message", (socketMessage) => {
-          console.log("message from socket, updating messages", socketMessage);
-          setMessage(socketMessage);
-        });
+        const number = userJSON?.phoneNumber || null;
+
+        if (number === null) {
+          console.error(
+            `Error: user phone number is null, cannot connect to socket`
+          );
+          // Do something
+          return;
+        }
+
+        setUpSocket(number);
       }
     } catch (err) {
-      console.log(err);
+      console.error(
+        `Error setting up socket and listeners to socket. Top level error. Error: ${err}`
+      );
     }
+
+    // Remove socket and disconnect
     return () => {
       if (socketRef.current) {
         socketRef.current.disconnect();
       }
     };
   }, [socketRef]);
+
+  useEffect(() => {
+    if (userJSONFailed !== null) {
+      console.error(
+        `Failed to grab user from local storage with a message: ${userJSONFailed.message}`
+      );
+      // Do something
+    }
+  }, [userJSONFailed]);
+  // useEffects -------------------------------------------------------
+
+  // Local Scop Context Methods ---------------------------------------
+  const setUpSocket = (number: string): void => {
+    const socketURL = import.meta.env.VITE_API_SOCKET_URL || "";
+    if (!socketURL) {
+      console.error(
+        `Importing env variable SOCKET_URL failed. socket url imported as: ${socketURL}`
+      );
+      return;
+    }
+
+    socketRef.current = io(socketURL, {
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+      query: {
+        number: number,
+      },
+    });
+
+    attachListeners(socketRef.current);
+  };
+
+  const attachListeners = (socketRef): void => {
+    if (!socketRef) {
+      return;
+    }
+
+    // Attach listeners and call appropriate methods
+    socketRef.on("connect", () => {
+      handleConnect();
+    });
+    socketRef.on("disconnect", () => {
+      handleDisconnect();
+    });
+    socketRef.on("connect_error", (error) => {
+      handleError(error);
+    });
+    socketRef.on("text-message", (socketMessage) => {
+      handleTextMessage(socketMessage);
+    });
+  };
+
+  // Socket Methods ---------------------------------------------------
+  const handleConnect = (): void => {
+    console.log("Connected to the server");
+  };
+
+  const handleDisconnect = (): void => {
+    console.log("Disconnected from the server");
+  };
+
+  const handleError = (error): void => {
+    console.log("Connection error:", error);
+    setTimeout((): void => {
+      if (socketRef && socketRef.current) {
+        socketRef.current.connect();
+      } else {
+        return;
+      }
+    }, 10000);
+  };
+
+  const handleTextMessage = (socketMessage): void => {
+    if (socketMessage) {
+      setMessage(socketMessage);
+      console.log("message from socket, updating messages", socketMessage);
+    } else {
+      console.log(
+        `Socket message came through as unknown data type. Message: ${socketMessage}`
+      );
+    }
+  };
+  // Socket Methods ---------------------------------------------------
+  // Local Scop Context Methods ---------------------------------------
 
   return (
     <SocketContext.Provider

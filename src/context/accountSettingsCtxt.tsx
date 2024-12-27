@@ -14,6 +14,7 @@ export const AccountSettingsProvider = ({
 }: {
   children: ReactNode;
 }): JSX.Element => {
+  // State hooks ----------------------------------------------------
   const [title, setTitle] = useState<Title>({
     string: "Account",
     icon: <MdAccountCircle />,
@@ -21,6 +22,7 @@ export const AccountSettingsProvider = ({
   const [settingsState, setSettingsState] = useState<SettingsState>({
     page: "main",
   });
+  // State hooks ----------------------------------------------------
 
   return (
     <AccountSettingsCtxt.Provider
