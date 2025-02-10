@@ -6,7 +6,7 @@ import NotifCtxt from "../context/notifCtxt";
 const SysNotif = (): JSX.Element => {
   const { sysNotif, setSysNotif } = useContext(NotifCtxt);
 
-  const notifTimeoutRef = useRef(null || 0);
+  const notifTimeoutRef = useRef(null);
 
   const handleDrag = (e): void => {
     const end = e.clientX;
@@ -24,19 +24,21 @@ const SysNotif = (): JSX.Element => {
   };
 
   useEffect(() => {
-    if (sysNotif && sysNotif?.show === true && sysNotif?.hasCancel === false) {
-      notifTimeoutRef.current = setTimeout(() => {
-        setSysNotif({
-          show: false,
-          title: "",
-          text: "",
-          color: "",
-          hasCancel: false,
-          actions: [],
-        });
-      }, 5000);
-    } else {
-      clearTimeout(notifTimeoutRef.current);
+    if (notifTimeoutRef.current) {
+      if (sysNotif.show === true && sysNotif.hasCancel === false) {
+        notifTimeoutRef.current = setTimeout(() => {
+          setSysNotif({
+            show: false,
+            title: "",
+            text: "",
+            color: "",
+            hasCancel: false,
+            actions: [],
+          });
+        }, 5000);
+      } else {
+        clearTimeout(notifTimeoutRef.current);
+      }
     }
     return () => {
       clearTimeout(notifTimeoutRef.current);
@@ -45,7 +47,7 @@ const SysNotif = (): JSX.Element => {
 
   return (
     <AnimatePresence>
-      {sysNotif && sysNotif?.show ? (
+      {sysNotif.show ? (
         <>
           <motion.div
             drag="x"

@@ -1,13 +1,14 @@
-import React, { createContext, useState, ReactNode, useEffect } from "react";
+import { AxiosResponse } from "axios";
+import React, { createContext, ReactNode, useEffect, useState } from "react";
+
+import useLocalStorage from "../hooks/useLocalStorage.ts";
 import {
   Contacts,
   MessageSession,
-  UserProps,
   User,
+  UserProps,
 } from "../types/userTypes.ts";
 import { fetchUserData, getContacts } from "../utils/api.ts";
-import { AxiosResponse } from "axios";
-import useLocalStorage from "../hooks/useLocalStorage.ts";
 
 const UserCtxt = createContext({} as UserProps);
 
@@ -42,20 +43,20 @@ export const UserProvider = ({
 
   useEffect(() => {
     // Listen for local storage parsing or fetching errors
-    if (userFailed || tokenFailed) {
-      console.error(
-        "Failed to grab user or token from storage or no value was present"
-      );
-      console.log(
-        `Error Messages: ${
-          userFailed
-            ? userFailed.message
-            : tokenFailed
-            ? tokenFailed.message
-            : "No errors present"
-        }`
-      );
-    }
+    // if (userFailed || tokenFailed) {
+    //   console.error(
+    //     "Failed to grab user or token from storage or no value was present"
+    //   );
+    //   console.log(
+    //     `Error messages for user or token information failure: ${
+    //       userFailed
+    //         ? userFailed.message
+    //         : tokenFailed
+    //         ? tokenFailed.message
+    //         : "No errors present"
+    //     }`
+    //   );
+    // }
   }, [tokenFailed, userFailed]);
   // useEffect hooks -------------------------------------------------------------------
 
