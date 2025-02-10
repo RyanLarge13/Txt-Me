@@ -1,9 +1,10 @@
+import { AnimatePresence, motion } from "framer-motion";
 import React, { useContext, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import UserContext from "../context/userCtxt";
+
+import NotifCtxt from "../context/notifCtxt";
 
 const SysNotif = (): JSX.Element => {
-  const { sysNotif, setSysNotif } = useContext(UserContext);
+  const { sysNotif, setSysNotif } = useContext(NotifCtxt);
 
   const notifTimeoutRef = useRef(null || 0);
 
@@ -23,7 +24,7 @@ const SysNotif = (): JSX.Element => {
   };
 
   useEffect(() => {
-    if (sysNotif.show === true && sysNotif.hasCancel === false) {
+    if (sysNotif && sysNotif?.show === true && sysNotif?.hasCancel === false) {
       notifTimeoutRef.current = setTimeout(() => {
         setSysNotif({
           show: false,
@@ -44,7 +45,7 @@ const SysNotif = (): JSX.Element => {
 
   return (
     <AnimatePresence>
-      {sysNotif.show && (
+      {sysNotif && sysNotif?.show ? (
         <>
           <motion.div
             drag="x"
@@ -89,7 +90,7 @@ const SysNotif = (): JSX.Element => {
             </div>
           </motion.div>
         </>
-      )}
+      ) : null}
     </AnimatePresence>
   );
 };

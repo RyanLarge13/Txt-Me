@@ -1,18 +1,4 @@
-import { SetStateAction, Dispatch } from "react";
-
-export type Actions = {
-  text: string;
-  func: () => void;
-};
-
-export type SysNotif = {
-  show: boolean;
-  title: string;
-  text: string;
-  color: string;
-  hasCancel: boolean;
-  actions: Actions[];
-};
+import { Dispatch, SetStateAction } from "react";
 
 export type User = {
   username: string;
@@ -50,18 +36,6 @@ export type MessageSession = {
   messages: Message[];
   contact: Contacts;
 };
-
-export interface NotifCtxtProps {
-  notifHdlr: {
-    closeNotif: () => void;
-    setNotif: (
-      title: string,
-      text: string,
-      hasCancel: boolean,
-      actions: Actions[] | []
-    ) => void;
-  };
-}
 
 export interface UserProps {
   setUser: (user: User) => void;

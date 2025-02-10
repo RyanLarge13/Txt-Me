@@ -1,6 +1,6 @@
-import React, { createContext, useState, ReactNode } from "react";
-import { NotifCtxtProps } from "../types/userTypes.ts";
-import NotifHdlr from "../utils/NotifHdlr.ts";
+import React, { createContext, ReactNode, useState } from "react";
+
+import { NotifCtxtProps } from "../types/notifTypes.ts";
 
 const NotifCtxt = createContext({} as NotifCtxtProps);
 
@@ -18,12 +18,11 @@ export const NotifProvider = ({
     actions: [{ text: "", func: (): void => {} }],
   });
 
-  const notifHdlr = new NotifHdlr(setSysNotif);
-
   return (
     <NotifCtxt.Provider
       value={{
-        notifHdlr,
+        sysNotif,
+        setSysNotif,
       }}
     >
       {children}
