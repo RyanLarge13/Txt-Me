@@ -1,47 +1,122 @@
 import React, { createContext, ReactNode, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
-import { NotifCtxtProps, SysNotifType} from "../types/notifTypes.ts";
+import { Actions, NotifCtxtProps, SysNotifType } from "../types/notifTypes.ts";
 
 const NotifCtxt = createContext({} as NotifCtxtProps);
 
 export const NotifProvider = ({
-	children
+  children,
 }: {
-	children: ReactNode;
+  children: ReactNode;
 }): JSX.Element => {
-	const [notifs, setNotifs] = useState([]);
+  const [notifs, setNotifs] = useState<SysNotifType[]>([]);
 
-	const addSuccessNotif = (): void => {};
+  const addSuccessNotif = (
+    title: string,
+    text: string,
+    hasCancel: boolean,
+    actions: Actions[]
+  ): void => {
+    const id = uuidv4();
+    const newNotif = {
+      id: id,
+      confirmation: false,
+      title: title,
+      text: text,
+      color: "bg-primary",
+      hasCancel: hasCancel,
+      time: new Date(),
+      actions: [{ text: "close", func: () => removeNotif(id) }, ...actions],
+    };
+    setNotifs((prev) => {
+      return [...prev, newNotif];
+    });
+  };
 
-	const addErrorNotif = (): void => {};
+  const addErrorNotif = (
+    title: string,
+    text: string,
+    hasCancel: boolean,
+    actions: Actions[]
+  ): void => {
+    const id = uuidv4();
+    const newNotif = {
+      id: id,
+      confirmation: false,
+      title: title,
+      text: text,
+      color: "bg-secondary",
+      hasCancel: hasCancel,
+      time: new Date(),
+      actions: [{ text: "close", func: () => removeNotif(id) }, ...actions],
+    };
+    setNotifs((prev) => {
+      return [...prev, newNotif];
+    });
+  };
 
-	const showNetworkErrorNotif = (): void => {};
+  const showNetworkErrorNotif = (actions: Actions[]): void => {
+    const id = uuidv4();
+    const newNotif = {
+      id: id,
+      confirmation: false,
+      title: "Network Error",
+      text: "Please check your internet connection",
+      color: "bg-secondary",
+      hasCancel: false,
+      time: new Date(),
+      actions: [{ text: "close", func: () => removeNotif(id) }, ...actions],
+    };
+    setNotifs((prev) => {
+      return [...prev, newNotif];
+    });
+  };
 
-	const removeNotif = (id: string): void => {
-		setNotifs((prev: SysNotifType[]): SysNotifType[] =>
-			prev.filter((notif: SysNotifType): boolean => notif.id !== id)
-		);
-	};
+  const removeNotif = (id: string): void => {
+    setNotifs((prev) => prev.filter((notif) => notif.id !== id));
+  };
 
-	const clearAllNotifs = (): void => {
-		setNotifs([]);
-	};
+  const clearAllNotifs = (): void => {
+    setNotifs([]);
+  };
 
-	return (
-		<NotifCtxt.Provider
-			value={{
-				notifs,
-				addSuccessNotif,
-				addErrorNotif,
-				removeNotif,
-				showNetworkErrorNotif,
-				clearAllNotifs
-			}}
-		>
-			{children}
-		</NotifCtxt.Provider>
-	);
+  const confirmOperation = (
+    title: string,
+    text: string,
+    actions: Actions[],
+    callback
+  ) => {
+    const id = uuidv4();
+    const newNotif = {
+      id: id,
+      confirmation: true,
+      title,
+      text,
+      color: "bg-primary",
+      hasCancel: false,
+      time: new Date(),
+      actions: [{ text: "close", func: () => removeNotif(id) }, ...actions],
+    };
+    setNotifs((prev) => {
+      return [...prev, newNotif];
+    });
+  };
+
+  return (
+    <NotifCtxt.Provider
+      value={{
+        notifs,
+        addSuccessNotif,
+        addErrorNotif,
+        removeNotif,
+        showNetworkErrorNotif,
+        clearAllNotifs,
+      }}
+    >
+      {children}
+    </NotifCtxt.Provider>
+  );
 };
 
 export default NotifCtxt;

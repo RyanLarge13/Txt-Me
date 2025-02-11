@@ -1,16 +1,20 @@
-import React, { useState, useContext, FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
-import { signUp } from "../utils/api.ts";
 import { motion } from "framer-motion";
+import React, { FormEvent, useContext, useState } from "react";
 import { TiMessages } from "react-icons/ti";
-import Validator from "../utils/validator.ts";
-import UserCtxt from "../context/userCtxt.tsx";
+import { useNavigate } from "react-router-dom";
 import { ClipLoader } from "react-spinners";
-import NotifCtxt from "../context/notifCtxt.tsx";
+
+import UserCtxt from "../context/userCtxt.tsx";
+import { signUp } from "../utils/api.ts";
+import {
+  valEmail,
+  valPassword,
+  valPhoneNumber,
+  valUsername,
+} from "../utils/validator.ts";
 
 const SignUp = (): JSX.Element => {
   const { setToken } = useContext(UserCtxt);
-  const { notifHdlr } = useContext(NotifCtxt);
 
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -19,21 +23,19 @@ const SignUp = (): JSX.Element => {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
-  const validator = new Validator();
 
   const tryingLogin = () => {
     navigate("/login/email");
-    notifHdlr.closeNotif();
   };
 
   const signUpNewUser = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     const valArr = [
-      validator.valUsername(username),
-      validator.valEmail(email),
-      validator.valPhoneNumber(phone),
-      validator.valPassword(password),
+      valUsername(username),
+      valEmail(email),
+      valPhoneNumber(phone),
+      valPassword(password),
     ];
     const showError = valArr.every((validation) => validation === false);
     if (showError) {
@@ -62,16 +64,14 @@ const SignUp = (): JSX.Element => {
     try {
       signUp({ username, email, phone, password })
         .then((res) => {
-          notifHdlr.setNotif("New Account", res.data.message, true, []);
+          // Add success Notif
           setToken(res.data.data.token);
           localStorage.setItem("authToken", res.data.data.token);
           navigate("/verify/phone/verify");
         })
         .catch((err) => {
           console.log(err);
-          notifHdlr.setNotif("Error", err.response.data.message, true, [
-            { text: "try login", func: (): void => tryingLogin() },
-          ]);
+          // Add Error Notif
         })
         .finally(() => {
           setLoading(false);
@@ -79,7 +79,7 @@ const SignUp = (): JSX.Element => {
     } catch (err) {
       console.log(err);
       if (err instanceof Error) {
-        notifHdlr.setNotif("Error", err.message, true, []);
+        // Add Error Notif
       }
       setLoading(false);
     }

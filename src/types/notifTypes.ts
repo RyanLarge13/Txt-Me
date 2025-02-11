@@ -1,25 +1,34 @@
-import { Dispatch, SetStateAction } from "react";
-
 export type SysNotifType = {
-	id: string;
-	title: string;
-	text: string;
-	color: string;
-	hasCancel: boolean;
-	time: Date;
-	actions: Actions[];
+  id: string;
+  confirmation: boolean;
+  title: string;
+  text: string;
+  color: string;
+  hasCancel: boolean;
+  time: Date;
+  actions: Actions[];
 };
 
 export type Actions = {
-	text: string;
-	func: () => void;
+  text: string;
+  func: () => void;
 };
 
 export interface NotifCtxtProps {
-	notifs: SysNotifType[];
-	addSuccessNotif: () => void;
-	addErrorNotif: () => void;
-	removeNotif: () => void;
-	showNetworkErrorNotif: () => void;
-	clearAllNotifs: () => void;
+  notifs: SysNotifType[];
+  addSuccessNotif: (
+    title: string,
+    text: string,
+    hasCancel: boolean,
+    actions: Actions[]
+  ) => void;
+  addErrorNotif: (
+    title: string,
+    text: string,
+    hasCancel: boolean,
+    actions: Actions[]
+  ) => void;
+  removeNotif: (id: string) => void;
+  showNetworkErrorNotif: (actions: Actions[]) => void;
+  clearAllNotifs: () => void;
 }
