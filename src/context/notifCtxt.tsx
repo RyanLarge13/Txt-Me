@@ -1,7 +1,7 @@
 import React, { createContext, ReactNode, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
-import { NotifCtxtProps } from "../types/notifTypes.ts";
+import { NotifCtxtProps, SysNotifType} from "../types/notifTypes.ts";
 
 const NotifCtxt = createContext({} as NotifCtxtProps);
 
@@ -19,8 +19,8 @@ export const NotifProvider = ({
 	const showNetworkErrorNotif = (): void => {};
 
 	const removeNotif = (id: string): void => {
-		setNotifs((prev: SysNotif[]): SysNotif[] =>
-			prev.filter((notif: SysNotif): boolean => notif.id !== id)
+		setNotifs((prev: SysNotifType[]): SysNotifType[] =>
+			prev.filter((notif: SysNotifType): boolean => notif.id !== id)
 		);
 	};
 
@@ -31,7 +31,12 @@ export const NotifProvider = ({
 	return (
 		<NotifCtxt.Provider
 			value={{
-				notifs
+				notifs,
+				addSuccessNotif,
+				addErrorNotif,
+				removeNotif,
+				showNetworkErrorNotif,
+				clearAllNotifs
 			}}
 		>
 			{children}

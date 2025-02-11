@@ -1,7 +1,7 @@
 import { Dispatch, SetStateAction } from "react";
 
 export type SysNotifType = {
- id:string;
+	id: string;
 	title: string;
 	text: string;
 	color: string;
@@ -16,6 +16,10 @@ export type Actions = {
 };
 
 export interface NotifCtxtProps {
-	setSysNotif: Dispatch<SetStateAction<SysNotif>>;
-	sysNotif: SysNotif;
+	notifs: SysNotifType[];
+	addSuccessNotif: () => void;
+	addErrorNotif: () => void;
+	removeNotif: () => void;
+	showNetworkErrorNotif: () => void;
+	clearAllNotifs: () => void;
 }
