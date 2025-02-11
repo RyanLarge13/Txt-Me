@@ -1,33 +1,42 @@
 import React, { createContext, ReactNode, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 
 import { NotifCtxtProps } from "../types/notifTypes.ts";
 
 const NotifCtxt = createContext({} as NotifCtxtProps);
 
 export const NotifProvider = ({
-  children,
+	children
 }: {
-  children: ReactNode;
+	children: ReactNode;
 }): JSX.Element => {
-  const [sysNotif, setSysNotif] = useState({
-    show: false,
-    title: "",
-    text: "",
-    color: "",
-    hasCancel: false,
-    actions: [{ text: "", func: (): void => {} }],
-  });
+	const [notifs, setNotifs] = useState([]);
 
-  return (
-    <NotifCtxt.Provider
-      value={{
-        sysNotif,
-        setSysNotif,
-      }}
-    >
-      {children}
-    </NotifCtxt.Provider>
-  );
+	const addSuccessNotif = (): void => {};
+
+	const addErrorNotif = (): void => {};
+
+	const showNetworkErrorNotif = (): void => {};
+
+	const removeNotif = (id: string): void => {
+		setNotifs((prev: SysNotif[]): SysNotif[] =>
+			prev.filter((notif: SysNotif): boolean => notif.id !== id)
+		);
+	};
+
+	const clearAllNotifs = (): void => {
+		setNotifs([]);
+	};
+
+	return (
+		<NotifCtxt.Provider
+			value={{
+				notifs
+			}}
+		>
+			{children}
+		</NotifCtxt.Provider>
+	);
 };
 
 export default NotifCtxt;

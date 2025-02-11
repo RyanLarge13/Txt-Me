@@ -1,20 +1,21 @@
 import { Dispatch, SetStateAction } from "react";
 
-export type SysNotif = {
-  show: boolean;
-  title: string;
-  text: string;
-  color: string;
-  hasCancel: boolean;
-  actions: Actions[];
+export type SysNotifType = {
+ id:string;
+	title: string;
+	text: string;
+	color: string;
+	hasCancel: boolean;
+	time: Date;
+	actions: Actions[];
 };
 
 export type Actions = {
-  text: string;
-  func: () => void;
+	text: string;
+	func: () => void;
 };
 
 export interface NotifCtxtProps {
-  setSysNotif: Dispatch<SetStateAction<SysNotif>>;
-  sysNotif: SysNotif;
+	setSysNotif: Dispatch<SetStateAction<SysNotif>>;
+	sysNotif: SysNotif;
 }
