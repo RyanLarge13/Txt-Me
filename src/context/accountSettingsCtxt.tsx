@@ -1,6 +1,6 @@
-import React from "react";
-import { createContext, useState, ReactNode } from "react";
+import React, { createContext, ReactNode, useState } from "react";
 import { MdAccountCircle } from "react-icons/md";
+
 import {
   AccountSettingsProps,
   SettingsState,

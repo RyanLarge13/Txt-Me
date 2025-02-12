@@ -1,11 +1,32 @@
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { FaCog } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 import NotifCtxt from "../context/notifCtxt.tsx";
+import UserCtxt from "../context/userCtxt.tsx";
 import { Actions, SysNotifType } from "../types/notifTypes.ts";
 
-const Notification = ({ notif, index }): JSX.Element => {
+const NotifSettingsButton = (): JSX.Element => {
+  const { user } = useContext(UserCtxt);
+
+  const navigate = useNavigate();
+
+  return (
+    <>
+      {user ? (
+        <button
+          onClick={() => navigate("/account")}
+          className="absolute top-2 right-3"
+        >
+          <FaCog />
+        </button>
+      ) : null}
+    </>
+  );
+};
+
+const Notification = ({ notif }): JSX.Element => {
   const { removeNotif } = useContext(NotifCtxt);
 
   const [cancel, setCancel] = useState(notif.hasCancel);
@@ -21,17 +42,16 @@ const Notification = ({ notif, index }): JSX.Element => {
   };
 
   useEffect(() => {
-    if (notifTimeoutRef.current) {
-      if (cancel === false) {
-        notifTimeoutRef.current = setTimeout(() => {
-          removeNotif(notif.id);
-        }, 5000);
-      } else {
-        clearTimeout(notifTimeoutRef.current);
-      }
+    if (cancel === false) {
+      notifTimeoutRef.current = setTimeout(() => {
+        removeNotif(notif.id);
+      }, 5000);
+    } else {
+      clearTimeout(notifTimeoutRef.current);
+      notifTimeoutRef.current = 0;
     }
     return () => {
-      // clearTimeout(notifTimeoutRef.current);
+      clearTimeout(notifTimeoutRef.current);
     };
   }, [notif, cancel]);
 
@@ -41,16 +61,15 @@ const Notification = ({ notif, index }): JSX.Element => {
       dragSnapToOrigin={true}
       onDragEnd={handleDrag}
       initial={{ x: -50, opacity: 0 }}
+      layout
       exit={{ x: 50, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       className={`p-3 pl-5 pb-0 rounded-lg shadow-lg my-3
             shadow-slate-950 text-[#fff] bg-[#0a0a0a] w-full relative`}
       onPointerDown={() => setCancel(true)}
     >
-      {/* On click open notification settings*/}
-      <button onClick={() => null} className="absolute top-2 right-3">
-        <FaCog />
-      </button>
+      {/* On click open notification settings. Possibly add routes for nested user settings in user menu?*/}
+      <NotifSettingsButton />
       {!cancel ? (
         <motion.div
           initial={{ width: 0 }}
@@ -86,13 +105,11 @@ const SysNotif = (): JSX.Element => {
 
   return (
     <div className="fixed z-50 top-0 left-3 right-0 padding-3 bg-transparent max-w-[400px]">
-      {notifs.map((notification: SysNotifType, index: number) => (
-        <Notification
-          key={notification.id}
-          notif={notification}
-          index={index}
-        />
-      ))}
+      <AnimatePresence mode="popLayout">
+        {notifs.map((notification: SysNotifType) => (
+          <Notification key={notification.id} notif={notification} />
+        ))}
+      </AnimatePresence>
     </div>
   );
 };

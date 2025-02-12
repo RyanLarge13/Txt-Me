@@ -7,10 +7,11 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { SocketProps } from "../types/socketTypes";
 import io, { Socket } from "socket.io-client";
+
 import useLocalStorage from "../hooks/useLocalStorage";
-import { Message, User } from "../types/userTypes";
+import { SocketProps } from "../types/socketTypes";
+import { User } from "../types/userTypes";
 
 const SocketContext = createContext({} as SocketProps);
 

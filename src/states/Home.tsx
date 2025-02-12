@@ -1,19 +1,10 @@
 import React, { motion } from "framer-motion";
-import { useContext, useEffect } from "react";
 import { FaPhone } from "react-icons/fa";
 import { MdEmail } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 
-import NotifCtxt from "../context/notifCtxt";
-
 const Home = (): JSX.Element => {
   const navigate = useNavigate();
-
-  const { addSuccessNotif } = useContext(NotifCtxt);
-
-  useEffect(() => {
-    addSuccessNotif("Test", "this is a test", true, []);
-  }, []);
 
   return (
     <main className="flex flex-col justify-center items-center h-screen gap-y-5 px-10 lg:px-80">
