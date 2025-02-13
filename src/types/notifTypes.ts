@@ -16,6 +16,7 @@ export type Actions = {
 
 export interface NotifCtxtProps {
   notifs: SysNotifType[];
+  storedNotifs: SysNotifType[];
   addSuccessNotif: (
     title: string,
     text: string,

@@ -54,30 +54,34 @@ const MainLoad = () => {
 };
 
 const App = () => {
-  const { user, token } = useContext(UserCtxt);
+  const { user } = useContext(UserCtxt);
 
   const [mainLoad, setMainLoad] = useState(false);
 
   useEffect(() => {
+    if (mainLoad === true) {
+      return;
+    }
+
     // 		// Fetch user was successful, Immediately remove load component
-    if (token && user?.userId !== 0) {
+    if (user.authToken && user?.userId !== 0) {
       setMainLoad(false);
     }
 
     // Currently fetching user data, return (keep load component)
-    if (token && user?.userId === 0) {
+    if (user.authToken && user?.userId === 0) {
       return;
     }
 
     // No existing user, allow default load component time 1s 250ms
     let timeoutId: number = 0;
-    if (!token && user?.userId === 0) {
+    if (!user.authToken && user?.userId === 0) {
       timeoutId = setTimeout(() => {
         setMainLoad(false);
       }, 1250);
     }
 
-    if (token === null && user === null) {
+    if (user.authToken === null && user === null) {
       setMainLoad(false);
       if (timeoutId !== 0) {
         clearTimeout(timeoutId);
@@ -87,7 +91,7 @@ const App = () => {
     return () => {
       clearTimeout(timeoutId);
     };
-  }, [token, user]);
+  }, [user]);
 
   return (
     <main>

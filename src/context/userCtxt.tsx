@@ -1,14 +1,28 @@
+/*
+Txt Me - A learn to draw program
+Copyright (C) 2025 Ryan Large
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+*/
+
 import { AxiosResponse } from "axios";
 import React, { createContext, ReactNode, useEffect, useState } from "react";
 
-import useLocalStorage from "../hooks/useLocalStorage.ts";
-import {
-  Contacts,
-  MessageSession,
-  User,
-  UserProps,
-} from "../types/userTypes.ts";
+import useLogger from "../hooks/useLogger.ts";
+import { Contacts, MessageSession, UserProps } from "../types/userTypes.ts";
 import { fetchUserData, getContacts } from "../utils/api.ts";
+import { useDatabase } from "./dbContext.tsx";
 
 const UserCtxt = createContext({} as UserProps);
 
@@ -18,11 +32,16 @@ export const UserProvider = ({
   children: ReactNode;
 }): JSX.Element => {
   // State and state hooks --------------------------------------------------------------
-  // Local storage items and their state
-  const [token, tokenFailed, setToken] = useLocalStorage<string>("authToken");
-  const [user, userFailed, setUser] = useLocalStorage<User>("user");
+  const { getAppUserData } = useDatabase();
 
   // State
+  const [user, setUser] = useState({
+    userId: 0,
+    authToken: "",
+    username: "",
+    email: "",
+    phoneNumber: "",
+  });
   const [openChatsMenu, setOpenChatsMenu] = useState(false);
   const [newChat, setNewChat] = useState(false);
   const [contacts, setContacts] = useState<Contacts[] | []>([]);
@@ -32,35 +51,32 @@ export const UserProvider = ({
   );
   // State and state hooks --------------------------------------------------------------
 
+  const log = useLogger();
+
   // useEffect hooks -------------------------------------------------------------------
   useEffect(() => {
-    // Fetch user data and contacts to update
-    if (token) {
-      getUserContacts(token);
-      getUserData(token);
-    }
-  }, [token]);
+    fetchLocalUser();
+  }, []);
 
   useEffect(() => {
-    // Listen for local storage parsing or fetching errors
-    // if (userFailed || tokenFailed) {
-    //   console.error(
-    //     "Failed to grab user or token from storage or no value was present"
-    //   );
-    //   console.log(
-    //     `Error messages for user or token information failure: ${
-    //       userFailed
-    //         ? userFailed.message
-    //         : tokenFailed
-    //         ? tokenFailed.message
-    //         : "No errors present"
-    //     }`
-    //   );
-    // }
-  }, [tokenFailed, userFailed]);
+    // Fetch user data and contacts to update
+    if (user.authToken) {
+      getUserContacts(user.authToken);
+      getUserData(user.authToken);
+    }
+  }, [user]);
   // useEffect hooks -------------------------------------------------------------------
 
   // Local Scope Context Functions ---------------------------------------------------
+  const fetchLocalUser = async () => {
+    const user = await getAppUserData();
+    log.devLog(user);
+
+    if (user) {
+      setUser(user);
+    }
+  };
+
   const getUserContacts = async (token: string): Promise<void> => {
     try {
       const contactsResponse: AxiosResponse = await getContacts(token);
@@ -84,7 +100,6 @@ export const UserProvider = ({
     <UserCtxt.Provider
       // Please keep static state on top half and set state hooks on lower half
       value={{
-        token,
         user,
         openChatsMenu,
         newChat,
@@ -96,7 +111,6 @@ export const UserProvider = ({
         setContacts,
         setNewChat,
         setOpenChatsMenu,
-        setToken,
         setUser,
       }}
     >

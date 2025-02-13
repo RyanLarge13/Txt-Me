@@ -1,3 +1,21 @@
+/*
+Txt Me - A learn to draw program
+Copyright (C) 2025 Ryan Large
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+*/
+
 /// <reference types="vite/client" />
 
 import React, {
@@ -9,9 +27,9 @@ import React, {
 } from "react";
 import io, { Socket } from "socket.io-client";
 
-import useLocalStorage from "../hooks/useLocalStorage";
+import useLogger from "../hooks/useLogger";
 import { SocketProps } from "../types/socketTypes";
-import { User } from "../types/userTypes";
+import { useDatabase } from "./dbContext";
 
 const SocketContext = createContext({} as SocketProps);
 
@@ -20,9 +38,8 @@ export const useSocket = () => {
 };
 
 export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
-  // Local Storage State --------------------------------------------
-  const [userJSON, userJSONFailed, _] = useLocalStorage<User | null>("user");
-  // Local Storage State --------------------------------------------
+  const { getPhoneNumber } = useDatabase();
+  const log = useLogger();
 
   // State ----------------------------------------------------------
   const [message, setMessage] = useState<{
@@ -37,25 +54,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
   // useEffects -----------------------------------------------------
   useEffect(() => {
-    try {
-      if (userJSON && socketRef) {
-        const number = userJSON?.phoneNumber || null;
-
-        if (number === null) {
-          console.error(
-            `Error: user phone number is null, cannot connect to socket`
-          );
-          // Do something
-          return;
-        }
-
-        setUpSocket(number);
-      }
-    } catch (err) {
-      console.error(
-        `Error setting up socket and listeners to socket. Top level error. Error: ${err}`
-      );
-    }
+    queryPhoneNumber();
 
     // Remove socket and disconnect
     return () => {
@@ -64,18 +63,26 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       }
     };
   }, [socketRef]);
-
-  useEffect(() => {
-    if (userJSONFailed !== null) {
-      console.error(
-        `Failed to grab user from local storage with a message: ${userJSONFailed.message}`
-      );
-      // Do something
-    }
-  }, [userJSONFailed]);
   // useEffects -------------------------------------------------------
 
   // Local Scop Context Methods ---------------------------------------
+  const queryPhoneNumber = async () => {
+    const phoneNumber = await getPhoneNumber();
+    try {
+      if (phoneNumber && socketRef) {
+        setUpSocket(phoneNumber);
+        return;
+      }
+      log.devLog(
+        `Error: user phone phoneNumber is null, cannot connect to socket`
+      );
+    } catch (err) {
+      log.logAllError(
+        `Error setting up socket and listeners to socket. Top level error. Error: ${err}`
+      );
+    }
+  };
+
   const setUpSocket = (number: string): void => {
     const socketURL = import.meta.env.VITE_API_SOCKET_URL || "";
     if (!socketURL) {

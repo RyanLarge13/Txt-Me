@@ -2,6 +2,7 @@ import { Dispatch, SetStateAction } from "react";
 
 export type User = {
   username: string;
+  authToken: string;
   userId: number;
   email: string;
   phoneNumber: string;
@@ -38,8 +39,7 @@ export type MessageSession = {
 };
 
 export interface UserProps {
-  setUser: (user: User) => void;
-  setToken: (value: string) => void;
+  setUser: Dispatch<SetStateAction<User>>;
   setOpenChatsMenu: Dispatch<SetStateAction<boolean>>;
   setNewChat: Dispatch<SetStateAction<boolean>>;
   setContacts: Dispatch<SetStateAction<Contacts[] | []>>;
@@ -47,8 +47,7 @@ export interface UserProps {
   setAllMessages: Dispatch<SetStateAction<Map<number, Message[]>>>;
   newChat: boolean;
   openChatsMenu: boolean;
-  user: User | null;
-  token: string | null;
+  user: User;
   contacts: Contacts[] | [];
   messageSession: MessageSession | null;
   allMessages: AllMessages;

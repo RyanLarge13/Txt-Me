@@ -21,25 +21,30 @@ import { DatabaseProvider } from "./context/dbContext.tsx";
 import { NotifProvider } from "./context/notifCtxt.tsx";
 import { UserProvider } from "./context/userCtxt.tsx";
 
-// if ("serviceWorker" in navigator) {
-//   // Register service worker for "/"
-//   window.addEventListener("load", () => {
-//     navigator.serviceWorker
-//       .register("/sw.js")
-//       .then((registration) => {
-//         console.log(
-//           "Service Worker registered with scope:",
-//           registration.scope
-//         );
-//       })
-//       .catch((error) => {
-//         console.error("Service Worker registration failed:", error);
-//       });
-//   });
-// }
+const mode = import.meta.env.VITE_APP_MODE || "prod";
+
+// Checking for null because no service worker should run in prod or dev for now
+if ("serviceWorker" in navigator && mode === "null") {
+  // Register service worker for "/"
+  window.addEventListener("load", () => {
+    navigator.serviceWorker
+      .register("/sw.js")
+      .then((registration) => {
+        console.log(
+          "Service Worker registered with scope:",
+          registration.scope
+        );
+      })
+      .catch((error) => {
+        console.error("Service Worker registration failed:", error);
+      });
+  });
+}
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
+  // <React.StrictMode>
+  // React.Fragment used to stop import from being erased and typescript errors to stay in check
+  <React.Fragment>
     <Router>
       <DatabaseProvider>
         <ConfigProvider>
@@ -51,5 +56,6 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         </ConfigProvider>
       </DatabaseProvider>
     </Router>
-  </React.StrictMode>
+  </React.Fragment>
+  // </React.StrictMode>
 );

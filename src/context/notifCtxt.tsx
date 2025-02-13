@@ -1,3 +1,21 @@
+/*
+Txt Me - A learn to draw program
+Copyright (C) 2025 Ryan Large
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+*/
+
 import React, { createContext, ReactNode, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
@@ -11,6 +29,7 @@ export const NotifProvider = ({
   children: ReactNode;
 }): JSX.Element => {
   const [notifs, setNotifs] = useState<SysNotifType[]>([]);
+  const [storedNotifs, setStoredNotifs] = useState<SysNotifType[]>([]);
 
   const addSuccessNotif = (
     title: string,
@@ -81,32 +100,11 @@ export const NotifProvider = ({
     setNotifs([]);
   };
 
-  const confirmOperation = (
-    title: string,
-    text: string,
-    actions: Actions[],
-    callback
-  ) => {
-    const id = uuidv4();
-    const newNotif = {
-      id: id,
-      confirmation: true,
-      title,
-      text,
-      color: "bg-primary",
-      hasCancel: false,
-      time: new Date(),
-      actions: [{ text: "close", func: () => removeNotif(id) }, ...actions],
-    };
-    setNotifs((prev) => {
-      return [...prev, newNotif];
-    });
-  };
-
   return (
     <NotifCtxt.Provider
       value={{
         notifs,
+        storedNotifs,
         addSuccessNotif,
         addErrorNotif,
         removeNotif,

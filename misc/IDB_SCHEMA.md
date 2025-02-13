@@ -6,9 +6,9 @@
 
 ```
 {
+    initialized: true,
     locked: false,
     passwordType: "pin",
-    authToken: "",
     showOnline: false,
     user: {
         ...user

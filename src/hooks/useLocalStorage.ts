@@ -1,10 +1,30 @@
-import { useState, useEffect, useCallback } from "react";
+/*
+Txt Me - A learn to draw program
+Copyright (C) 2025 Ryan Large
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+*/
+
+import { useCallback, useEffect, useState } from "react";
+
+import useLogger from "./useLogger";
 
 // Hook types ----------------------------------------
 export type LocalStorageHookReturn<T> = [
   T | null,
-  { didFail: boolean; message: string },
-  (value: T) => void
+  (value: T) => void,
+  { didFail: boolean; message: string }
 ];
 // Hook types ----------------------------------------
 
@@ -18,6 +38,7 @@ const useLocalStorage = <T>(item: string): LocalStorageHookReturn<T> => {
   // Hook state ------------------------------------------------
 
   // Static Variable -------------------------------------------
+  const log = useLogger();
   const errMessage =
     "There were problems loading your data. Please double check your permissions, and contact Txt Me immediately";
   // Static Variable -------------------------------------------
@@ -38,7 +59,7 @@ const useLocalStorage = <T>(item: string): LocalStorageHookReturn<T> => {
         }
         return parsedValue;
       } catch (err) {
-        console.error(
+        log.logAllError(
           `Error parsing local storage return value from ${item}. Error: ${err}`
         );
         setFailed({
@@ -63,7 +84,7 @@ const useLocalStorage = <T>(item: string): LocalStorageHookReturn<T> => {
       }
       return parseValue(rawValue);
     } catch (err) {
-      console.error(`Error retrieving form Local Storage ${err}`);
+      log.logAllError(`Error retrieving form Local Storage ${err}`);
       setFailed({
         didFail: true,
         message: errMessage,
@@ -79,7 +100,7 @@ const useLocalStorage = <T>(item: string): LocalStorageHookReturn<T> => {
         localStorage.setItem(item, stringValue);
         setStorageValue(value);
       } catch (err) {
-        console.error(
+        log.logAllError(
           `Error setting local storage value for ${item}. Error: ${err}`
         );
         setFailed({
@@ -92,7 +113,7 @@ const useLocalStorage = <T>(item: string): LocalStorageHookReturn<T> => {
   );
   // Local scope hook methods ----------------------------------
 
-  return [storageValue, failed, setValueInStorage];
+  return [storageValue, setValueInStorage, failed];
 };
 
 export default useLocalStorage;

@@ -30,12 +30,12 @@
     "declaration": true,
     "outDir": "./dist",
     "baseUrl": "./src",
-    "types": ["react"],
+    "types": ["react", "vite/client"],
     "paths": {
       "*": ["./src/*"]
     }
   },
   "references": [{ "path": "./tsconfig.node.json" }],
-  "include": ["src/**/*.ts", "vite.config.ts"],
+  "include": ["src/**/*.ts", "vite.config.ts", "vite-env.d.ts"],
   "exclude": ["node_modules", "dist", "vite.config.ts"]
 }
