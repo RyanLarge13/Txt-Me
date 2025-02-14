@@ -1,18 +1,12 @@
 import { motion } from "framer-motion";
-import React, {
-  FormEvent,
-  useCallback,
-  useContext,
-  useRef,
-  useState,
-} from "react";
+import React, { FormEvent, useCallback, useRef, useState } from "react";
 import { FaPhone } from "react-icons/fa";
 import { GrMagic } from "react-icons/gr";
 import { MdEmail } from "react-icons/md";
 import { useNavigate, useParams } from "react-router-dom";
 import { ClipLoader } from "react-spinners";
 
-import NotifCtxt from "../context/notifCtxt.tsx";
+import { useNotifActions } from "../context/notifCtxt.tsx";
 import { pinEmail, pinPhone } from "../utils/api.ts";
 import { valEmail, valPhoneNumber } from "../utils/validator.ts";
 
@@ -41,7 +35,7 @@ const ValueInput = React.memo(
 );
 
 const LoginPhone = (): JSX.Element => {
-  const { addErrorNotif, addSuccessNotif } = useContext(NotifCtxt);
+  const { addErrorNotif, addSuccessNotif } = useNotifActions();
 
   const [loading, setLoading] = useState(false);
 
@@ -126,7 +120,7 @@ const LoginPhone = (): JSX.Element => {
 };
 
 const LoginEmail = (): JSX.Element => {
-  const { addErrorNotif, addSuccessNotif } = useContext(NotifCtxt);
+  const { addErrorNotif, addSuccessNotif } = useNotifActions();
 
   const [loading, setLoading] = useState(false);
   const email = useRef("");
@@ -212,7 +206,7 @@ const LoginEmail = (): JSX.Element => {
   );
 };
 
-const Login = React.memo((): JSX.Element => {
+const Login = (): JSX.Element => {
   const { type } = useParams();
 
   return (
@@ -220,6 +214,6 @@ const Login = React.memo((): JSX.Element => {
       {type === "email" ? <LoginEmail /> : <LoginPhone />}
     </main>
   );
-});
+};
 
 export default Login;

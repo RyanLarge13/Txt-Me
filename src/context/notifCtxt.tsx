@@ -16,12 +16,13 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import React, { createContext, ReactNode, useCallback, useState } from "react";
+import React, { createContext, ReactNode, useCallback, useContext, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 import { Actions, NotifCtxtProps, SysNotifType } from "../types/notifTypes.ts";
 
-const NotifCtxt = createContext({} as NotifCtxtProps);
+const NotifStateCtxt = createContext({} as NotifCtxtProps);
+const NotifActionsCtxt = createContext({} as any);
 
 export const NotifProvider = ({
   children,
@@ -107,20 +108,38 @@ export const NotifProvider = ({
   }, []);
 
   return (
-    <NotifCtxt.Provider
+    <NotifStateCtxt.Provider
       value={{
         notifs,
         storedNotifs,
-        addSuccessNotif,
-        addErrorNotif,
-        removeNotif,
-        showNetworkErrorNotif,
-        clearAllNotifs,
       }}
     >
-      {children}
-    </NotifCtxt.Provider>
+      <NotifActionsCtxt.Provider
+        value={{
+          addSuccessNotif,
+          addErrorNotif,
+          removeNotif,
+          showNetworkErrorNotif,
+          clearAllNotifs,
+          setStoredNotifs,
+        }}
+      >
+        {children}
+      </NotifActionsCtxt.Provider>
+    </NotifStateCtxt.Provider>
   );
 };
 
-export default NotifCtxt;
+export const useNotifState = () => {
+  const context = useContext(NotifStateCtxt);
+  if (!context)
+    throw new Error("useNotifState must be used within a NotifProvider");
+  return context;
+};
+
+export const useNotifActions = () => {
+  const context = useContext(NotifActionsCtxt);
+  if (!context)
+    throw new Error("useNotifActions must be used within a NotifProvider");
+  return context;
+};

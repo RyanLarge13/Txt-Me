@@ -4,7 +4,6 @@ import { MdMarkEmailRead, MdOutlinePermPhoneMsg } from "react-icons/md";
 import { useNavigate, useParams } from "react-router-dom";
 import { ClipLoader } from "react-spinners";
 
-import NotifCtxt from "../context/notifCtxt.tsx";
 import UserCtxt from "../context/userCtxt.tsx";
 import { verifyEmail, verifyEmailLogin, verifyPhone } from "../utils/api";
 import { valEmail } from "../utils/validator.ts";
@@ -12,7 +11,7 @@ import { valEmail } from "../utils/validator.ts";
 const Verify = React.memo((): JSX.Element => {
   // Context
   const { token, setUser } = useContext(UserCtxt);
-  const { addSuccessNotif, addErrorNotif } = useContext(NotifCtxt);
+  // const { addSuccessNotif, addErrorNotif } = useNotifActions();
 
   // Params
   const { type, method } = useParams();
@@ -25,9 +24,9 @@ const Verify = React.memo((): JSX.Element => {
   const [emailPin, setEmailPin] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const tryingLogin = (): void => {};
+  // const tryingLogin = (): void => {};
 
-  const forgotCreds = (): void => {};
+  // const forgotCreds = (): void => {};
 
   const handlePhoneVerify = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();

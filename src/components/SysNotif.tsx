@@ -1,14 +1,16 @@
 import { AnimatePresence, motion } from "framer-motion";
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { FaCog } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
-import NotifCtxt from "../context/notifCtxt.tsx";
-import UserCtxt from "../context/userCtxt.tsx";
+import { useConfig } from "../context/configContext.tsx";
+import { useNotifActions, useNotifState } from "../context/notifCtxt.tsx";
 import { Actions, SysNotifType } from "../types/notifTypes.ts";
 
 const NotifSettingsButton = (): JSX.Element => {
-  const { user } = useContext(UserCtxt);
+  const { getUserData } = useConfig();
+
+  const user = getUserData("userId");
 
   const navigate = useNavigate();
 
@@ -27,7 +29,7 @@ const NotifSettingsButton = (): JSX.Element => {
 };
 
 const Notification = ({ notif }): JSX.Element => {
-  const { removeNotif } = useContext(NotifCtxt);
+  const { removeNotif } = useNotifActions();
 
   const [cancel, setCancel] = useState(notif.hasCancel);
 
@@ -53,7 +55,7 @@ const Notification = ({ notif }): JSX.Element => {
     return () => {
       clearTimeout(notifTimeoutRef.current);
     };
-  }, [notif, cancel]);
+  }, [notif, cancel, removeNotif]);
 
   return (
     <motion.div
@@ -101,7 +103,7 @@ const Notification = ({ notif }): JSX.Element => {
 };
 
 const SysNotif = React.memo((): JSX.Element => {
-  const { notifs } = useContext(NotifCtxt);
+  const { notifs } = useNotifState();
 
   return (
     <div className="fixed z-50 top-0 left-3 right-0 padding-3 bg-transparent max-w-[400px]">
