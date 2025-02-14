@@ -1,5 +1,5 @@
 /*
-Txt Me - A learn to draw program
+Txt Me - A web based messaging platform
 Copyright (C) 2025 Ryan Large
 
 This program is free software: you can redistribute it and/or modify
@@ -31,14 +31,14 @@ export const DatabaseProvider = ({ children }) => {
   const log = useLogger();
 
   const buildAppConfig = async (db) => {
-    const authSettings = {
+    const appSettings = {
       initialized: true,
       locked: false,
       passwordType: "pin",
       showOnline: false,
     };
 
-    const authUser = {
+    const appUser = {
       userId: 0,
       authToken: "",
       username: "",
@@ -46,18 +46,19 @@ export const DatabaseProvider = ({ children }) => {
       phoneNumber: "",
     };
 
-    await db.put("app", authSettings, "settings");
-    await db.put("app", authUser, "user");
+    await db.put("app", appSettings, "settings");
+    await db.put("app", appUser, "user");
   };
 
   const buildThemeConfig = async (db) => {
     const theme = {
       darkMode: true,
       accent: "#fff",
-      background: "",
-      showLogo: true,
-      animations: true,
-      animationSpeed: 0.3,
+      background: "none",
+      animations: {
+        speed: 0.25,
+        spring: true,
+      },
     };
 
     await db.put("theme", theme, "theme");
@@ -150,7 +151,7 @@ export const DatabaseProvider = ({ children }) => {
   const initDatabase = async (db) => {
     const userInitialized = await db.get("app", "settings");
 
-    log.devLog(`user initialized: ${JSON.stringify(userInitialized)}`);
+    log.devLog(`user from indexedDB`, userInitialized);
 
     if (userInitialized && userInitialized?.initialized) {
       return userInitialized;

@@ -10,7 +10,7 @@
  */
 
 import { AnimatePresence, motion } from "framer-motion";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import { TiMessages } from "react-icons/ti";
 import { Navigate, Route, Routes } from "react-router-dom";
 
@@ -20,8 +20,8 @@ import Nav from "./components/Nav.tsx";
 import ProfileNav from "./components/ProfileNav.tsx";
 import SysNotif from "./components/SysNotif.tsx";
 import { AccountSettingsProvider } from "./context/accountSettingsCtxt.tsx";
+import { useConfig } from "./context/configContext.tsx";
 import { SocketProvider } from "./context/socketCtxt.tsx";
-import UserCtxt from "./context/userCtxt.tsx";
 import Home from "./states/Home.tsx";
 import Login from "./states/Login.tsx";
 import NewContact from "./states/NewContact.tsx";
@@ -54,53 +54,47 @@ const MainLoad = () => {
 };
 
 const App = () => {
-  const { user } = useContext(UserCtxt);
+  const { getUserData } = useConfig();
 
-  const [mainLoad, setMainLoad] = useState(false);
+  const authToken = getUserData("authToken");
+
+  const mainLoad = useRef(true);
 
   useEffect(() => {
-    if (mainLoad === true) {
-      return;
-    }
+    let timeoutId = setTimeout(() => {});
 
-    // 		// Fetch user was successful, Immediately remove load component
-    if (user.authToken && user?.userId !== 0) {
-      setMainLoad(false);
-    }
-
-    // Currently fetching user data, return (keep load component)
-    if (user.authToken && user?.userId === 0) {
+    if (!mainLoad.current) {
       return;
     }
 
     // No existing user, allow default load component time 1s 250ms
-    let timeoutId: number = 0;
-    if (!user.authToken && user?.userId === 0) {
+    if (authToken) {
       timeoutId = setTimeout(() => {
-        setMainLoad(false);
+        mainLoad.current = false;
       }, 1250);
     }
 
-    if (user.authToken === null && user === null) {
-      setMainLoad(false);
-      if (timeoutId !== 0) {
-        clearTimeout(timeoutId);
-      }
+    if (!authToken) {
+      mainLoad.current = false;
+      clearTimeout(timeoutId);
     }
 
     return () => {
       clearTimeout(timeoutId);
     };
-  }, [user]);
+  }, [authToken]);
 
   return (
     <main>
-      {/* Loading component */}
-      <AnimatePresence>{mainLoad && <MainLoad />}</AnimatePresence>
-      {user?.userId ? <ProfileNav /> : <Nav />}
+      {/* Loading component --local */}
+      <AnimatePresence>
+        {mainLoad.current ? <MainLoad /> : null}
+      </AnimatePresence>
+      {/* Loading component --local */}
+      {authToken ? <ProfileNav /> : <Nav />}
       <SysNotif />
       <Routes>
-        {user?.userId ? (
+        {authToken ? (
           <Route path="/" element={<Navigate to="/profile" />} />
         ) : (
           <Route path="/" element={<Home />} />
@@ -111,7 +105,7 @@ const App = () => {
         <Route
           path="/profile"
           element={
-            user?.userId ? (
+            authToken ? (
               <SocketProvider>
                 <Profile />
               </SocketProvider>
@@ -136,9 +130,7 @@ const App = () => {
         </Route>
         <Route
           path="*"
-          element={
-            user?.userId ? <Navigate to="/profile" /> : <Navigate to="/" />
-          }
+          element={authToken ? <Navigate to="/profile" /> : <Navigate to="/" />}
         />
       </Routes>
     </main>

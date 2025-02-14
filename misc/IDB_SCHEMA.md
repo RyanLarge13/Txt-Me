@@ -22,10 +22,11 @@
 {
     darkMode: true,
     accent: "#fff",
-    background: "",
-    showLogo: true,
-    animations: true,
-    animationSpeed: 0.3,
+    background: "none",
+    animations: {
+      speed: 0.25,
+      spring: true,
+    },
 }
 ```
 

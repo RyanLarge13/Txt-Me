@@ -1,5 +1,5 @@
 /*
-Txt Me - A learn to draw program
+Txt Me - A web based messaging platform
 Copyright (C) 2025 Ryan Large
 
 This program is free software: you can redistribute it and/or modify
@@ -16,17 +16,36 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Dispatch, SetStateAction } from "react";
-
 export type AppData = {
-  initialized: true;
-  locked: false;
+  initialized: boolean;
+  locked: boolean;
   passwordType: string;
   authToken: string;
-  showOnline: false;
+  showOnline: boolean;
 };
 
-export interface ConfigCTxtTypes {
-  setAppData: Dispatch<SetStateAction<AppData>>;
-  appData: AppData;
-}
+export type Theme = {
+  darkMode: boolean;
+  accent: string;
+  background: string;
+  animations: {
+    speed: number;
+    spring: boolean;
+  };
+};
+export type User = {
+  userId: number;
+  authToken: string;
+  username: string;
+  email: string;
+  phoneNumber: string;
+};
+
+export type ConfigContextType = {
+  getAppData: <K extends keyof AppData>(key: K) => AppData[K];
+  setAppData: React.Dispatch<React.SetStateAction<AppData>>;
+  getThemeData: <K extends keyof Theme>(key: K) => Theme[K];
+  setTheme: React.Dispatch<React.SetStateAction<Theme>>;
+  setUser: React.Dispatch<React.SetStateAction<User>>;
+  getUserData: <K extends keyof User>(key: K) => User[K];
+};

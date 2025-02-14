@@ -31,7 +31,7 @@ const Notification = ({ notif }): JSX.Element => {
 
   const [cancel, setCancel] = useState(notif.hasCancel);
 
-  const notifTimeoutRef = useRef(0);
+  const notifTimeoutRef = useRef(setTimeout(() => {}));
 
   const handleDrag = (e): void => {
     const end = e.clientX;
@@ -48,7 +48,7 @@ const Notification = ({ notif }): JSX.Element => {
       }, 5000);
     } else {
       clearTimeout(notifTimeoutRef.current);
-      notifTimeoutRef.current = 0;
+      notifTimeoutRef.current = setTimeout(() => {});
     }
     return () => {
       clearTimeout(notifTimeoutRef.current);
@@ -100,7 +100,7 @@ const Notification = ({ notif }): JSX.Element => {
   );
 };
 
-const SysNotif = (): JSX.Element => {
+const SysNotif = React.memo((): JSX.Element => {
   const { notifs } = useContext(NotifCtxt);
 
   return (
@@ -112,6 +112,6 @@ const SysNotif = (): JSX.Element => {
       </AnimatePresence>
     </div>
   );
-};
+});
 
 export default SysNotif;

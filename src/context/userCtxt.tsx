@@ -1,5 +1,5 @@
 /*
-Txt Me - A learn to draw program
+Txt Me - A web based messaging platform
 Copyright (C) 2025 Ryan Large
 
 This program is free software: you can redistribute it and/or modify
@@ -20,11 +20,12 @@ import { AxiosResponse } from "axios";
 import React, { createContext, ReactNode, useEffect, useState } from "react";
 
 import useLogger from "../hooks/useLogger.ts";
-import { Contacts, MessageSession, UserProps } from "../types/userTypes.ts";
-import { fetchUserData, getContacts } from "../utils/api.ts";
+import { Contacts, MessageSession } from "../types/userTypes.ts";
+import { fetchUserData } from "../utils/api.ts";
+import { useConfig } from "./configContext.tsx";
 import { useDatabase } from "./dbContext.tsx";
 
-const UserCtxt = createContext({} as UserProps);
+const UserCtxt = createContext({} as any);
 
 export const UserProvider = ({
   children,
@@ -32,16 +33,12 @@ export const UserProvider = ({
   children: ReactNode;
 }): JSX.Element => {
   // State and state hooks --------------------------------------------------------------
-  const { getAppUserData } = useDatabase();
+  const { getContactsData, getMessagesData } = useDatabase();
+  const { getUserData } = useConfig();
+  const log = useLogger();
 
-  // State
-  const [user, setUser] = useState({
-    userId: 0,
-    authToken: "",
-    username: "",
-    email: "",
-    phoneNumber: "",
-  });
+  const token = getUserData("authToken");
+
   const [openChatsMenu, setOpenChatsMenu] = useState(false);
   const [newChat, setNewChat] = useState(false);
   const [contacts, setContacts] = useState<Contacts[] | []>([]);
@@ -51,56 +48,47 @@ export const UserProvider = ({
   );
   // State and state hooks --------------------------------------------------------------
 
-  const log = useLogger();
-
   // useEffect hooks -------------------------------------------------------------------
   useEffect(() => {
-    fetchLocalUser();
-  }, []);
-
-  useEffect(() => {
     // Fetch user data and contacts to update
-    if (user.authToken) {
-      getUserContacts(user.authToken);
-      getUserData(user.authToken);
+    if (token) {
+      log.devLog(
+        "Fetching user data and initializing app from cache (indexedDB), authToken present"
+      );
+
+      fetchLocalMessagesAndContacts();
+      fetchNetworkMessagesAndContacts();
+      // getUserData(user.authToken);
+    } else {
+      log.devLog("Skipping fetch, no auth token present. User must login");
     }
-  }, [user]);
+  }, [token]);
   // useEffect hooks -------------------------------------------------------------------
 
   // Local Scope Context Functions ---------------------------------------------------
-  const fetchLocalUser = async () => {
-    const user = await getAppUserData();
-    log.devLog(user);
 
-    if (user) {
-      setUser(user);
-    }
+  const fetchLocalMessagesAndContacts = async () => {
+    const messages = await getMessagesData();
+    const contacts = await getContactsData();
+
+    log.devLog("Messages and contacts data from IndexedDB", messages, contacts);
   };
 
-  const getUserContacts = async (token: string): Promise<void> => {
-    try {
-      const contactsResponse: AxiosResponse = await getContacts(token);
-      setContacts(contactsResponse.data.data.contacts);
-    } catch (err) {
-      console.log(`Error when fetching users contacts. Error: ${err}`);
-    }
-  };
-
-  const getUserData = async (token: string): Promise<void> => {
+  const fetchNetworkMessagesAndContacts = async () => {
     try {
       const userDataResponse: AxiosResponse = await fetchUserData(token);
-      setUser(userDataResponse.data.data.user);
+      log.devLog("Fetched user data from server", userDataResponse);
     } catch (err) {
       console.log(`Error when fetching user data. Error: ${err}`);
     }
   };
+
   // Local Scope Context Functions --------------------------------------------------
 
   return (
     <UserCtxt.Provider
       // Please keep static state on top half and set state hooks on lower half
       value={{
-        user,
         openChatsMenu,
         newChat,
         contacts,
@@ -111,7 +99,6 @@ export const UserProvider = ({
         setContacts,
         setNewChat,
         setOpenChatsMenu,
-        setUser,
       }}
     >
       {children}

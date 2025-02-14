@@ -1,5 +1,5 @@
 /*
-Txt Me - A learn to draw program
+Txt Me - A web based messaging platform
 Copyright (C) 2025 Ryan Large
 
 This program is free software: you can redistribute it and/or modify
@@ -16,26 +16,51 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import React, { createContext, ReactNode, useEffect, useState } from "react";
+import React, {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 
 import useLogger from "../hooks/useLogger";
+import { AppData, ConfigContextType, Theme } from "../types/configCtxtTypes";
 import { useDatabase } from "./dbContext";
 
-const ConfigContext = createContext({});
+const ConfigContext = createContext({} as ConfigContextType);
 
 export const ConfigProvider = ({
   children,
 }: {
   children: ReactNode;
 }): JSX.Element => {
-  const { getDB, initDatabase } = useDatabase();
+  const { getDB, initDatabase, getThemeData, getAppUserData } = useDatabase();
 
-  const [appData, setAppData] = useState({
+  const [appData, setAppData] = useState<AppData>({
     initialized: true,
     locked: false,
     passwordType: "pin",
     authToken: "",
     showOnline: false,
+  });
+
+  const [theme, setTheme] = useState<Theme>({
+    darkMode: true,
+    accent: "#fff",
+    background: "none",
+    animations: {
+      speed: 0.25,
+      spring: true,
+    },
+  });
+
+  const [user, setUser] = useState({
+    userId: 0,
+    authToken: "",
+    username: "",
+    email: "",
+    phoneNumber: "",
   });
 
   const log = useLogger();
@@ -53,12 +78,36 @@ export const ConfigProvider = ({
     if (appInfo) {
       setAppData(appInfo);
     }
+
+    fetchLocalThemeData();
+    fetchLocalUserData();
+  };
+
+  const fetchLocalThemeData = async () => {
+    const themeData = await getThemeData();
+
+    if (themeData) {
+      setTheme(themeData);
+    }
+  };
+
+  const fetchLocalUserData = async () => {
+    const user = await getAppUserData();
+
+    if (user) {
+      setUser(user);
+    }
   };
 
   return (
     <ConfigContext.Provider
       value={{
-        appData,
+        getAppData: (key) => appData[key],
+        getThemeData: (key) => theme[key],
+        getUserData: (key) => user[key],
+        setUser,
+        setAppData,
+        setTheme,
       }}
     >
       {children}
@@ -66,4 +115,11 @@ export const ConfigProvider = ({
   );
 };
 
-export default ConfigContext;
+export const useConfig = () => {
+  const context = useContext(ConfigContext);
+  if (!context) {
+    throw new Error("useConfig must be within a ConfigProvider");
+  }
+
+  return context;
+};

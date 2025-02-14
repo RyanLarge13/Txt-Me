@@ -22,36 +22,34 @@ const useLogger = () => {
   const loggerMode = import.meta.env.VITE_LOGGER_MODE || "prod";
 
   return useMemo(() => {
-    const devLog = (text: string, warn: boolean = false) => {
+    const devLog = (...args: any[]) => {
       if (loggerMode === "dev") {
-        warn
-          ? console.warn(`DEV LOG: \n${text}`)
-          : console.log(`DEV LOG: \n${text}`);
+        console.log.apply(console, ["DEV LOG:", ...args]);
       }
     };
 
-    const devLogDebug = (text: string) => {
+    const devLogDebug = (...args: any[]) => {
       if (loggerMode === "dev") {
-        console.debug(`DEV LOG DEBUG: \n${text}`);
+        console.debug.apply(console, ["DEV LOG DEBUG:", ...args]);
       }
     };
 
-    const logError = (text: string) => {
-      console.error(`ERROR: \n${text}`);
+    const logError = (...args: any[]) => {
+      console.error.apply(console, ["ERROR:", ...args]);
     };
 
-    const productionLog = (text: string) => {
+    const productionLog = (...args: any[]) => {
       if (loggerMode === "production") {
-        console.log(`PRODUCTION LOG: \n${text}`);
+        console.log.apply(console, ["PRODUCTION LOG:", ...args]);
       }
     };
 
-    const logAll = (text: string) => {
-      console.log(`LOG: \n${text}`);
+    const logAll = (...args: any[]) => {
+      console.log.apply(console, ["LOG:", ...args]);
     };
 
-    const logAllError = (text: string) => {
-      console.error(`LOG ERROR: \n${text}`);
+    const logAllError = (...args: any[]) => {
+      console.error.apply(console, ["LOG ERROR:", ...args]);
     };
 
     return {
