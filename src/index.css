@@ -18,6 +18,10 @@
 #FF63C1 - 255,99,193
 #EF63FF - 239,99,255 */
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background-color: #000;
   font-family: "Madimi One", Georgia;

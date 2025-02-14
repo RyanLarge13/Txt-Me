@@ -29,6 +29,7 @@ import SysNotif from "./components/SysNotif.tsx";
 import { useConfig } from "./context/configContext.tsx";
 import { InteractiveProvider } from "./context/interactiveCtxt.tsx";
 import { SocketProvider } from "./context/socketCtxt.tsx";
+import Help from "./states/Help.tsx";
 import Home from "./states/Home.tsx";
 import Login from "./states/Login.tsx";
 import NewContact from "./states/NewContact.tsx";
@@ -112,6 +113,7 @@ const App = () => {
           <Route path="/login/:type" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/verify/:type/:method" element={<Verify />} />
+          <Route path="/help" element={<Help />} />
           {/* All memoized routes to not suffer recalculation on authToken changes */}
 
           <Route

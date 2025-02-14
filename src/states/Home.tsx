@@ -16,15 +16,17 @@ const Home = (): JSX.Element => {
       </p>
       <motion.button
         whileTap={{ backgroundColor: "#fff" }}
+        whileHover={{ backgroundColor: "#ef63ff" }}
         onClick={() => navigate("/login/email")}
-        className="p-3 mt-20 rounded-sm shadow-lg bg-primary w-full"
+        className="p-3 mt-20 rounded-sm shadow-lg bg-primary w-full max-w-[400px]"
       >
         Login With <MdEmail className="inline ml-1" />
       </motion.button>
       <motion.button
         whileTap={{ backgroundColor: "#fff" }}
+        whileHover={{ backgroundColor: "#ef63ff" }}
         onClick={() => navigate("/login/phone")}
-        className="p-3 mt-1 rounded-sm shadow-lg bg-primary w-full"
+        className="p-3 mt-1 rounded-sm shadow-lg bg-primary w-full max-w-[400px]"
       >
         Login With <FaPhone className="inline ml-1" />
       </motion.button>
@@ -34,7 +36,9 @@ const Home = (): JSX.Element => {
       >
         New User? Sign Up
       </button>
-      <button className="mt-40 text-primary">Help?</button>
+      <button className="mt-40 text-primary" onClick={() => navigate("/help")}>
+        Help?
+      </button>
     </main>
   );
 };
