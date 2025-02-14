@@ -1,5 +1,5 @@
 /*
-Txt Me - A learn to draw program
+Txt Me - A web based messaging platform
 Copyright (C) 2025 Ryan Large
 
 This program is free software: you can redistribute it and/or modify
@@ -19,20 +19,17 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 import React, { createContext, ReactNode, useState } from "react";
 import { MdAccountCircle } from "react-icons/md";
 
-import {
-  AccountSettingsProps,
-  SettingsState,
-  Title,
-} from "../types/accountSettingsProps";
+import { SettingsState, Title } from "../types/accountSettingsProps";
 
-const AccountSettingsCtxt = createContext({} as AccountSettingsProps);
+const InteractiveCtxt = createContext({} as any);
 
-export const AccountSettingsProvider = ({
+export const InteractiveProvider = ({
   children,
 }: {
   children: ReactNode;
 }): JSX.Element => {
-  // State hooks ----------------------------------------------------
+  const [openChatsMenu, setOpenChatsMenu] = useState(false);
+  const [newChat, setNewChat] = useState(false);
   const [title, setTitle] = useState<Title>({
     string: "Account",
     icon: <MdAccountCircle />,
@@ -40,20 +37,23 @@ export const AccountSettingsProvider = ({
   const [settingsState, setSettingsState] = useState<SettingsState>({
     page: "main",
   });
-  // State hooks ----------------------------------------------------
 
   return (
-    <AccountSettingsCtxt.Provider
+    <InteractiveCtxt.Provider
       value={{
+        setNewChat,
+        setOpenChatsMenu,
+        setTitle,
+        setSettingsState,
+        openChatsMenu,
+        newChat,
         title,
         settingsState,
-        setSettingsState,
-        setTitle,
       }}
     >
       {children}
-    </AccountSettingsCtxt.Provider>
+    </InteractiveCtxt.Provider>
   );
 };
 
-export default AccountSettingsCtxt;
+export default InteractiveCtxt;

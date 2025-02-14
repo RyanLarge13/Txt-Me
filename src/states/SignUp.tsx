@@ -13,7 +13,7 @@ import {
   valUsername,
 } from "../utils/validator.ts";
 
-const SignUp = (): JSX.Element => {
+const SignUp = React.memo((): JSX.Element => {
   const { setToken } = useContext(UserCtxt);
 
   const [username, setUsername] = useState("");
@@ -139,6 +139,6 @@ const SignUp = (): JSX.Element => {
       </button>
     </main>
   );
-};
+});
 
 export default SignUp;

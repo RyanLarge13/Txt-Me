@@ -39,8 +39,6 @@ export const UserProvider = ({
 
   const token = getUserData("authToken");
 
-  const [openChatsMenu, setOpenChatsMenu] = useState(false);
-  const [newChat, setNewChat] = useState(false);
   const [contacts, setContacts] = useState<Contacts[] | []>([]);
   const [allMessages, setAllMessages] = useState(new Map());
   const [messageSession, setMessageSession] = useState<MessageSession | null>(
@@ -89,16 +87,12 @@ export const UserProvider = ({
     <UserCtxt.Provider
       // Please keep static state on top half and set state hooks on lower half
       value={{
-        openChatsMenu,
-        newChat,
         contacts,
         messageSession,
         allMessages,
         setAllMessages,
         setMessageSession,
         setContacts,
-        setNewChat,
-        setOpenChatsMenu,
       }}
     >
       {children}

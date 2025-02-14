@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import React, { createContext, ReactNode, useState } from "react";
+import React, { createContext, ReactNode, useCallback, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 import { Actions, NotifCtxtProps, SysNotifType } from "../types/notifTypes.ts";
@@ -31,51 +31,57 @@ export const NotifProvider = ({
   const [notifs, setNotifs] = useState<SysNotifType[]>([]);
   const [storedNotifs, setStoredNotifs] = useState<SysNotifType[]>([]);
 
-  const addSuccessNotif = (
-    title: string,
-    text: string,
-    hasCancel: boolean,
-    actions: Actions[]
-  ): void => {
-    const id = uuidv4();
-    const newNotif = {
-      id: id,
-      confirmation: false,
-      title: title,
-      text: text,
-      color: "bg-primary",
-      hasCancel: hasCancel,
-      time: new Date(),
-      actions: [{ text: "close", func: () => removeNotif(id) }, ...actions],
-    };
-    setNotifs((prev) => {
-      return [...prev, newNotif];
-    });
-  };
+  const addSuccessNotif = useCallback(
+    (
+      title: string,
+      text: string,
+      hasCancel: boolean,
+      actions: Actions[]
+    ): void => {
+      const id = uuidv4();
+      const newNotif = {
+        id: id,
+        confirmation: false,
+        title: title,
+        text: text,
+        color: "bg-primary",
+        hasCancel: hasCancel,
+        time: new Date(),
+        actions: [{ text: "close", func: () => removeNotif(id) }, ...actions],
+      };
+      setNotifs((prev) => {
+        return [...prev, newNotif];
+      });
+    },
+    []
+  );
 
-  const addErrorNotif = (
-    title: string,
-    text: string,
-    hasCancel: boolean,
-    actions: Actions[]
-  ): void => {
-    const id = uuidv4();
-    const newNotif = {
-      id: id,
-      confirmation: false,
-      title: title,
-      text: text,
-      color: "bg-secondary",
-      hasCancel: hasCancel,
-      time: new Date(),
-      actions: [{ text: "close", func: () => removeNotif(id) }, ...actions],
-    };
-    setNotifs((prev) => {
-      return [...prev, newNotif];
-    });
-  };
+  const addErrorNotif = useCallback(
+    (
+      title: string,
+      text: string,
+      hasCancel: boolean,
+      actions: Actions[]
+    ): void => {
+      const id = uuidv4();
+      const newNotif = {
+        id: id,
+        confirmation: false,
+        title: title,
+        text: text,
+        color: "bg-secondary",
+        hasCancel: hasCancel,
+        time: new Date(),
+        actions: [{ text: "close", func: () => removeNotif(id) }, ...actions],
+      };
+      setNotifs((prev) => {
+        return [...prev, newNotif];
+      });
+    },
+    []
+  );
 
-  const showNetworkErrorNotif = (actions: Actions[]): void => {
+  const showNetworkErrorNotif = useCallback((actions: Actions[]): void => {
     const id = uuidv4();
     const newNotif = {
       id: id,
@@ -90,15 +96,15 @@ export const NotifProvider = ({
     setNotifs((prev) => {
       return [...prev, newNotif];
     });
-  };
+  }, []);
 
-  const removeNotif = (id: string): void => {
+  const removeNotif = useCallback((id: string): void => {
     setNotifs((prev) => prev.filter((notif) => notif.id !== id));
-  };
+  }, []);
 
-  const clearAllNotifs = (): void => {
+  const clearAllNotifs = useCallback((): void => {
     setNotifs([]);
-  };
+  }, []);
 
   return (
     <NotifCtxt.Provider

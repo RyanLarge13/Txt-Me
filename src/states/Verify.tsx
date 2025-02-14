@@ -9,7 +9,7 @@ import UserCtxt from "../context/userCtxt.tsx";
 import { verifyEmail, verifyEmailLogin, verifyPhone } from "../utils/api";
 import { valEmail } from "../utils/validator.ts";
 
-const Verify = (): JSX.Element => {
+const Verify = React.memo((): JSX.Element => {
   // Context
   const { token, setUser } = useContext(UserCtxt);
   const { addSuccessNotif, addErrorNotif } = useContext(NotifCtxt);
@@ -241,6 +241,6 @@ const Verify = (): JSX.Element => {
       )}
     </main>
   );
-};
+});
 
 export default Verify;

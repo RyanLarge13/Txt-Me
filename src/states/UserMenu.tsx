@@ -1,14 +1,15 @@
+import { AnimatePresence, motion } from "framer-motion";
 import React, { useContext } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import MainSettings from "../components/MainSettings";
+import { useNavigate } from "react-router-dom";
+
 import BackDrop from "../components/BackDrop";
 import Logout from "../components/Logout";
-import AccountSettingsCtxt from "../context/accountSettingsCtxt";
-import { useNavigate } from "react-router-dom";
+import MainSettings from "../components/MainSettings";
+import InteractiveCtxt from "../context/interactiveCtxt";
 
 const UserMenu = (): JSX.Element => {
   const { title, setTitle, settingsState, setSettingsState } =
-    useContext(AccountSettingsCtxt);
+    useContext(InteractiveCtxt);
 
   const navigate = useNavigate();
 

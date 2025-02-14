@@ -1,6 +1,6 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
 import { SiHomeadvisor } from "react-icons/si";
+import { useNavigate } from "react-router-dom";
 
 const Nav = (): JSX.Element => {
   const navigate = useNavigate();
