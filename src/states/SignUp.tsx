@@ -1,9 +1,11 @@
 import { motion } from "framer-motion";
-import React, { FormEvent, useContext, useState } from "react";
+import React, { FormEvent, useState } from "react";
 import { TiMessages } from "react-icons/ti";
 import { useNavigate } from "react-router-dom";
 import { ClipLoader } from "react-spinners";
 
+import { useConfig } from "../context/configContext.tsx";
+import { useNotifActions } from "../context/notifCtxt.tsx";
 import UserCtxt from "../context/userCtxt.tsx";
 import { signUp } from "../utils/api.ts";
 import {
@@ -14,7 +16,8 @@ import {
 } from "../utils/validator.ts";
 
 const SignUp = React.memo((): JSX.Element => {
-  const { setToken } = useContext(UserCtxt);
+  const { addErrorNotif } = useNotifActions();
+  const { setUser } = useConfig();
 
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -24,22 +27,18 @@ const SignUp = React.memo((): JSX.Element => {
 
   const navigate = useNavigate();
 
-  const tryingLogin = () => {
-    navigate("/login/email");
-  };
-
-  const signUpNewUser = (e: FormEvent<HTMLFormElement>) => {
+  const signUpNewUser = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true);
+    // setLoading(true);
     const valArr = [
       valUsername(username),
       valEmail(email),
       valPhoneNumber(phone),
       valPassword(password),
     ];
-    const showError = valArr.every((validation) => validation === false);
+    const showError = valArr.some((validation) => validation === false);
     if (showError) {
-      let type;
+      let type = "";
       const firstIndex = valArr.indexOf(false);
       switch (firstIndex) {
         case 0:
@@ -58,30 +57,32 @@ const SignUp = React.memo((): JSX.Element => {
           "username";
           break;
       }
-      console.log(type);
+      addErrorNotif(
+        "Invalid Field",
+        `Please correct any discrepancies you can find before attempting to sign in again`,
+        false,
+        []
+      );
+      // setLoading(false);
       return;
     }
     try {
-      signUp({ username, email, phone, password })
-        .then((res) => {
-          // Add success Notif
-          setToken(res.data.data.token);
-          localStorage.setItem("authToken", res.data.data.token);
-          navigate("/verify/phone/verify");
-        })
-        .catch((err) => {
-          console.log(err);
-          // Add Error Notif
-        })
-        .finally(() => {
-          setLoading(false);
-        });
+      const response = await signUp({ username, email, phone, password });
+
+      setUser((prev) => {
+        return { ...prev, authToken: response.data.data.token };
+      });
+
+      try {
+        localStorage.setItem("authToken", response.data.data.token);
+      } catch (err) {
+        console.log(`Error saving authToken to localStorage. Error: ${err}`);
+      }
+
+      navigate("/verify/phone/verify");
     } catch (err) {
       console.log(err);
-      if (err instanceof Error) {
-        // Add Error Notif
-      }
-      setLoading(false);
+      // setLoading(false);
     }
   };
 

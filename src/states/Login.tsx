@@ -13,8 +13,12 @@ import { valEmail, valPhoneNumber } from "../utils/validator.ts";
 const ValueInput = React.memo(
   ({
     retrieveValue,
+    placeholder,
+    type,
   }: {
     retrieveValue: (value: string) => void;
+    placeholder: string;
+    type: string;
   }): JSX.Element => {
     const [value, setValue] = useState("");
 
@@ -25,10 +29,10 @@ const ValueInput = React.memo(
           retrieveValue(e.target.value);
           setValue(e.target.value);
         }}
-        type="phone"
+        type={type}
         value={value}
         className="focus:outline-none py-2 my-1 bg-[transparent] w-full"
-        placeholder="(702)-981-1370"
+        placeholder={placeholder}
       />
     );
   }
@@ -92,6 +96,8 @@ const LoginPhone = (): JSX.Element => {
       <form className="mt-20 w-full" onSubmit={handlePhonePin}>
         <ValueInput
           retrieveValue={useCallback((value) => (phone.current = value), [])}
+          placeholder="(702)-981-1370"
+          type="phone"
         />
         <motion.button
           disabled={loading}
@@ -179,6 +185,8 @@ const LoginEmail = (): JSX.Element => {
       <form className="mt-20 w-full" onSubmit={handleEmailPin}>
         <ValueInput
           retrieveValue={useCallback((value) => (email.current = value), [])}
+          placeholder="Email"
+          type="email"
         />
         <motion.button
           disabled={loading}
