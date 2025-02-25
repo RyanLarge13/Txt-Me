@@ -14,6 +14,7 @@ import "./index.css";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter as Router } from "react-router-dom";
+import { scan } from "react-scan";
 
 import App from "./App.tsx";
 import { ConfigProvider } from "./context/configContext.tsx";
@@ -22,6 +23,12 @@ import { NotifProvider } from "./context/notifCtxt.tsx";
 import { UserProvider } from "./context/userCtxt.tsx";
 
 const mode = import.meta.env.VITE_APP_MODE || "prod";
+
+if (mode === "dev") {
+  scan({
+    enabled: true,
+  });
+}
 
 // Checking for null because no service worker should run in prod or dev for now
 if ("serviceWorker" in navigator && mode === "null") {

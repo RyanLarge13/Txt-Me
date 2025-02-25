@@ -6,7 +6,7 @@ import { ClipLoader } from "react-spinners";
 
 import { useConfig } from "../context/configContext.tsx";
 import { useNotifActions } from "../context/notifCtxt.tsx";
-import UserCtxt from "../context/userCtxt.tsx";
+import useLogger from "../hooks/useLogger.ts";
 import { signUp } from "../utils/api.ts";
 import {
   valEmail,
@@ -16,73 +16,94 @@ import {
 } from "../utils/validator.ts";
 
 const SignUp = React.memo((): JSX.Element => {
-  const { addErrorNotif } = useNotifActions();
+  const { handleAPIErrorNotif, addErrorNotif } = useNotifActions();
   const { setUser } = useConfig();
 
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
+  // Uncomment if you want a more controlled state of react. Possibly change to useRef instead
+  // TODO: Think about changing these useState values to useRef inside form component and have a bit more control over state while keeping unnecessary rerenders low
+
+  // const [username, setUsername] = useState("");
+  // const [email, setEmail] = useState("");
+  // const [phone, setPhone] = useState("");
+  // const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const log = useLogger();
   const navigate = useNavigate();
 
-  const signUpNewUser = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    // setLoading(true);
+  const validateForm = (
+    username: string,
+    email: string,
+    phone: string,
+    password: string
+  ): boolean => {
     const valArr = [
       valUsername(username),
       valEmail(email),
       valPhoneNumber(phone),
       valPassword(password),
     ];
-    const showError = valArr.some((validation) => validation === false);
+    const showError = valArr.some((validation) => validation.valid === false);
+
     if (showError) {
-      let type = "";
-      const firstIndex = valArr.indexOf(false);
-      switch (firstIndex) {
-        case 0:
-          type = "username";
-          break;
-        case 1:
-          type = "email";
-          break;
-        case 2:
-          type = "phone";
-          break;
-        case 3:
-          type = "Password";
-          break;
-        default:
-          "username";
-          break;
-      }
-      addErrorNotif(
-        "Invalid Field",
-        `Please correct any discrepancies you can find before attempting to sign in again`,
-        false,
-        []
-      );
-      // setLoading(false);
+      valArr.forEach((validation) => {
+        if (!validation.valid) {
+          addErrorNotif("Bad Field", validation.reason, true, []);
+        }
+      });
+      return false;
+    }
+    return true;
+  };
+
+  const signUpNewUser = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const formData = new FormData(e.currentTarget);
+
+    const username = formData.get("username") as string;
+    const email = formData.get("email") as string;
+    const phone = formData.get("phone") as string;
+    const password = formData.get("password") as string;
+
+    if (!validateForm(username, email, phone, password)) {
+      setLoading(false);
       return;
     }
+
     try {
       const response = await signUp({ username, email, phone, password });
 
+      const newToken = response.data.data?.token || "";
+
+      if (!newToken) {
+        log.logAllError(
+          "No auth token from the server. Check server immediately"
+        );
+        addErrorNotif(
+          "Sign Up Failed",
+          "There was an unexpected problem with our servers. If the issue persists please contact the developer immediately at your earliest convenience",
+          true,
+          []
+        );
+        return;
+      }
+
       setUser((prev) => {
-        return { ...prev, authToken: response.data.data.token };
+        return { ...prev, authToken: newToken };
       });
 
       try {
-        localStorage.setItem("authToken", response.data.data.token);
+        localStorage.setItem("authToken", newToken);
       } catch (err) {
-        console.log(`Error saving authToken to localStorage. Error: ${err}`);
+        log.logAllError("Error saving authToken to localStorage. Error: ", err);
       }
 
       navigate("/verify/phone/verify");
     } catch (err) {
-      console.log(err);
-      // setLoading(false);
+      handleAPIErrorNotif(err);
+      setLoading(false);
     }
   };
 
@@ -96,30 +117,38 @@ const SignUp = React.memo((): JSX.Element => {
       <form className="mt-20" onSubmit={signUpNewUser}>
         <input
           autoFocus={true}
-          type="text"
-          onChange={(e) => setUsername(e.target.value)}
-          value={username}
+          type="username"
+          name="username"
+          id="username"
+          // onChange={(e) => setUsername(e.target.value)}
+          // value={username}
           className="focus:outline-none py-2 my-1 bg-[transparent] w-full"
           placeholder="Username"
         />
         <input
           type="email"
-          onChange={(e) => setEmail(e.target.value)}
-          value={email}
+          name="email"
+          id="email"
+          // onChange={(e) => setEmail(e.target.value)}
+          // value={email}
           className="focus:outline-none py-2 my-1 bg-[transparent] w-full"
           placeholder="Email"
         />
         <input
-          type="phone"
-          onChange={(e) => setPhone(e.target.value)}
-          value={phone}
+          type="tel"
+          name="phone"
+          id="phone"
+          // onChange={(e) => setPhone(e.target.value)}
+          // value={phone}
           className="focus:outline-none py-2 my-1 bg-[transparent] w-full"
           placeholder="(702)-981-1370"
         />
         <input
           type="password"
-          onChange={(e) => setPassword(e.target.value)}
-          value={password}
+          name="password"
+          id="password"
+          // onChange={(e) => setPassword(e.target.value)}
+          // value={password}
           className="focus:outline-none py-2 my-1 bg-[transparent] w-full"
           placeholder="Password"
         />

@@ -1,3 +1,6 @@
+import { AxiosError } from "axios";
+import { Dispatch, SetStateAction } from "react";
+
 export type SysNotifType = {
   id: string;
   confirmation: boolean;
@@ -14,9 +17,7 @@ export type Actions = {
   func: () => void;
 };
 
-export interface NotifCtxtProps {
-  notifs: SysNotifType[];
-  storedNotifs: SysNotifType[];
+export interface NotifActionProps {
   addSuccessNotif: (
     title: string,
     text: string,
@@ -32,4 +33,11 @@ export interface NotifCtxtProps {
   removeNotif: (id: string) => void;
   showNetworkErrorNotif: (actions: Actions[]) => void;
   clearAllNotifs: () => void;
+  setStoredNotifs: Dispatch<SetStateAction<SysNotifType[]>>;
+  handleAPIErrorNotif: (err: AxiosError) => void;
+}
+
+export interface NotifStateProps {
+  notifs: SysNotifType[];
+  storedNotifs: SysNotifType[];
 }

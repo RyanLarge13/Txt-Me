@@ -7,6 +7,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { ClipLoader } from "react-spinners";
 
 import { useNotifActions } from "../context/notifCtxt.tsx";
+import useLogger from "../hooks/useLogger.ts";
 import { pinEmail, pinPhone } from "../utils/api.ts";
 import { valEmail, valPhoneNumber } from "../utils/validator.ts";
 
@@ -39,26 +40,37 @@ const ValueInput = React.memo(
 );
 
 const LoginPhone = (): JSX.Element => {
-  const { addErrorNotif, addSuccessNotif } = useNotifActions();
+  const { addErrorNotif, addSuccessNotif, handleAPIErrorNotif } =
+    useNotifActions();
 
   const [loading, setLoading] = useState(false);
 
   const phone = useRef("");
 
   const navigate = useNavigate();
+  const log = useLogger();
+
+  const validFormData = (): boolean => {
+    const isValidPhone = valPhoneNumber(phone.current);
+    if (!isValidPhone.valid) {
+      addErrorNotif(
+        "Invalid Phone Number",
+        `Please provide a valid number. ${isValidPhone.reason}`,
+        true,
+        []
+      );
+      setLoading(false);
+      return false;
+    }
+    return true;
+  };
 
   const handlePhonePin = useCallback(
     async (e: FormEvent<HTMLFormElement>): Promise<void> => {
       e.preventDefault();
       setLoading(true);
-      const isValidPhone = valPhoneNumber(phone.current);
-      if (!isValidPhone) {
-        addErrorNotif(
-          "Invalid Phone Number",
-          "Please provide a valid number",
-          false,
-          []
-        );
+
+      if (!validFormData()) {
         setLoading(false);
         return;
       }
@@ -66,21 +78,30 @@ const LoginPhone = (): JSX.Element => {
       try {
         localStorage.setItem("phone", phone.current);
       } catch (err) {
-        console.log(err);
+        log.logAllError("Could not store phone number in local storage", err);
       }
 
       try {
         const response = await pinPhone(phone.current);
+        const message = response.data.data?.message || "";
+
+        if (!message) {
+          addErrorNotif(
+            "Application Error",
+            "There was a problem with our servers and you should not be getting this error. If this error appears again please contact the developer at your earliest convenience",
+            true,
+            []
+          );
+          setLoading(false);
+          return;
+        }
+
         addSuccessNotif("Pin Sent", response.data.data.message, false, []);
         navigate("/verify/phone/login");
-        setLoading(false);
       } catch (err) {
+        log.devLog("Error logging in for phone pin", err);
+        handleAPIErrorNotif(err);
         setLoading(false);
-        console.log(err);
-        const errorMessage = err.response
-          ? err.response.data.message
-          : "You are offline, please check your internet connection";
-        addErrorNotif("Sending Pin", errorMessage, true, []);
       }
     },
     []
