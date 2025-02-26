@@ -66,7 +66,7 @@ export const valStr = ({
 
 // Validate an integer
 export const valInt = ({
-  testLen,
+  testLen = false,
   minSize = 0,
   maxSize = 100000,
   customRegex = /^\d+$/,

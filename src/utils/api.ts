@@ -1,4 +1,5 @@
 import Axios, { AxiosResponse } from "axios";
+
 const devUrl = import.meta.env.VITE_API_URL;
 
 // User and verification fetches --------------------------------
@@ -86,7 +87,7 @@ export const pinPhone = (phone: string): Promise<AxiosResponse> => {
   return res;
 };
 
-// Retrieve the users contacta information
+// Retrieve the users contacts information
 export const getContacts = (token: string): Promise<AxiosResponse> => {
   const res = Axios.get(`${devUrl}/user/contacts`, {
     headers: { Authorization: `Bearer ${token}` },

@@ -22,6 +22,7 @@ import { openDB } from "idb";
 import React, { createContext, useContext } from "react";
 
 import useLogger from "../hooks/useLogger.ts";
+import { User } from "../types/configCtxtTypes.ts";
 
 const DatabaseContext = createContext({} as any);
 
@@ -162,6 +163,7 @@ export const DatabaseProvider = ({ children }) => {
     return userInitialized;
   };
 
+  // Get DB Data --------------------------------------------------------------------------------
   const getAppData = async () => (await getDB()).get("app", "settings");
   const getAppUserData = async () => (await getDB()).get("app", "user");
   const getThemeData = async () => (await getDB()).getAll("theme");
@@ -175,6 +177,12 @@ export const DatabaseProvider = ({ children }) => {
     (await getDB())
       .get("app", "settings")
       .then((settings) => settings.phoneNumber);
+  // Get DB Data --------------------------------------------------------------------------------
+
+  // Put/Patch DB Data ----------------------------------------------------------------------------
+  const updateUserInDB = async (user: User) =>
+    (await getDB()).put("app", user, "user");
+  // Put/Patch DB Data ----------------------------------------------------------------------------
 
   return (
     <DatabaseContext.Provider
@@ -189,6 +197,7 @@ export const DatabaseProvider = ({ children }) => {
         getMessageSettingsData,
         getContactSettingsData,
         getPhoneNumber,
+        updateUserInDB,
       }}
     >
       {children}

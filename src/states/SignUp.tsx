@@ -19,13 +19,6 @@ const SignUp = React.memo((): JSX.Element => {
   const { handleAPIErrorNotif, addErrorNotif } = useNotifActions();
   const { setUser } = useConfig();
 
-  // Uncomment if you want a more controlled state of react. Possibly change to useRef instead
-  // TODO: Think about changing these useState values to useRef inside form component and have a bit more control over state while keeping unnecessary rerenders low
-
-  // const [username, setUsername] = useState("");
-  // const [email, setEmail] = useState("");
-  // const [phone, setPhone] = useState("");
-  // const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   const log = useLogger();
@@ -73,9 +66,10 @@ const SignUp = React.memo((): JSX.Element => {
     }
 
     try {
-      const response = await signUp({ username, email, phone, password });
+      const newUser = { username, email, phone, password };
+      const response = await signUp(newUser);
 
-      const newToken = response.data.data?.token || "";
+      const newToken = response.data?.token || "";
 
       if (!newToken) {
         log.logAllError(
@@ -87,7 +81,9 @@ const SignUp = React.memo((): JSX.Element => {
           true,
           []
         );
-        return;
+        throw new Error(
+          "There was no token returned from the server. Check server immediately! You should not be getting this error"
+        );
       }
 
       setUser((prev) => {
@@ -120,8 +116,6 @@ const SignUp = React.memo((): JSX.Element => {
           type="username"
           name="username"
           id="username"
-          // onChange={(e) => setUsername(e.target.value)}
-          // value={username}
           className="focus:outline-none py-2 my-1 bg-[transparent] w-full"
           placeholder="Username"
         />
@@ -129,8 +123,6 @@ const SignUp = React.memo((): JSX.Element => {
           type="email"
           name="email"
           id="email"
-          // onChange={(e) => setEmail(e.target.value)}
-          // value={email}
           className="focus:outline-none py-2 my-1 bg-[transparent] w-full"
           placeholder="Email"
         />
@@ -138,8 +130,6 @@ const SignUp = React.memo((): JSX.Element => {
           type="tel"
           name="phone"
           id="phone"
-          // onChange={(e) => setPhone(e.target.value)}
-          // value={phone}
           className="focus:outline-none py-2 my-1 bg-[transparent] w-full"
           placeholder="(702)-981-1370"
         />
@@ -147,8 +137,6 @@ const SignUp = React.memo((): JSX.Element => {
           type="password"
           name="password"
           id="password"
-          // onChange={(e) => setPassword(e.target.value)}
-          // value={password}
           className="focus:outline-none py-2 my-1 bg-[transparent] w-full"
           placeholder="Password"
         />

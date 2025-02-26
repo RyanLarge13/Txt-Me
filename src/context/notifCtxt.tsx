@@ -128,11 +128,13 @@ export const NotifProvider = ({
     const response = err.response;
     const request = err.request;
 
-    if (!err.code || !err.message) {
-      throw new TypeError(
-        "You must pass AxiosError type into handleAPIErrorNotif function. You are missing 'code' or 'message' in error object"
-      );
-    }
+    log.devLog(err);
+
+    // if (!err.code || !err.message) {
+    //   throw new TypeError(
+    //     "You must pass AxiosError type into handleAPIErrorNotif function. You are missing 'code' or 'message' in error object"
+    //   );
+    // }
 
     if (
       code === "ECONNABORTED" ||
