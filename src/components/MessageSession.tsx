@@ -19,14 +19,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { IoSend } from "react-icons/io5";
 
-import { useSocket } from "../context/socketCtxt";
 import UserCtxt from "../context/userCtxt";
+import useSocket from "../hooks/useSocket";
+import useUserData from "../hooks/useUserData";
 
 const MessageSession = () => {
-  const { user, messageSession, setMessageSession } = useContext(UserCtxt);
+  const { messageSession, setMessageSession } = useContext(UserCtxt);
   const { socket, message } = useSocket();
 
   const [value, setValue] = useState("");
+  const [phoneNumber] = useUserData("phoneNumber");
 
   const messagesRef = useRef<HTMLDivElement | null>(null);
 
@@ -34,22 +36,22 @@ const MessageSession = () => {
     const newMessage = message;
     if (newMessage) {
       console.log("New message from me or sender");
-      setMessageSession((prev) => {
-        if (!prev) {
-          return null;
-        }
-        return {
-          ...prev,
-          messages: [
-            ...prev.messages,
-            {
-              fromid: newMessage.from,
-              message: newMessage.message,
-              time: newMessage.time,
-            },
-          ],
-        };
-      });
+      // setMessageSession((prev) => {
+      //   if (!prev) {
+      //     return null;
+      //   }
+      //   return {
+      //     ...prev,
+      //     messages: [
+      //       ...prev.messages,
+      //       {
+      //         fromid: newMessage.fromid,
+      //         message: newMessage.message,
+      //         time: newMessage.time,
+      //       },
+      //     ],
+      //   };
+      // });
       setTimeout(() => {
         if (messagesRef && messagesRef.current) {
           messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
@@ -59,22 +61,22 @@ const MessageSession = () => {
   }, [message, setMessageSession]);
 
   const sendMessage = () => {
-    setMessageSession((prev) => {
-      if (!prev) {
-        return null;
-      }
-      return {
-        ...prev,
-        messages: [
-          ...prev.messages,
-          {
-            fromid: user?.phoneNumber,
-            message: value,
-            time: new Date(),
-          },
-        ],
-      };
-    });
+    // setMessageSession((prev) => {
+    //   if (!prev) {
+    //     return null;
+    //   }
+    //   return {
+    //     ...prev,
+    //     messages: [
+    //       ...prev.messages,
+    //       {
+    //         fromid: phoneNumber,
+    //         message: value,
+    //         time: new Date(),
+    //       },
+    //     ],
+    //   };
+    // });
     setTimeout(() => {
       if (messagesRef && messagesRef.current) {
         messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
@@ -82,7 +84,7 @@ const MessageSession = () => {
     }, 0);
     if (socket && messageSession) {
       socket.emit("text-message", {
-        sender: user?.phoneNumber,
+        sender: phoneNumber,
         recipient: messageSession.contact.number,
         message: value,
         time: new Date(),
@@ -106,7 +108,7 @@ const MessageSession = () => {
             <div
               key={index}
               className={`${
-                message.fromid === user?.phoneNumber
+                message.fromid === phoneNumber
                   ? "bg-tri self-end"
                   : "bg-secondary self-start"
               } rounded-lg shadow-lg text-black p-3 outline-red-400 min-w-[50%]`}

@@ -16,13 +16,13 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import React, { useContext } from "react";
+import React from "react";
 import { IoIosArrowForward, IoMdLogOut } from "react-icons/io";
 
-import UserCtxt from "../context/userCtxt";
+import useUserData from "../hooks/useUserData";
 
 const MainSettings = ({ setSettingsState, setTitle }) => {
-  const { user } = useContext(UserCtxt);
+  const [username] = useUserData("username");
 
   return (
     <div>
@@ -30,7 +30,7 @@ const MainSettings = ({ setSettingsState, setTitle }) => {
         <p className="rounded-full bg-slate-800 text-4xl text-primary p-3 w-min">
           RL
         </p>
-        <p>{user?.username}</p>
+        <p>{username}</p>
       </div>
       <div className="p-3">
         <p className="text-gray-400 mt-5 text-lg">Account Settings</p>

@@ -21,11 +21,11 @@ import React, { ChangeEvent, useContext, useState } from "react";
 import { FaSearch } from "react-icons/fa";
 
 import SearchIcon from "../assets/search.svg";
-import UserCtxt from "../context/userCtxt";
+import InteractiveCtxt from "../context/interactiveCtxt.tsx";
 import Contacts from "./Contacts.tsx";
 
 const Messages = () => {
-  const { openChatsMenu } = useContext(UserCtxt);
+  const { openChatsMenu } = useContext(InteractiveCtxt);
 
   const [noFoundContacts, setNoFoundContact] = useState(false);
 
