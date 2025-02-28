@@ -17,11 +17,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import React, {
-  createContext,
-  ReactNode,
-  useContext,
-  useEffect,
-  useState,
+	createContext,
+	ReactNode,
+	useMemo,
+	useContext,
+	useEffect,
+	useState
 } from "react";
 
 import useLogger from "../hooks/useLogger";
@@ -31,95 +32,110 @@ import { useDatabase } from "./dbContext";
 const ConfigContext = createContext({} as ConfigContextType);
 
 export const ConfigProvider = ({
-  children,
+	children
 }: {
-  children: ReactNode;
+	children: ReactNode;
 }): JSX.Element => {
-  const { getDB, initDatabase, getThemeData, getAppUserData } = useDatabase();
+	const { getDB, initDatabase, getThemeData, getAppUserData } = useDatabase();
 
-  const [appData, setAppData] = useState<AppData>({
-    initialized: true,
-    locked: false,
-    passwordType: "pin",
-    authToken: "",
-    showOnline: false,
-  });
+	const [appData, setAppData] = useState<AppData>({
+		initialized: true,
+		locked: false,
+		passwordType: "pin",
+		authToken: "",
+		showOnline: false
+	});
 
-  const [theme, setTheme] = useState<Theme>({
-    darkMode: true,
-    accent: "#fff",
-    background: "none",
-    animations: {
-      speed: 0.25,
-      spring: true,
-    },
-  });
+	const [theme, setTheme] = useState<Theme>({
+		darkMode: true,
+		accent: "#fff",
+		background: "none",
+		animations: {
+			speed: 0.25,
+			spring: true
+		}
+	});
 
-  const [user, setUser] = useState({
-    userId: 0,
-    authToken: "",
-    username: "",
-    email: "",
-    phoneNumber: "",
-  });
+	const [user, setUser] = useState({
+		userId: 0,
+		authToken: "",
+		username: "",
+		email: "",
+		phoneNumber: ""
+	});
 
-  const log = useLogger();
+	const log = useLogger();
 
-  useEffect(() => {
-    openDBBAndInit();
-  }, []);
+	useEffect(() => {
+		openDBBAndInit();
+	}, []);
 
-  const openDBBAndInit = async () => {
-    const db = await getDB();
-    const appInfo = await initDatabase(db);
+	const openDBBAndInit = async () => {
+		const db = await getDB();
+		const appInfo = await initDatabase(db);
 
-    log.devLog(appInfo);
+		log.devLog(appInfo);
 
-    if (appInfo) {
-      setAppData(appInfo);
-    }
+		if (appInfo) {
+			setAppData(appInfo);
+		}
 
-    fetchLocalThemeData();
-    fetchLocalUserData();
-  };
+		fetchLocalThemeData();
+		fetchLocalUserData();
+	};
 
-  const fetchLocalThemeData = async () => {
-    const themeData = await getThemeData();
+	const fetchLocalThemeData = async () => {
+		const themeData = await getThemeData();
 
-    if (themeData) {
-      setTheme(themeData);
-    }
-  };
+		if (themeData) {
+			setTheme(themeData);
+		}
+	};
 
-  const fetchLocalUserData = async () => {
-    const user = await getAppUserData();
+	const fetchLocalUserData = async () => {
+		const user = await getAppUserData();
 
-    if (user) {
-      setUser(user);
-    }
-  };
+		if (user) {
+			setUser(user);
+		} else {
+			log.devLog("No user exists in local indexedDB");
+		}
+	};
 
-  return (
-    <ConfigContext.Provider
-      value={{
-        getAppData: (key) => appData[key],
-        getThemeData: (key) => theme[key],
-        getUserData: (key) => user[key],
-        setUser,
-        setAppData,
-        setTheme,
-      }}
-    >
-      {children}
-    </ConfigContext.Provider>
-  );
+	const contextValue = useMemo(() => {
+		return {
+			getAppData: key => appData[key],
+			getThemeData: key => theme[key],
+			getUserData: key => user[key],
+			setUser,
+			setAppData,
+			setTheme
+		};
+	}, [user, theme, appData]);
+
+	return (
+		<ConfigContext.Provider value={contextValue}>
+			{children}
+		</ConfigContext.Provider>
+	);
 };
 
 export const useConfig = () => {
-  const context = useContext(ConfigContext);
-  if (!context) {
-    throw new Error("useConfig must be within a ConfigProvider");
-  }
+	const context = useContext(ConfigContext);
+	if (!context) {
+		throw new Error("useConfig must be within a ConfigProvider");
+	}
 
-  return context;
+	return context;
+};
+
+export const useUserData = key => {
+	const { getUserData, setUser } = useContext(ConfigContext);
+	const [value, setValue] = useState(() => getUserData(key));
+
+	useEffect(() => {
+		setValue(getUserData(key));
+	}, [getUserData(key)]);
+
+	return [value, setUser];
 };
