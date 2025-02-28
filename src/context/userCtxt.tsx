@@ -20,12 +20,12 @@ import { AxiosResponse } from "axios";
 import React, { createContext, ReactNode, useEffect, useState } from "react";
 
 import useLogger from "../hooks/useLogger.ts";
-import { Contacts, MessageSession } from "../types/userTypes.ts";
+import { Contacts, MessageSession, UserCtxtProps } from "../types/userTypes.ts";
 import { fetchUserData } from "../utils/api.ts";
 import { useConfig } from "./configContext.tsx";
 import { useDatabase } from "./dbContext.tsx";
 
-const UserCtxt = createContext({} as any);
+const UserCtxt = createContext({} as UserCtxtProps);
 
 export const UserProvider = ({
   children,
@@ -77,7 +77,7 @@ export const UserProvider = ({
       const userDataResponse: AxiosResponse = await fetchUserData(token);
       log.devLog("Fetched user data from server", userDataResponse);
     } catch (err) {
-      console.log(`Error when fetching user data. Error: ${err}`);
+      log.logAllError("Error when fetching user data", err);
     }
   };
 

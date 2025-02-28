@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import React, {
+import {
   createContext,
   ReactNode,
   useContext,
@@ -26,7 +26,12 @@ import React, {
 } from "react";
 
 import useLogger from "../hooks/useLogger";
-import { AppData, ConfigContextType, Theme } from "../types/configCtxtTypes";
+import {
+  AppData,
+  ConfigContextType,
+  Theme,
+  User,
+} from "../types/configCtxtTypes";
 import { useDatabase } from "./dbContext";
 
 export const ConfigContext = createContext({} as ConfigContextType);
@@ -104,9 +109,9 @@ export const ConfigProvider = ({
 
   const contextValue = useMemo(() => {
     return {
-      getAppData: (key) => appData[key],
-      getThemeData: (key) => theme[key],
-      getUserData: (key) => user[key],
+      getAppData: <K extends keyof AppData>(key: K) => appData[key],
+      getThemeData: <K extends keyof Theme>(key: K) => theme[key],
+      getUserData: <K extends keyof User>(key: K) => user[key],
       setUser,
       setAppData,
       setTheme,

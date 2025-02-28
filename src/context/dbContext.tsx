@@ -18,7 +18,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 /// <reference types="vite/client" />
 
-import { openDB } from "idb";
+import { IDBPDatabase, openDB } from "idb";
 import { createContext, useContext } from "react";
 
 import useLogger from "../hooks/useLogger.ts";
@@ -35,7 +35,7 @@ export const DatabaseProvider = ({
 }) => {
   const log = useLogger();
 
-  const buildAppConfig = async (db) => {
+  const buildAppConfig = async (db: IDBPDatabase) => {
     const appSettings = {
       initialized: true,
       locked: false,
@@ -55,7 +55,7 @@ export const DatabaseProvider = ({
     await db.put("app", appUser, "user");
   };
 
-  const buildThemeConfig = async (db) => {
+  const buildThemeConfig = async (db: IDBPDatabase) => {
     const theme = {
       darkMode: true,
       accent: "#fff",
@@ -69,7 +69,7 @@ export const DatabaseProvider = ({
     await db.put("theme", theme, "theme");
   };
 
-  const buildMessagesAndContacts = async (db) => {
+  const buildMessagesAndContacts = async (db: IDBPDatabase) => {
     const messages = { messages: [] };
     const contacts = { contacts: [] };
 
@@ -77,7 +77,7 @@ export const DatabaseProvider = ({
     await db.put("contacts", contacts, "contacts");
   };
 
-  const buildMessageSettings = async (db) => {
+  const buildMessageSettings = async (db: IDBPDatabase) => {
     const messageSettings = {
       showImg: true,
       showLatestMessage: true,
@@ -92,7 +92,7 @@ export const DatabaseProvider = ({
     await db.put("messageSettings", messageSettings, "messageSettings");
   };
 
-  const buildContactSettings = async (db) => {
+  const buildContactSettings = async (db: IDBPDatabase) => {
     const contactSettings = {
       showImage: true,
       showLatestMessages: true,
@@ -104,7 +104,7 @@ export const DatabaseProvider = ({
     await db.put("contactSettings", contactSettings, "contactSettings");
   };
 
-  const addDefaultConfiguration = async (db) => {
+  const addDefaultConfiguration = async (db: IDBPDatabase) => {
     try {
       await buildAppConfig(db);
     } catch (err) {
@@ -153,7 +153,7 @@ export const DatabaseProvider = ({
     return db;
   };
 
-  const initDatabase = async (db) => {
+  const initDatabase = async (db: IDBPDatabase) => {
     const userInitialized = await db.get("app", "settings");
 
     log.devLog(`user from indexedDB`, userInitialized);

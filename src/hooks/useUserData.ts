@@ -19,8 +19,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 import { useContext, useEffect, useState } from "react";
 
 import { ConfigContext } from "../context/configContext";
+import { User } from "../types/configCtxtTypes";
 
-const useUserData = (key) => {
+const useUserData = <K extends keyof User>(key: K) => {
   const { getUserData, setUser } = useContext(ConfigContext);
   const [value, setValue] = useState(() => getUserData(key));
 

@@ -22,7 +22,7 @@ import React, { createContext, useEffect, useRef, useState } from "react";
 import io, { Socket } from "socket.io-client";
 
 import useLogger from "../hooks/useLogger";
-import { SocketProps } from "../types/socketTypes";
+import { SocketMessage, SocketProps } from "../types/socketTypes";
 import { useDatabase } from "./dbContext";
 
 export const SocketContext = createContext({} as SocketProps);
@@ -32,11 +32,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const log = useLogger();
 
   // State ----------------------------------------------------------
-  const [message, setMessage] = useState<{
-    fromid: string;
-    message: string;
-    time: string;
-  } | null>(null);
+  const [message, setMessage] = useState<SocketMessage | null>(null);
   // State ----------------------------------------------------------
 
   // UseRef for socket to avoid unwanted rerenders
@@ -93,7 +89,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     attachListeners(socketRef.current);
   };
 
-  const attachListeners = (socketRef): void => {
+  const attachListeners = (socketRef: Socket | null): void => {
     if (!socketRef) {
       return;
     }
@@ -122,7 +118,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     console.log("Disconnected from the server");
   };
 
-  const handleError = (error): void => {
+  const handleError = (error: Error): void => {
     console.log("Connection error:", error);
     setTimeout((): void => {
       if (socketRef && socketRef.current) {
@@ -133,7 +129,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     }, 10000);
   };
 
-  const handleTextMessage = (socketMessage): void => {
+  const handleTextMessage = (socketMessage: SocketMessage): void => {
     if (socketMessage) {
       setMessage(socketMessage);
       console.log("message from socket, updating messages", socketMessage);

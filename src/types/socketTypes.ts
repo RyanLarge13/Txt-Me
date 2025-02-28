@@ -18,11 +18,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import { Socket } from "socket.io-client";
 
+export type SocketMessage = {
+  fromid: string;
+  message: string;
+  time: string;
+} | null;
 export interface SocketProps {
   socket: Socket | null;
-  message: {
-    fromid: string;
-    message: string;
-    time: string;
-  } | null;
+  message: SocketMessage;
 }

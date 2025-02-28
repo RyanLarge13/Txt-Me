@@ -19,9 +19,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 import React, { createContext, ReactNode, useState } from "react";
 import { MdAccountCircle } from "react-icons/md";
 
-import { SettingsState, Title } from "../types/accountSettingsProps";
+import { InteractiveCtxtTypes, MenuTitle } from "../types/interactiveCtxtTypes";
 
-const InteractiveCtxt = createContext({} as any);
+const InteractiveCtxt = createContext({} as InteractiveCtxtTypes);
 
 export const InteractiveProvider = ({
   children,
@@ -30,11 +30,11 @@ export const InteractiveProvider = ({
 }): JSX.Element => {
   const [openChatsMenu, setOpenChatsMenu] = useState(false);
   const [newChat, setNewChat] = useState(false);
-  const [title, setTitle] = useState<Title>({
+  const [title, setTitle] = useState<MenuTitle>({
     string: "Account",
     icon: <MdAccountCircle />,
   });
-  const [settingsState, setSettingsState] = useState<SettingsState>({
+  const [settingsState, setSettingsState] = useState({
     page: "main",
   });
 

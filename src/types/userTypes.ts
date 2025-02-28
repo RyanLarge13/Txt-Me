@@ -18,14 +18,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import { Dispatch, SetStateAction } from "react";
 
-export type User = {
-  username: string;
-  authToken: string;
-  userId: number;
-  email: string;
-  phoneNumber: string;
-};
-
 export type AllMessages = Map<
   number,
   { contact: Contacts; messages: Message[] }
@@ -52,20 +44,19 @@ export type Message = {
 };
 
 export type MessageSession = {
+  number: number;
   messages: Message[];
   contact: Contacts;
 };
 
-export interface UserProps {
-  setUser: Dispatch<SetStateAction<User>>;
-  setOpenChatsMenu: Dispatch<SetStateAction<boolean>>;
-  setNewChat: Dispatch<SetStateAction<boolean>>;
+export interface UserCtxtProps {
+  // setOpenChatsMenu: Dispatch<SetStateAction<boolean>>;
+  // setNewChat: Dispatch<SetStateAction<boolean>>;
+  // newChat: boolean;
+  // openChatsMenu: boolean;
   setContacts: Dispatch<SetStateAction<Contacts[] | []>>;
   setMessageSession: Dispatch<SetStateAction<MessageSession | null>>;
   setAllMessages: Dispatch<SetStateAction<Map<number, Message[]>>>;
-  newChat: boolean;
-  openChatsMenu: boolean;
-  user: User;
   contacts: Contacts[] | [];
   messageSession: MessageSession | null;
   allMessages: AllMessages;
