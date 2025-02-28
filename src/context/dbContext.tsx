@@ -19,7 +19,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 /// <reference types="vite/client" />
 
 import { openDB } from "idb";
-import React, { createContext, useContext } from "react";
+import { createContext, useContext } from "react";
 
 import useLogger from "../hooks/useLogger.ts";
 import { User } from "../types/configCtxtTypes.ts";
@@ -28,7 +28,11 @@ const DatabaseContext = createContext({} as any);
 
 // IDB Documentation https://www.npmjs.com/package/idb
 
-export const DatabaseProvider = ({ children }) => {
+export const DatabaseProvider = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
   const log = useLogger();
 
   const buildAppConfig = async (db) => {

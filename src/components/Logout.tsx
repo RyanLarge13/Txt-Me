@@ -1,30 +1,31 @@
-import React, { useContext } from "react";
 import { motion } from "framer-motion";
+import React from "react";
 import { MdAccountCircle } from "react-icons/md";
-import UserCtxt from "../context/userCtxt";
+
+import { useConfig } from "../context/configContext";
+import useLogger from "../hooks/useLogger";
+import useNotifActions from "../hooks/useNotifActions";
+import { defaultUser } from "../utils/constants";
 
 const Logout = ({ setSettingsState, setTitle }) => {
-  const { setUser, setToken, notifHdlr } = useContext(UserCtxt);
+  const { setUser } = useConfig();
+  const { addSuccessNotif } = useNotifActions();
+
+  const log = useLogger();
 
   const handleLogout = () => {
     try {
       localStorage.removeItem("authToken");
     } catch (err) {
+      log.logAllError(
+        "Error when removing authToken from localStorage when logging out.",
+        err
+      );
       console.log("Could not remove stored auth token");
     }
-    setUser({
-      username: "",
-      userId: 0,
-      email: "",
-      phoneNumber: "",
-    });
-    setToken("");
-    notifHdlr.setNotif(
-      "Logged Out",
-      "You have successfully logged out. Hope to see you again soon!",
-      true,
-      []
-    );
+    setUser(defaultUser);
+
+    addSuccessNotif("Logged Out", "You are now logged out", false, []);
   };
 
   return (

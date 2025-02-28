@@ -15,3 +15,11 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
+
+import { useContext } from "react";
+
+import { SocketContext } from "../context/socketCtxt";
+
+export const useSocket = () => {
+  return useContext(SocketContext);
+};

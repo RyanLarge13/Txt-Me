@@ -6,8 +6,8 @@ import { ClipLoader } from "react-spinners";
 
 import { useConfig } from "../context/configContext.tsx";
 import { useDatabase } from "../context/dbContext.tsx";
-import { useNotifActions } from "../context/notifCtxt.tsx";
 import useLogger from "../hooks/useLogger.ts";
+import useNotifActions from "../hooks/useNotifActions.ts";
 import { verifyPhone, verifyPhoneLogin } from "../utils/api";
 import { defaultUser } from "../utils/constants.js";
 import { valInt, valPhoneNumber } from "../utils/validator.ts";

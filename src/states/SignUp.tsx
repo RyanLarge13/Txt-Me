@@ -5,8 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { ClipLoader } from "react-spinners";
 
 import { useConfig } from "../context/configContext.tsx";
-import { useNotifActions } from "../context/notifCtxt.tsx";
 import useLogger from "../hooks/useLogger.ts";
+import useNotifActions from "../hooks/useNotifActions.ts";
 import { signUp } from "../utils/api.ts";
 import {
   valEmail,

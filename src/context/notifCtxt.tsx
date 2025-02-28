@@ -1,5 +1,5 @@
 /*
-Txt Me - A learn to draw program
+Txt Me - A web based messaging platform
 Copyright (C) 2025 Ryan Large
 
 This program is free software: you can redistribute it and/or modify
@@ -17,13 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { AxiosError } from "axios";
-import React, {
-  createContext,
-  ReactNode,
-  useCallback,
-  useContext,
-  useState,
-} from "react";
+import { createContext, ReactNode, useCallback, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 import useLogger from "../hooks/useLogger.ts";
@@ -34,8 +28,8 @@ import {
   SysNotifType,
 } from "../types/notifTypes.ts";
 
-const NotifStateCtxt = createContext({} as NotifStateProps);
-const NotifActionsCtxt = createContext({} as NotifActionProps);
+export const NotifStateCtxt = createContext({} as NotifStateProps);
+export const NotifActionsCtxt = createContext({} as NotifActionProps);
 
 export const NotifProvider = ({
   children,
@@ -241,18 +235,4 @@ export const NotifProvider = ({
       </NotifActionsCtxt.Provider>
     </NotifStateCtxt.Provider>
   );
-};
-
-export const useNotifState = () => {
-  const context = useContext(NotifStateCtxt);
-  if (!context)
-    throw new Error("useNotifState must be used within a NotifProvider");
-  return context;
-};
-
-export const useNotifActions = () => {
-  const context = useContext(NotifActionsCtxt);
-  if (!context)
-    throw new Error("useNotifActions must be used within a NotifProvider");
-  return context;
 };

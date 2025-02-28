@@ -15,3 +15,16 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
+
+import { useContext } from "react";
+
+import { NotifActionsCtxt } from "../context/notifCtxt";
+
+const useNotifActions = () => {
+  const context = useContext(NotifActionsCtxt);
+  if (!context)
+    throw new Error("useNotifActions must be used within a NotifProvider");
+  return context;
+};
+
+export default useNotifActions;

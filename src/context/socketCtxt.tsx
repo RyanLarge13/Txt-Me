@@ -1,5 +1,5 @@
 /*
-Txt Me - A learn to draw program
+Txt Me - A web based messaging platform
 Copyright (C) 2025 Ryan Large
 
 This program is free software: you can redistribute it and/or modify
@@ -18,24 +18,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 /// <reference types="vite/client" />
 
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { createContext, useEffect, useRef, useState } from "react";
 import io, { Socket } from "socket.io-client";
 
 import useLogger from "../hooks/useLogger";
 import { SocketProps } from "../types/socketTypes";
 import { useDatabase } from "./dbContext";
 
-const SocketContext = createContext({} as SocketProps);
-
-export const useSocket = () => {
-  return useContext(SocketContext);
-};
+export const SocketContext = createContext({} as SocketProps);
 
 export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const { getPhoneNumber } = useDatabase();

@@ -26,9 +26,9 @@ import Messages from "./components/Messages.tsx";
 import Nav from "./components/Nav.tsx";
 import ProfileNav from "./components/ProfileNav.tsx";
 import SysNotif from "./components/SysNotif.tsx";
-import { useConfig } from "./context/configContext.tsx";
 import { InteractiveProvider } from "./context/interactiveCtxt.tsx";
 import { SocketProvider } from "./context/socketCtxt.tsx";
+import useUserData from "./hooks/useUserData.ts";
 import Help from "./states/Help.tsx";
 import Home from "./states/Home.tsx";
 import Login from "./states/Login.tsx";
@@ -62,9 +62,7 @@ const MainLoad = () => {
 };
 
 const App = () => {
-  const { getUserData } = useConfig();
-
-  const authToken = getUserData("authToken");
+  const [authToken] = useUserData("authToken");
 
   const mainLoad = useRef(true);
 

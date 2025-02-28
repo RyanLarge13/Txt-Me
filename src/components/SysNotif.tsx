@@ -4,7 +4,8 @@ import { FaCog } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
 import { useConfig } from "../context/configContext.tsx";
-import { useNotifActions, useNotifState } from "../context/notifCtxt.tsx";
+import useNotifActions from "../hooks/useNotifActions.ts";
+import useNotifState from "../hooks/useNotifState.ts";
 import { Actions, SysNotifType } from "../types/notifTypes.ts";
 
 const NotifSettingsButton = (): JSX.Element => {

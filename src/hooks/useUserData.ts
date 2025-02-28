@@ -15,3 +15,20 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
+
+import { useContext, useEffect, useState } from "react";
+
+import { ConfigContext } from "../context/configContext";
+
+const useUserData = (key) => {
+  const { getUserData, setUser } = useContext(ConfigContext);
+  const [value, setValue] = useState(() => getUserData(key));
+
+  useEffect(() => {
+    setValue(getUserData(key));
+  }, [getUserData(key)]);
+
+  return [value, setUser];
+};
+
+export default useUserData;

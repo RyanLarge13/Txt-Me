@@ -12,8 +12,8 @@ import { MdEmail } from "react-icons/md";
 import { useNavigate, useParams } from "react-router-dom";
 import { ClipLoader } from "react-spinners";
 
-import { useNotifActions } from "../context/notifCtxt.tsx";
 import useLogger from "../hooks/useLogger.ts";
+import useNotifActions from "../hooks/useNotifActions.ts";
 import { pinEmail, pinPhone } from "../utils/api.ts";
 import { valEmail, valPhoneNumber } from "../utils/validator.ts";
 
