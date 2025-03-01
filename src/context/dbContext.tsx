@@ -23,7 +23,9 @@ import { createContext, useContext } from "react";
 
 import useLogger from "../hooks/useLogger.ts";
 import { User } from "../types/configCtxtTypes.ts";
-import { DBCtxtProps } from "../types/dbCtxtTypes.ts";
+import {
+    Contact, ContactSettings, DBCtxtProps, Message, MessageSettings, Theme
+} from "../types/dbCtxtTypes.ts";
 
 const DatabaseContext = createContext({} as DBCtxtProps);
 
@@ -171,21 +173,24 @@ export const DatabaseProvider = ({
   // Get DB Data --------------------------------------------------------------------------------
   const getAppData = async () => (await getDB()).get("app", "settings");
   const getAppUserData = async () => (await getDB()).get("app", "user");
-  const getThemeData = async () => (await getDB()).getAll("theme");
-  const getMessagesData = async () => (await getDB()).getAll("messages");
-  const getContactsData = async () => (await getDB()).getAll("contacts");
-  const getMessageSettingsData = async () =>
+  const getThemeData = async (): Promise<Theme[]> =>
+    (await getDB()).getAll("theme");
+  const getMessagesData = async (): Promise<Message[]> =>
+    (await getDB()).getAll("messages");
+  const getContactsData = async (): Promise<Contact[]> =>
+    (await getDB()).getAll("contacts");
+  const getMessageSettingsData = async (): Promise<MessageSettings[]> =>
     (await getDB()).getAll("messageSettings");
-  const getContactSettingsData = async () =>
+  const getContactSettingsData = async (): Promise<ContactSettings[]> =>
     (await getDB()).getAll("contactSettings");
-  const getPhoneNumber = async () =>
+  const getPhoneNumber = async (): Promise<string> =>
     (await getDB())
       .get("app", "settings")
       .then((settings) => settings.phoneNumber);
   // Get DB Data --------------------------------------------------------------------------------
 
   // Put/Patch DB Data ----------------------------------------------------------------------------
-  const updateUserInDB = async (user: User) =>
+  const updateUserInDB = async (user: User): Promise<IDBValidKey> =>
     (await getDB()).put("app", user, "user");
   // Put/Patch DB Data ----------------------------------------------------------------------------
 

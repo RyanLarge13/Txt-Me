@@ -1,13 +1,15 @@
 import { IDBPDatabase } from "idb";
 
-type AppSettings = {
+import { User } from "./configCtxtTypes";
+
+export type AppSettings = {
   initialized: boolean;
   locked: boolean;
   passwordType: string;
   showOnline: boolean;
 };
 
-type DBUser = {
+export type DBUser = {
   userId: number;
   username: string;
   email: string;
@@ -15,7 +17,7 @@ type DBUser = {
   authToken: string;
 };
 
-type Theme = {
+export type Theme = {
   darkMode: boolean;
   accent: string;
   background: string;
@@ -25,7 +27,7 @@ type Theme = {
   };
 };
 
-type MessageSettings = {
+export type MessageSettings = {
   showImg: boolean;
   showLatestMessage: boolean;
   showTimeOfLatestMessage: boolean;
@@ -36,7 +38,7 @@ type MessageSettings = {
   showYouHaveRead: boolean;
 };
 
-type ContactSettings = {
+export type ContactSettings = {
   showImage: boolean;
   showLatestMessages: boolean;
   showHowMayUnreadMessages: boolean;
@@ -44,11 +46,11 @@ type ContactSettings = {
   order: string;
 };
 
-type Contact = {
+export type Contact = {
   contacts: [];
 };
 
-type Message = {
+export type Message = {
   messages: [];
 };
 
@@ -57,11 +59,11 @@ export interface DBCtxtProps {
   initDatabase: (db: IDBPDatabase) => Promise<AppSettings>;
   getAppUserData: () => Promise<DBUser>;
   getAppData: () => Promise<AppSettings>;
-  getThemeData: () => Promise<Theme>;
-  getMessagesData: () => Promise<Message>;
-  getContactsData: () => Promise<Contact>;
-  getMessageSettingsData: () => Promise<MessageSettings>;
-  getContactSettingsData: () => Promise<ContactSettings>;
+  getThemeData: () => Promise<Theme[]>;
+  getMessagesData: () => Promise<Message[]>;
+  getContactsData: () => Promise<Contact[]>;
+  getMessageSettingsData: () => Promise<MessageSettings[]>;
+  getContactSettingsData: () => Promise<ContactSettings[]>;
   getPhoneNumber: () => Promise<string>;
-  updateUserInDB: () => Promise<void>;
+  updateUserInDB: (user: User) => Promise<IDBValidKey>;
 }
