@@ -23,8 +23,9 @@ import { createContext, useContext } from "react";
 
 import useLogger from "../hooks/useLogger.ts";
 import { User } from "../types/configCtxtTypes.ts";
+import { DBCtxtProps } from "../types/dbCtxtTypes.ts";
 
-const DatabaseContext = createContext({} as any);
+const DatabaseContext = createContext({} as DBCtxtProps);
 
 // IDB Documentation https://www.npmjs.com/package/idb
 
