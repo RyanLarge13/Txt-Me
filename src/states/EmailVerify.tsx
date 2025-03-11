@@ -17,7 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { motion } from "framer-motion";
-import React, { FormEvent, useState } from "react";
+import React, { FormEvent, useCallback, useRef, useState } from "react";
 import { MdMarkEmailRead } from "react-icons/md";
 import { useNavigate, useParams } from "react-router-dom";
 import { ClipLoader } from "react-spinners";
@@ -31,19 +31,47 @@ import { verifyEmail, verifyEmailLogin } from "../utils/api";
 import { defaultUser } from "../utils/constants.js";
 import { valEmail, valInt } from "../utils/validator.ts";
 
+const ValueInput = React.memo(
+  ({
+    retrieveValue,
+    placeholder,
+    type,
+  }: {
+    retrieveValue: (value: string) => void;
+    placeholder: string;
+    type: string;
+  }): JSX.Element => {
+    const [value, setValue] = useState("");
+
+    return (
+      <input
+        autoFocus={true}
+        onChange={(e) => {
+          retrieveValue(e.target.value);
+          setValue(e.target.value);
+        }}
+        type={type}
+        value={value}
+        className="focus:outline-none py-2 my-1 bg-[transparent] w-full"
+        placeholder={placeholder}
+      />
+    );
+  }
+);
+
 const EmailVerify = (): JSX.Element => {
-  const { getUserData, setUser } = useConfig();
+  const { setUser } = useConfig();
   const { addErrorNotif, addSuccessNotif, handleAPIErrorNotif } =
     useNotifActions();
   const { updateUserInDB } = useDatabase();
 
-  const [emailPin, setEmailPin] = useState("");
+  // const [emailPin, setEmailPin] = useState("");
   const [loading, setLoading] = useState(false);
   const [token] = useUserData("authToken");
 
+  const emailPin = useRef("");
   const navigate = useNavigate();
   const log = useLogger();
-  //	const token = getUserData("authToken");
   const { method } = useParams();
 
   const isEmailValid = (): string => {
@@ -73,7 +101,7 @@ const EmailVerify = (): JSX.Element => {
   };
 
   const verifyPin = (): boolean => {
-    const pinNumber = Number(emailPin);
+    const pinNumber = Number(emailPin.current);
     if (!pinNumber || isNaN(pinNumber)) {
       addErrorNotif(
         "6 Digit Pin",
@@ -110,16 +138,16 @@ const EmailVerify = (): JSX.Element => {
     e.preventDefault();
     setLoading(true);
 
-    // if (!token) {
-    //       addErrorNotif(
-    //         "Login",
-    //         "Please try to login again or sign up if you have not already before trying to verify your email",
-    //         true,
-    //         []
-    //       );
-    //       log.devLogDebug("No token present when calling handleEmailVerify");
-    //       navigate("/login/email");
-    //     }
+    if (!token) {
+      addErrorNotif(
+        "Login",
+        "Please try to login again or sign up if you have not already before trying to verify your email",
+        true,
+        []
+      );
+      log.devLogDebug("No token present when calling handleEmailVerify");
+      navigate("/login/email");
+    }
 
     if (!verifyPin()) {
       setLoading(false);
@@ -127,7 +155,7 @@ const EmailVerify = (): JSX.Element => {
     }
 
     try {
-      const response = await verifyEmail(token, emailPin);
+      const response = await verifyEmail(token, emailPin.current);
       log.devLog(
         "Response from verifyEmail API call to server under handleEmailVerify",
         response
@@ -172,7 +200,7 @@ const EmailVerify = (): JSX.Element => {
     }
 
     try {
-      const response = await verifyEmailLogin(email, emailPin);
+      const response = await verifyEmailLogin(email, emailPin.current);
 
       try {
         localStorage.removeItem("email");
@@ -237,12 +265,10 @@ const EmailVerify = (): JSX.Element => {
           }
         }}
       >
-        <input
-          autoFocus={true}
-          className="focus:outline-none py-2 my-1 bg-[transparent] w-full"
+        <ValueInput
+          retrieveValue={useCallback((value) => (emailPin.current = value), [])}
           placeholder="pin"
-          value={emailPin}
-          onChange={(e) => setEmailPin(e.target.value)}
+          type="text"
         />
         <motion.button
           disabled={loading}
