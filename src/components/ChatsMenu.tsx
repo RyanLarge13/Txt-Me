@@ -51,10 +51,10 @@ const ChatsMenu = () => {
             <div
               key={index}
               onClick={() => {
-                setMessageSession({
-                  contact: messageSession.contact,
-                  messages: messageSession.messages,
-                });
+                // setMessageSession({
+                //   contact: messageSession.contact,
+                //   messages: messageSession.messages,
+                // });
                 navigate("/profile");
               }}
               className="flex justify-between items-center relative"

@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useRef, useState } from "react";
 import { IoSend } from "react-icons/io5";
 
 import UserCtxt from "../context/userCtxt";
@@ -31,67 +31,6 @@ const MessageSession = () => {
   const [phoneNumber] = useUserData("phoneNumber");
 
   const messagesRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    const newMessage = message;
-    if (newMessage) {
-      console.log("New message from me or sender");
-      // setMessageSession((prev) => {
-      //   if (!prev) {
-      //     return null;
-      //   }
-      //   return {
-      //     ...prev,
-      //     messages: [
-      //       ...prev.messages,
-      //       {
-      //         fromid: newMessage.fromid,
-      //         message: newMessage.message,
-      //         time: newMessage.time,
-      //       },
-      //     ],
-      //   };
-      // });
-      setTimeout(() => {
-        if (messagesRef && messagesRef.current) {
-          messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
-        }
-      }, 0);
-    }
-  }, [message, setMessageSession]);
-
-  const sendMessage = () => {
-    // setMessageSession((prev) => {
-    //   if (!prev) {
-    //     return null;
-    //   }
-    //   return {
-    //     ...prev,
-    //     messages: [
-    //       ...prev.messages,
-    //       {
-    //         fromid: phoneNumber,
-    //         message: value,
-    //         time: new Date(),
-    //       },
-    //     ],
-    //   };
-    // });
-    setTimeout(() => {
-      if (messagesRef && messagesRef.current) {
-        messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
-      }
-    }, 0);
-    if (socket && messageSession) {
-      socket.emit("text-message", {
-        sender: phoneNumber,
-        recipient: messageSession.contact.number,
-        message: value,
-        time: new Date(),
-      });
-      setValue("");
-    }
-  };
 
   return (
     <div
@@ -145,7 +84,7 @@ const MessageSession = () => {
             const key = e.key;
             if (key === "Enter") {
               e.preventDefault();
-              sendMessage();
+              // sendMessage();
             }
           }}
           onChange={(e) => setValue(e.target.value)}
@@ -154,7 +93,7 @@ const MessageSession = () => {
         ></textarea>
         <button
           type="submit"
-          onClick={sendMessage}
+          // onClick={sendMessage}
           className="text-primary flex justify-center items-center p-3"
         >
           <IoSend />

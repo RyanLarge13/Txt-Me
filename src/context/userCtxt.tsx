@@ -39,7 +39,7 @@ export const UserProvider = ({
 
   const token = getUserData("authToken");
 
-  const [contacts, setContacts] = useState<Contacts[] | []>([]);
+  const [contacts, setContacts] = useState<Contacts[]>([]);
   const [allMessages, setAllMessages] = useState(new Map());
   const [messageSession, setMessageSession] = useState<MessageSession | null>(
     null
@@ -76,6 +76,8 @@ export const UserProvider = ({
     try {
       const userDataResponse: AxiosResponse = await API_FetchUserData(token);
       log.devLog("Fetched user data from server", userDataResponse);
+
+      // Update the Local Database
     } catch (err) {
       log.logAllError("Error when fetching user data", err);
     }

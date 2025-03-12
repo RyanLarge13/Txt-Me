@@ -50,10 +50,6 @@ export type MessageSession = {
 };
 
 export interface UserCtxtProps {
-  // setOpenChatsMenu: Dispatch<SetStateAction<boolean>>;
-  // setNewChat: Dispatch<SetStateAction<boolean>>;
-  // newChat: boolean;
-  // openChatsMenu: boolean;
   setContacts: Dispatch<SetStateAction<Contacts[] | []>>;
   setMessageSession: Dispatch<SetStateAction<MessageSession | null>>;
   setAllMessages: Dispatch<SetStateAction<Map<number, Message[]>>>;
