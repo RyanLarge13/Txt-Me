@@ -17,7 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { motion } from "framer-motion";
-import React, { FormEvent, useState } from "react";
+import React, { FormEvent, useCallback, useRef, useState } from "react";
 import { MdOutlinePermPhoneMsg } from "react-icons/md";
 import { useNavigate, useParams } from "react-router-dom";
 import { ClipLoader } from "react-spinners";
@@ -26,9 +26,37 @@ import { useConfig } from "../context/configContext.tsx";
 import { useDatabase } from "../context/dbContext.tsx";
 import useLogger from "../hooks/useLogger.ts";
 import useNotifActions from "../hooks/useNotifActions.ts";
-import { verifyPhone, verifyPhoneLogin } from "../utils/api";
+import { API_VerifyPhone, API_VerifyPhoneLogin } from "../utils/api";
 import { defaultUser } from "../utils/constants.js";
 import { valInt, valPhoneNumber } from "../utils/validator.ts";
+
+const ValueInput = React.memo(
+  ({
+    retrieveValue,
+    placeholder,
+    type,
+  }: {
+    retrieveValue: (value: string) => void;
+    placeholder: string;
+    type: string;
+  }): JSX.Element => {
+    const [value, setValue] = useState("");
+
+    return (
+      <input
+        autoFocus={true}
+        onChange={(e) => {
+          retrieveValue(e.target.value);
+          setValue(e.target.value);
+        }}
+        type={type}
+        value={value}
+        className="focus:outline-none py-2 my-1 bg-[transparent] w-full"
+        placeholder={placeholder}
+      />
+    );
+  }
+);
 
 const PhoneVerify = (): JSX.Element => {
   const { updateUserInDB } = useDatabase();
@@ -36,9 +64,9 @@ const PhoneVerify = (): JSX.Element => {
   const { addErrorNotif, handleAPIErrorNotif, addSuccessNotif } =
     useNotifActions();
 
-  const [pin, setPin] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const pin = useRef("");
   const navigate = useNavigate();
   const log = useLogger();
   const token = getUserData("authToken");
@@ -76,7 +104,7 @@ const PhoneVerify = (): JSX.Element => {
   };
 
   const verifyPin = (): boolean => {
-    const pinNumber = Number(pin);
+    const pinNumber = Number(pin.current);
     if (!pinNumber || isNaN(pinNumber)) {
       addErrorNotif(
         "6 Digit Pin",
@@ -121,7 +149,7 @@ const PhoneVerify = (): JSX.Element => {
     }
 
     try {
-      const response = await verifyPhoneLogin(phone, pin);
+      const response = await API_VerifyPhoneLogin(phone, pin.current);
       log.devLog("Response from phone login", response);
 
       const serverToken = response.data?.token || "";
@@ -181,7 +209,7 @@ const PhoneVerify = (): JSX.Element => {
     }
 
     try {
-      const response = await verifyPhone(token, pin);
+      const response = await API_VerifyPhone(token, pin.current);
       log.devLog("Response from verify phone", response);
       addSuccessNotif(
         "Verify Phone",
@@ -215,12 +243,10 @@ const PhoneVerify = (): JSX.Element => {
           }
         }}
       >
-        <input
-          autoFocus={true}
-          value={pin}
-          onChange={(e) => setPin(e.target.value)}
-          className="focus:outline-none py-2 my-1 bg-[transparent] w-full"
+        <ValueInput
+          retrieveValue={useCallback((value) => (pin.current = value), [])}
           placeholder="6 digit pin"
+          type="text"
         />
         <motion.button
           disabled={loading}

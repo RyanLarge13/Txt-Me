@@ -18,10 +18,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import Axios, { AxiosResponse } from "axios";
 
+import { Contacts } from "../types/userTypes";
+
 const devUrl = import.meta.env.VITE_API_URL;
 
 // User and verification fetches --------------------------------
-export const signUp = (newUser: {
+export const API_SignUp = (newUser: {
   username: string;
   email: string;
   phone: string;
@@ -32,7 +34,7 @@ export const signUp = (newUser: {
 };
 
 // Pass the pass code received by phone back to the server to verify user information
-export const verifyPhone = (
+export const API_VerifyPhone = (
   token: string,
   pin: string
 ): Promise<AxiosResponse> => {
@@ -49,7 +51,7 @@ export const verifyPhone = (
 };
 
 // Pass the pass code received by email back to server to verify user information
-export const verifyEmail = (
+export const API_VerifyEmail = (
   token: string,
   pin: string
 ): Promise<AxiosResponse> => {
@@ -62,7 +64,7 @@ export const verifyEmail = (
 };
 
 // Pass the pass code received by phone back to the server to login
-export const verifyPhoneLogin = (
+export const API_VerifyPhoneLogin = (
   email: string,
   pin: string
 ): Promise<AxiosResponse> => {
@@ -74,7 +76,7 @@ export const verifyPhoneLogin = (
 };
 
 // Pass the pass code received by email back to server to login
-export const verifyEmailLogin = (
+export const API_VerifyEmailLogin = (
   email: string,
   pin: string
 ): Promise<AxiosResponse> => {
@@ -86,7 +88,7 @@ export const verifyEmailLogin = (
 };
 
 // Grab latest user information, Includes all data related to user
-export const fetchUserData = (token: string): Promise<AxiosResponse> => {
+export const API_FetchUserData = (token: string): Promise<AxiosResponse> => {
   const res = Axios.get(`${devUrl}/login/user`, {
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -94,22 +96,36 @@ export const fetchUserData = (token: string): Promise<AxiosResponse> => {
 };
 
 // Request a new pin via email to login
-export const pinEmail = (email: string): Promise<AxiosResponse> => {
+export const API_PinEmail = (email: string): Promise<AxiosResponse> => {
   const res = Axios.post(`${devUrl}/verify/email/newpin`, { email: email });
   return res;
 };
 
 // Request a new pin via phone to login
-export const pinPhone = (phone: string): Promise<AxiosResponse> => {
+export const API_PinPhone = (phone: string): Promise<AxiosResponse> => {
   const res = Axios.post(`${devUrl}/verify/phone/newpin`, { phone });
   return res;
 };
 
 // Retrieve the users contacts information
-export const getContacts = (token: string): Promise<AxiosResponse> => {
+export const API_GetContacts = (token: string): Promise<AxiosResponse> => {
   const res = Axios.get(`${devUrl}/user/contacts`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   return res;
 };
 // User and verification fetches --------------------------------
+
+// Contact related requests --------------------------------------
+export const API_AddContact = (
+  token: string,
+  contact: Contacts
+): Promise<AxiosResponse> => {
+  const res = Axios.post(
+    `${devUrl}/contacts/add`,
+    { contact: contact },
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  return res;
+};
+// Contact related requests --------------------------------------

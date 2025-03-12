@@ -32,7 +32,7 @@ import { ClipLoader } from "react-spinners";
 
 import useLogger from "../hooks/useLogger.ts";
 import useNotifActions from "../hooks/useNotifActions.ts";
-import { pinEmail, pinPhone } from "../utils/api.ts";
+import { API_PinEmail, API_PinPhone } from "../utils/api.ts";
 import { valEmail, valPhoneNumber } from "../utils/validator.ts";
 
 const ValueInput = React.memo(
@@ -105,7 +105,7 @@ const LoginPhone = (): JSX.Element => {
       }
 
       try {
-        const response = await pinPhone(phone.current);
+        const response = await API_PinPhone(phone.current);
 
         addSuccessNotif(
           "Pin Sent",
@@ -215,7 +215,7 @@ const LoginEmail = (): JSX.Element => {
       }
 
       try {
-        const response = await pinEmail(email.current);
+        const response = await API_PinEmail(email.current);
         addSuccessNotif(
           "Email Sent",
           response.data?.message ||

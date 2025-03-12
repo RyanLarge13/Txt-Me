@@ -27,7 +27,7 @@ import { useDatabase } from "../context/dbContext.tsx";
 import useLogger from "../hooks/useLogger.ts";
 import useNotifActions from "../hooks/useNotifActions.ts";
 import useUserData from "../hooks/useUserData.ts";
-import { verifyEmail, verifyEmailLogin } from "../utils/api";
+import { API_VerifyEmail, API_VerifyEmailLogin } from "../utils/api";
 import { defaultUser } from "../utils/constants.js";
 import { valEmail, valInt } from "../utils/validator.ts";
 
@@ -155,7 +155,7 @@ const EmailVerify = (): JSX.Element => {
     }
 
     try {
-      const response = await verifyEmail(token, emailPin.current);
+      const response = await API_VerifyEmail(token, emailPin.current);
       log.devLog(
         "Response from verifyEmail API call to server under handleEmailVerify",
         response
@@ -200,7 +200,7 @@ const EmailVerify = (): JSX.Element => {
     }
 
     try {
-      const response = await verifyEmailLogin(email, emailPin.current);
+      const response = await API_VerifyEmailLogin(email, emailPin.current);
 
       try {
         localStorage.removeItem("email");

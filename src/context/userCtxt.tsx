@@ -21,7 +21,7 @@ import React, { createContext, ReactNode, useEffect, useState } from "react";
 
 import useLogger from "../hooks/useLogger.ts";
 import { Contacts, MessageSession, UserCtxtProps } from "../types/userTypes.ts";
-import { fetchUserData } from "../utils/api.ts";
+import { API_FetchUserData } from "../utils/api.ts";
 import { useConfig } from "./configContext.tsx";
 import { useDatabase } from "./dbContext.tsx";
 
@@ -74,7 +74,7 @@ export const UserProvider = ({
 
   const fetchNetworkMessagesAndContacts = async () => {
     try {
-      const userDataResponse: AxiosResponse = await fetchUserData(token);
+      const userDataResponse: AxiosResponse = await API_FetchUserData(token);
       log.devLog("Fetched user data from server", userDataResponse);
     } catch (err) {
       log.logAllError("Error when fetching user data", err);

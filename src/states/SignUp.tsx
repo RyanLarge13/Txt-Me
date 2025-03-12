@@ -25,7 +25,7 @@ import { ClipLoader } from "react-spinners";
 import { useConfig } from "../context/configContext.tsx";
 import useLogger from "../hooks/useLogger.ts";
 import useNotifActions from "../hooks/useNotifActions.ts";
-import { signUp } from "../utils/api.ts";
+import { API_SignUp } from "../utils/api.ts";
 import {
   valEmail,
   valPassword,
@@ -85,7 +85,7 @@ const SignUp = React.memo((): JSX.Element => {
 
     try {
       const newUser = { username, email, phone, password };
-      const response = await signUp(newUser);
+      const response = await API_SignUp(newUser);
 
       const newToken = response.data?.token || "";
 
