@@ -41,6 +41,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     // Remove socket and disconnect
     return () => {
       if (socketRef.current) {
+        log.devLog("Socket reference disconnecting");
         socketRef.current.disconnect();
       }
     };
@@ -68,8 +69,9 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const setUpSocket = (number: string): void => {
     const socketURL = import.meta.env.VITE_API_SOCKET_URL || "";
     if (!socketURL) {
-      console.error(
-        `Importing env variable SOCKET_URL failed. socket url imported as: ${socketURL}`
+      log.logAllError(
+        "No socket url specified! Check server or development env variable immediately",
+        socketURL
       );
       return;
     }
@@ -107,15 +109,17 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Socket Methods ---------------------------------------------------
   const handleConnect = (): void => {
-    console.log("Connected to the server");
+    log.devLog("Connected to server via socket");
   };
 
   const handleDisconnect = (): void => {
-    console.log("Disconnected from the server");
+    log.devLog("Socket disconnected from the server");
   };
 
   const handleError = (error: Error): void => {
-    console.log("Connection error:", error);
+    log.logAllError("Socket connection error", error);
+
+    // Call timeout to reconnect 10s
     setTimeout((): void => {
       if (socketRef && socketRef.current) {
         socketRef.current.connect();
@@ -127,10 +131,11 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
   const handleTextMessage = (socketMessage: SocketMessage): void => {
     if (socketMessage) {
-      console.log("message from socket, updating messages", socketMessage);
+      log.devLog("Message from socket", socketMessage);
     } else {
-      console.log(
-        `Socket message came through as unknown data type. Message: ${socketMessage}`
+      log.devLogDebug(
+        "Socket message came through with unknown data type",
+        socketMessage
       );
     }
   };

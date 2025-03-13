@@ -226,7 +226,7 @@ const EmailVerify = (): JSX.Element => {
         await updateUserInDB({ ...serverUser, authToken: serverToken });
       } catch (err) {
         log.logAllError(
-          "Error storing new token in Local DB after login phone was called",
+          "Error storing new token in Local DB after login email was called",
           err
         );
       }

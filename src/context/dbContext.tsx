@@ -164,7 +164,7 @@ export const DatabaseProvider = ({
   const initDatabase = async (db: IDBPDatabase) => {
     const userInitialized = await db.get("app", "settings");
 
-    log.devLog(`user from indexedDB`, userInitialized);
+    log.devLog(`User from indexedDB`, userInitialized);
 
     if (userInitialized && userInitialized?.initialized) {
       return userInitialized;
@@ -189,9 +189,7 @@ export const DatabaseProvider = ({
   const getContactSettingsData = async (): Promise<ContactSettings[]> =>
     (await getDB()).getAll("contactSettings");
   const getPhoneNumber = async (): Promise<string> =>
-    (await getDB())
-      .get("app", "settings")
-      .then((settings) => settings.phoneNumber);
+    (await getDB()).get("app", "user").then((settings) => settings.phoneNumber);
   // Get DB Data --------------------------------------------------------------------------------
 
   // Put/Patch DB Data ----------------------------------------------------------------------------
