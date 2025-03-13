@@ -25,7 +25,7 @@ import useUserData from "../hooks/useUserData";
 
 const MessageSession = () => {
   const { messageSession, setMessageSession } = useContext(UserCtxt);
-  const { socket, message } = useSocket();
+  const { socket } = useSocket();
 
   const [value, setValue] = useState("");
   const [phoneNumber] = useUserData("phoneNumber");

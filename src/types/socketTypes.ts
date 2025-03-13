@@ -25,5 +25,4 @@ export type SocketMessage = {
 } | null;
 export interface SocketProps {
   socket: Socket | null;
-  message: SocketMessage;
 }

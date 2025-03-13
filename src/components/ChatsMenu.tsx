@@ -21,11 +21,27 @@ import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 
 import UserCtxt from "../context/userCtxt";
+import { Contacts, Message } from "../types/userTypes";
 
 const ChatsMenu = () => {
   const { setMessageSession, allMessages } = useContext(UserCtxt);
 
   const navigate = useNavigate();
+
+  const createMessageSession = (session: {
+    contact: Contacts;
+    messages: Message[];
+  }): void => {
+    const contact = session.contact;
+    const messages = session.messages;
+
+    setMessageSession({
+      number: contact.number,
+      contact: contact,
+      messages: messages,
+    });
+    navigate("/profile");
+  };
 
   return (
     <motion.nav
@@ -50,13 +66,7 @@ const ChatsMenu = () => {
         ? Array.from(allMessages).map(([_, messageSession], index) => (
             <div
               key={index}
-              onClick={() => {
-                // setMessageSession({
-                //   contact: messageSession.contact,
-                //   messages: messageSession.messages,
-                // });
-                navigate("/profile");
-              }}
+              onClick={() => createMessageSession(messageSession)}
               className="flex justify-between items-center relative"
             >
               <div className="rounded-full w-30 h-30 flex justify-center items-center">

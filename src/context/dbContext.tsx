@@ -24,7 +24,12 @@ import { createContext, useContext } from "react";
 import useLogger from "../hooks/useLogger.ts";
 import { User } from "../types/configCtxtTypes.ts";
 import {
-    Contact, ContactSettings, DBCtxtProps, Message, MessageSettings, Theme
+  Contact,
+  ContactSettings,
+  DBCtxtProps,
+  Message,
+  MessageSettings,
+  Theme,
 } from "../types/dbCtxtTypes.ts";
 
 const DatabaseContext = createContext({} as DBCtxtProps);

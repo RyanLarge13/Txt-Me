@@ -35,7 +35,11 @@ const Contacts = () => {
   const startMessage = (contact: ContactsType) => {
     const sessionMessages = messagesMap.get(contact.contactid) || [];
 
-    // setMessageSession({ contact: contact, messages: sessionMessages });
+    setMessageSession({
+      number: contact.number,
+      contact: contact,
+      messages: sessionMessages,
+    });
 
     const newSessionMap: AllMessages = new Map(allMessages);
 

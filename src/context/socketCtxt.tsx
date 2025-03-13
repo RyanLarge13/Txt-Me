@@ -18,7 +18,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 /// <reference types="vite/client" />
 
-import React, { createContext, useEffect, useRef, useState } from "react";
+import React, { createContext, useEffect, useRef } from "react";
 import io, { Socket } from "socket.io-client";
 
 import useLogger from "../hooks/useLogger";
@@ -30,10 +30,6 @@ export const SocketContext = createContext({} as SocketProps);
 export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const { getPhoneNumber } = useDatabase();
   const log = useLogger();
-
-  // State ----------------------------------------------------------
-  const [message, setMessage] = useState<SocketMessage | null>(null);
-  // State ----------------------------------------------------------
 
   // UseRef for socket to avoid unwanted rerenders
   const socketRef = useRef<Socket | null>(null);
@@ -131,7 +127,6 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
   const handleTextMessage = (socketMessage: SocketMessage): void => {
     if (socketMessage) {
-      setMessage(socketMessage);
       console.log("message from socket, updating messages", socketMessage);
     } else {
       console.log(
@@ -143,9 +138,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   // Local Scop Context Methods ---------------------------------------
 
   return (
-    <SocketContext.Provider
-      value={{ socket: socketRef.current, message: message }}
-    >
+    <SocketContext.Provider value={{ socket: socketRef.current }}>
       {children}
     </SocketContext.Provider>
   );
