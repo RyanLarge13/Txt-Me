@@ -24,13 +24,12 @@ import { createContext, useContext } from "react";
 import useLogger from "../hooks/useLogger.ts";
 import { User } from "../types/configCtxtTypes.ts";
 import {
-  Contact,
   ContactSettings,
   DBCtxtProps,
-  Message,
   MessageSettings,
   Theme,
 } from "../types/dbCtxtTypes.ts";
+import { Contacts, Message } from "../types/userTypes.ts";
 
 const DatabaseContext = createContext({} as DBCtxtProps);
 
@@ -78,8 +77,8 @@ export const DatabaseProvider = ({
   };
 
   const buildMessagesAndContacts = async (db: IDBPDatabase) => {
-    const messages = { messages: [] };
-    const contacts = { contacts: [] };
+    const messages: Message[] = [];
+    const contacts: Contacts[] = [];
 
     await db.put("messages", messages, "messages");
     await db.put("contacts", contacts, "contacts");
@@ -182,7 +181,7 @@ export const DatabaseProvider = ({
     (await getDB()).getAll("theme");
   const getMessagesData = async (): Promise<Message[]> =>
     (await getDB()).getAll("messages");
-  const getContactsData = async (): Promise<Contact[]> =>
+  const getContactsData = async (): Promise<Contacts[]> =>
     (await getDB()).getAll("contacts");
   const getMessageSettingsData = async (): Promise<MessageSettings[]> =>
     (await getDB()).getAll("messageSettings");

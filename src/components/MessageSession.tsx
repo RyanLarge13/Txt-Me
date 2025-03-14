@@ -16,52 +16,71 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import React, { useContext, useRef, useState } from "react";
+import React, { FormEvent, useContext, useRef, useState } from "react";
 import { IoSend } from "react-icons/io5";
+import { TiMessages } from "react-icons/ti";
 
 import UserCtxt from "../context/userCtxt";
 import useSocket from "../hooks/useSocket";
 import useUserData from "../hooks/useUserData";
+import { MessageSession } from "../types/userTypes";
+import { defaultMessage } from "../utils/constants";
 
 const MessageSession = () => {
-  const { messageSession, setMessageSession } = useContext(UserCtxt);
-  const { socket } = useSocket();
+  const { messageSession, allMessages } = useContext(UserCtxt);
 
   const [value, setValue] = useState("");
   const [phoneNumber] = useUserData("phoneNumber");
+  const [sessionMessages, setSessionMessages] = useState(
+    messageSession?.messages || []
+  );
 
   const messagesRef = useRef<HTMLDivElement | null>(null);
+  const { socket } = useSocket();
 
-  return (
+  const M_SendMessage = (
+    e: FormEvent<HTMLFormElement>,
+    messageSession: MessageSession
+  ) => {
+    e.preventDefault();
+
+    const newMessage = {
+      ...defaultMessage,
+      message: value,
+      fromnumber: phoneNumber,
+      tonumber: messageSession.number,
+      sentat: new Date(),
+    };
+    socket ? socket.emit("message", newMessage) : null;
+
+    // Update local component state
+    setSessionMessages((prev) => [...prev, newMessage]);
+
+    // Update map without rerender trigger. Possibly change this in the future
+    allMessages.get(messageSession.number)?.messages.push(newMessage);
+  };
+
+  return messageSession ? (
     <div
       ref={messagesRef}
       className="h-full w-full overflow-y-auto py-20 scroll-smooth"
     >
       <div className="p-5 fixed top-0 z-10 right-0 left-0 bg-black">
-        <p>{messageSession?.contact.name}</p>
-        <p>{messageSession?.contact.number}</p>
+        <p>{messageSession.contact?.name || messageSession?.number}</p>
+        <p>{messageSession.contact?.number || ""}</p>
       </div>
-      {messageSession && messageSession.messages.length > 0 ? (
+      {sessionMessages.length > 0 ? (
         <div className="flex flex-col justify-start px-10 py-20 gap-y-5 min-h-full">
-          {messageSession.messages.map((message, index) => (
+          {sessionMessages.map((message, index) => (
             <div
               key={index}
               className={`${
-                message.fromid === phoneNumber
+                message.fromnumber === phoneNumber
                   ? "bg-tri self-end"
                   : "bg-secondary self-start"
               } rounded-lg shadow-lg text-black p-3 outline-red-400 min-w-[50%]`}
             >
               <p>{message.message}</p>
-              <p>
-                {message.time
-                  ? message.time.toLocaleTimeString("en-US", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      dayPeriod: "short",
-                    })
-                  : "Just Now"}
-              </p>
             </div>
           ))}
         </div>
@@ -69,9 +88,7 @@ const MessageSession = () => {
         <p className="text-gray-400 text-center mt-40">No Messages</p>
       )}
       <form
-        onSubmit={(e) => {
-          e.preventDefault();
-        }}
+        onSubmit={(e) => M_SendMessage(e, messageSession)}
         className="bg-black fixed bottom-[60px] left-0 right-0 py-5 px-2 flex justify-between items-center gap-x-2"
       >
         <textarea
@@ -80,26 +97,22 @@ const MessageSession = () => {
           rows={1}
           cols={50}
           value={value}
-          onKeyDown={(e) => {
-            const key = e.key;
-            if (key === "Enter") {
-              e.preventDefault();
-              // sendMessage();
-            }
-          }}
           onChange={(e) => setValue(e.target.value)}
           placeholder="text message"
           className="px-3 py-2 h-auto w-full bg-[#222] rounded-full whitespace-pre-wrap break-words outline-none focus:outline-none"
         ></textarea>
         <button
           type="submit"
-          // onClick={sendMessage}
           className="text-primary flex justify-center items-center p-3"
         >
           <IoSend />
         </button>
       </form>
     </div>
+  ) : (
+    <p className="text-primary text-9xl">
+      <TiMessages />
+    </p>
   );
 };
 

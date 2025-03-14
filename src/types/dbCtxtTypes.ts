@@ -1,6 +1,7 @@
 import { IDBPDatabase } from "idb";
 
 import { User } from "./configCtxtTypes";
+import { Contacts, Message } from "./userTypes";
 
 export type AppSettings = {
   initialized: boolean;
@@ -46,14 +47,6 @@ export type ContactSettings = {
   order: string;
 };
 
-export type Contact = {
-  contacts: [];
-};
-
-export type Message = {
-  messages: [];
-};
-
 export interface DBCtxtProps {
   getDB: () => Promise<IDBPDatabase>;
   initDatabase: (db: IDBPDatabase) => Promise<AppSettings>;
@@ -61,7 +54,7 @@ export interface DBCtxtProps {
   getAppData: () => Promise<AppSettings>;
   getThemeData: () => Promise<Theme[]>;
   getMessagesData: () => Promise<Message[]>;
-  getContactsData: () => Promise<Contact[]>;
+  getContactsData: () => Promise<Contacts[]>;
   getMessageSettingsData: () => Promise<MessageSettings[]>;
   getContactSettingsData: () => Promise<ContactSettings[]>;
   getPhoneNumber: () => Promise<string>;

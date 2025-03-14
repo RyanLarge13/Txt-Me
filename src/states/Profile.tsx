@@ -16,29 +16,19 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import React, { useContext } from "react";
-import { TiMessages } from "react-icons/ti";
+import React from "react";
 import { Outlet } from "react-router-dom";
 
 import BottomNav from "../components/BottomNav.tsx";
 import MessageSession from "../components/MessageSession.tsx";
 import ProfileNav from "../components/ProfileNav.tsx";
-import UserCtxt from "../context/userCtxt.tsx";
 
 const Profile = (): JSX.Element => {
-  const { messageSession } = useContext(UserCtxt);
-
   return (
     <main className="mt-20 text-[#fff]">
       <ProfileNav />
       <div className="flex justify-center items-center absolute inset-0 outline outline-red-300">
-        {messageSession !== null ? (
-          <MessageSession />
-        ) : (
-          <p className="text-primary text-9xl">
-            <TiMessages />
-          </p>
-        )}
+        <MessageSession />
       </div>
       <BottomNav />
       <Outlet />

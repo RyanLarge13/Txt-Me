@@ -23,3 +23,16 @@ export const defaultUser = {
   email: "",
   phoneNumber: "",
 };
+
+export const defaultMessage = {
+  messageid: 0,
+  message: "",
+  sent: true,
+  sentat: null,
+  delivered: false,
+  deliveredat: null,
+  read: false,
+  readat: null,
+  fromnumber: "",
+  tonumber: "",
+};

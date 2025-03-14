@@ -22,32 +22,22 @@ import { BsThreeDotsVertical } from "react-icons/bs";
 import { useNavigate } from "react-router-dom";
 
 import UserCtxt from "../context/userCtxt";
-import { AllMessages, Contacts as ContactsType } from "../types/userTypes";
+import { Contacts as ContactsType } from "../types/userTypes";
 import { getInitials } from "../utils/helpers";
 
 const Contacts = () => {
-  const { contacts, setMessageSession, setAllMessages, allMessages } =
-    useContext(UserCtxt);
+  const { contacts, setMessageSession, allMessages } = useContext(UserCtxt);
 
   const navigate = useNavigate();
-  const messagesMap = new Map();
 
   const startMessage = (contact: ContactsType) => {
-    const sessionMessages = messagesMap.get(contact.contactid) || [];
+    const messages = allMessages.get(contact.number)?.messages;
 
     setMessageSession({
       number: contact.number,
       contact: contact,
-      messages: sessionMessages,
+      messages: messages || [],
     });
-
-    const newSessionMap: AllMessages = new Map(allMessages);
-
-    const newMessageSession = { contact: contact, messages: sessionMessages };
-
-    newSessionMap.set(contact.number, newMessageSession);
-
-    setAllMessages(newMessageSession.messages);
 
     navigate("/profile");
   };

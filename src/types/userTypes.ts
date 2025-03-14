@@ -19,40 +19,46 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 import { Dispatch, SetStateAction } from "react";
 
 export type AllMessages = Map<
-  number,
-  { contact: Contacts; messages: Message[] }
+  string,
+  { contact: Contacts | null; messages: Message[] }
 >;
 
 export type Contacts = {
-  address: string;
-  avatar: null | string;
   contactid: number;
-  createdat: string;
-  email: string;
   name: string;
-  nickname: string;
-  number: number;
+  email: string;
+  number: string;
+  createdat: string;
   space: string;
-  userid: string;
+  nickname: string;
+  address: string;
   website: string;
+  avatar: null | string;
 };
 
 export type Message = {
-  fromid: string | undefined;
+  messageid: number;
   message: string;
-  time: Date;
+  sent: boolean;
+  sentat: Date;
+  delivered: boolean;
+  deliveredat: Date | null;
+  read: boolean;
+  readat: Date | null;
+  fromnumber: string;
+  tonumber: string;
 };
 
 export type MessageSession = {
-  number: number;
+  number: string;
   messages: Message[];
-  contact: Contacts;
+  contact: Contacts | null;
 };
 
 export interface UserCtxtProps {
   setContacts: Dispatch<SetStateAction<Contacts[] | []>>;
   setMessageSession: Dispatch<SetStateAction<MessageSession | null>>;
-  setAllMessages: Dispatch<SetStateAction<Map<number, Message[]>>>;
+  setAllMessages: Dispatch<SetStateAction<AllMessages>>;
   contacts: Contacts[] | [];
   messageSession: MessageSession | null;
   allMessages: AllMessages;

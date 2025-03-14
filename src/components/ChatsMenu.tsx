@@ -21,23 +21,32 @@ import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 
 import UserCtxt from "../context/userCtxt";
+import useLogger from "../hooks/useLogger";
 import { Contacts, Message } from "../types/userTypes";
 
 const ChatsMenu = () => {
   const { setMessageSession, allMessages } = useContext(UserCtxt);
 
   const navigate = useNavigate();
+  const log = useLogger();
 
-  const createMessageSession = (session: {
-    contact: Contacts;
-    messages: Message[];
-  }): void => {
+  const createMessageSession = (
+    fromNumber: string,
+    session: {
+      contact: Contacts | null;
+      messages: Message[];
+    }
+  ): void => {
     const contact = session.contact;
     const messages = session.messages;
 
+    if (!contact) {
+      log.devLog("No contact for this message session");
+    }
+
     setMessageSession({
-      number: contact.number,
-      contact: contact,
+      number: contact?.number || fromNumber,
+      contact: contact !== null ? contact : null,
       messages: messages,
     });
     navigate("/profile");
@@ -63,29 +72,32 @@ const ChatsMenu = () => {
         </button>
       </div>
       {allMessages
-        ? Array.from(allMessages).map(([_, messageSession], index) => (
+        ? Array.from(allMessages).map(([fromNumber, messageSession], index) => (
             <div
               key={index}
-              onClick={() => createMessageSession(messageSession)}
+              onClick={() => createMessageSession(fromNumber, messageSession)}
               className="flex justify-between items-center relative"
             >
               <div className="rounded-full w-30 h-30 flex justify-center items-center">
                 <p className="text-xl">
-                  {messageSession.contact.name[0].toUpperCase()}
+                  {messageSession.contact
+                    ? messageSession.contact.name[0].toUpperCase()
+                    : fromNumber}
                 </p>
               </div>
-              <p>{messageSession.contact.nickname}</p>
-              <p className="absolute top-1 right-1">
+              <p>{messageSession?.contact?.nickname || ""}</p>
+              {/* Lets check date accordingly first before attempting render */}
+              {/* <p className="absolute top-1 right-1">
                 {new Date(
                   messageSession.messages[
                     messageSession.messages.length - 1
-                  ].time
+                  ].sentat
                 ).toLocaleTimeString("en-US", {
                   hour: "numeric",
                   minute: "numeric",
                   dayPeriod: "short",
                 })}
-              </p>
+              </p> */}
             </div>
           ))
         : null}

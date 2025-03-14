@@ -18,9 +18,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 /// <reference types="vite/client" />
 
-import React, { createContext, useEffect, useRef } from "react";
+import React, { createContext, useContext, useEffect, useRef } from "react";
 import io, { Socket } from "socket.io-client";
 
+import UserCtxt from "../context/userCtxt";
 import useLogger from "../hooks/useLogger";
 import { SocketMessage, SocketProps } from "../types/socketTypes";
 import { useDatabase } from "./dbContext";
@@ -29,6 +30,7 @@ export const SocketContext = createContext({} as SocketProps);
 
 export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const { getPhoneNumber } = useDatabase();
+  const { allMessages, setAllMessages } = useContext(UserCtxt);
   const log = useLogger();
 
   // UseRef for socket to avoid unwanted rerenders
@@ -132,6 +134,16 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const handleTextMessage = (socketMessage: SocketMessage): void => {
     if (socketMessage) {
       log.devLog("Message from socket", socketMessage);
+
+      allMessages
+        .get(socketMessage.fromid)
+        ?.messages.push
+        // add in socket message
+        ();
+
+      // Trigger rerender. But for who? The entire <Profile /> component? Sounds a bit much
+      const newMap = new Map(allMessages);
+      setAllMessages(newMap);
     } else {
       log.devLogDebug(
         "Socket message came through with unknown data type",

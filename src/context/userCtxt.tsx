@@ -20,7 +20,13 @@ import { AxiosResponse } from "axios";
 import React, { createContext, ReactNode, useEffect, useState } from "react";
 
 import useLogger from "../hooks/useLogger.ts";
-import { Contacts, MessageSession, UserCtxtProps } from "../types/userTypes.ts";
+import {
+  AllMessages,
+  Contacts,
+  Message,
+  MessageSession,
+  UserCtxtProps,
+} from "../types/userTypes.ts";
 import { API_FetchUserData } from "../utils/api.ts";
 import { useConfig } from "./configContext.tsx";
 import { useDatabase } from "./dbContext.tsx";
@@ -54,9 +60,8 @@ export const UserProvider = ({
         "Fetching user data and initializing app from cache (indexedDB), authToken present"
       );
 
-      fetchLocalMessagesAndContacts();
-      fetchNetworkMessagesAndContacts();
-      // getUserData(user.authToken);
+      M_FetchLocalMessagesAndContacts();
+      M_FetchNetworkMessagesAndContacts();
     } else {
       log.devLog("Skipping fetch, no auth token present. User must login");
     }
@@ -65,19 +70,54 @@ export const UserProvider = ({
 
   // Local Scope Context Functions ---------------------------------------------------
 
-  const fetchLocalMessagesAndContacts = async () => {
-    const messages = await getMessagesData();
-    const contacts = await getContactsData();
+  const M_BuildMessagesMap = (
+    messages: Message[],
+    contacts: Contacts[]
+  ): void => {
+    const newMap: AllMessages = new Map();
 
-    log.devLog("Messages and contacts data from IndexedDB", messages, contacts);
+    messages.forEach((m: Message) => {
+      if (!newMap.has(m.fromnumber)) {
+        const contact = contacts.find((c) => c.number === m.fromnumber);
+
+        if (!contact) {
+          log.devLog(
+            "No contact in the db from this number when building message map",
+            contact,
+            `Number: ${m.fromnumber}`
+          );
+        }
+
+        newMap.set(m.fromnumber, {
+          contact: contact || null,
+          messages: [m],
+        });
+      } else {
+        newMap.get(m.fromnumber)?.messages.push(m);
+      }
+    });
+
+    setAllMessages(newMap);
   };
 
-  const fetchNetworkMessagesAndContacts = async () => {
+  const M_FetchLocalMessagesAndContacts = async () => {
+    const messages: Message[] = (await getMessagesData()) || [];
+    const contacts: Contacts[] = (await getContactsData()) || [];
+
+    log.devLog("Messages and contacts data from IndexedDB", messages, contacts);
+
+    // Add messages and contact to state
+    setContacts(contacts);
+    M_BuildMessagesMap(messages, contacts);
+  };
+
+  const M_FetchNetworkMessagesAndContacts = async () => {
     try {
       const userDataResponse: AxiosResponse = await API_FetchUserData(token);
       log.devLog("Fetched user data from server", userDataResponse);
 
       // Update the Local Database
+      // Update app state
     } catch (err) {
       log.logAllError("Error when fetching user data", err);
     }
