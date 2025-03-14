@@ -27,13 +27,10 @@ import { MessageSessionType } from "../types/userTypes";
 import { defaultMessage } from "../utils/constants";
 
 const MessageSession = () => {
-  const { messageSession, allMessages } = useContext(UserCtxt);
+  const { messageSession, allMessages, setAllMessages } = useContext(UserCtxt);
 
   const [value, setValue] = useState("");
   const [phoneNumber] = useUserData("phoneNumber");
-  const [sessionMessages, setSessionMessages] = useState(
-    messageSession?.messages || []
-  );
 
   const messagesRef = useRef<HTMLDivElement | null>(null);
   const { socket } = useSocket();
@@ -53,11 +50,11 @@ const MessageSession = () => {
     };
     socket ? socket.emit("message", newMessage) : null;
 
-    // Update local component state
-    setSessionMessages((prev) => [...prev, newMessage]);
-
-    // Update map without rerender trigger. Possibly change this in the future
     allMessages.get(messageSession.number)?.messages.push(newMessage);
+
+    const newMap = new Map(allMessages);
+
+    setAllMessages(newMap);
   };
 
   return messageSession ? (
@@ -66,12 +63,12 @@ const MessageSession = () => {
       className="h-full w-full overflow-y-auto py-20 scroll-smooth"
     >
       <div className="p-5 fixed top-0 z-10 right-0 left-0 bg-black">
-        <p>{messageSession.contact?.name || messageSession?.number}</p>
+        <p>{messageSession.contact?.name || messageSession.number}</p>
         <p>{messageSession.contact?.number || ""}</p>
       </div>
-      {sessionMessages.length > 0 ? (
+      {messageSession.messages.length > 0 ? (
         <div className="flex flex-col justify-start px-10 py-20 gap-y-5 min-h-full">
-          {sessionMessages.map((message, index) => (
+          {messageSession.messages.map((message, index) => (
             <div
               key={index}
               className={`${
