@@ -56,7 +56,7 @@ const Contacts = () => {
         New Contact
       </button>
       {contacts.length > 0 ? (
-        contacts.map((contact) => (
+        contacts.map((contact: ContactsType) => (
           <div
             key={contact.contactid}
             onClick={() => startMessage(contact)}
@@ -64,7 +64,7 @@ const Contacts = () => {
           >
             {contact.avatar ? (
               <img
-                src={contact.avatar}
+                src={contact?.avatar}
                 alt="avatar"
                 width={30}
                 height={30}
@@ -72,7 +72,7 @@ const Contacts = () => {
               />
             ) : (
               <p className="flex justify-center items-center w-[40px] h-[40px] text-black rounded-full bg-slate-400">
-                {getInitials(contact.name)}
+                {getInitials(contact.name || "")}
               </p>
             )}
             <p>{contact.name}</p>

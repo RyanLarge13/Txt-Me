@@ -17,14 +17,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { AxiosResponse } from "axios";
-import React, { createContext, ReactNode, useEffect, useState } from "react";
+import { createContext, ReactNode, useEffect, useState } from "react";
 
 import useLogger from "../hooks/useLogger.ts";
 import {
   AllMessages,
   Contacts,
   Message,
-  MessageSession,
+  MessageSessionType,
   UserCtxtProps,
 } from "../types/userTypes.ts";
 import { API_FetchUserData } from "../utils/api.ts";
@@ -47,9 +47,8 @@ export const UserProvider = ({
 
   const [contacts, setContacts] = useState<Contacts[]>([]);
   const [allMessages, setAllMessages] = useState(new Map());
-  const [messageSession, setMessageSession] = useState<MessageSession | null>(
-    null
-  );
+  const [messageSession, setMessageSession] =
+    useState<MessageSessionType | null>(null);
   // State and state hooks --------------------------------------------------------------
 
   // useEffect hooks -------------------------------------------------------------------

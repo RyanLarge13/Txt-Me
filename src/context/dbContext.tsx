@@ -180,9 +180,9 @@ export const DatabaseProvider = ({
   const getThemeData = async (): Promise<Theme[]> =>
     (await getDB()).getAll("theme");
   const getMessagesData = async (): Promise<Message[]> =>
-    (await getDB()).getAll("messages");
+    (await getDB()).get("messages", "messages");
   const getContactsData = async (): Promise<Contacts[]> =>
-    (await getDB()).getAll("contacts");
+    (await getDB()).get("contacts", "contacts");
   const getMessageSettingsData = async (): Promise<MessageSettings[]> =>
     (await getDB()).getAll("messageSettings");
   const getContactSettingsData = async (): Promise<ContactSettings[]> =>
