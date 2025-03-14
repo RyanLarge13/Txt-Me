@@ -49,7 +49,7 @@ export type Message = {
   tonumber: string;
 };
 
-export type MessageSession = {
+export type MessageSessionType = {
   number: string;
   messages: Message[];
   contact: Contacts | null;
@@ -57,9 +57,9 @@ export type MessageSession = {
 
 export interface UserCtxtProps {
   setContacts: Dispatch<SetStateAction<Contacts[] | []>>;
-  setMessageSession: Dispatch<SetStateAction<MessageSession | null>>;
+  setMessageSession: Dispatch<SetStateAction<MessageSessionType | null>>;
   setAllMessages: Dispatch<SetStateAction<AllMessages>>;
   contacts: Contacts[] | [];
-  messageSession: MessageSession | null;
+  messageSession: MessageSessionType | null;
   allMessages: AllMessages;
 }

@@ -23,7 +23,7 @@ import { TiMessages } from "react-icons/ti";
 import UserCtxt from "../context/userCtxt";
 import useSocket from "../hooks/useSocket";
 import useUserData from "../hooks/useUserData";
-import { MessageSession } from "../types/userTypes";
+import { MessageSessionType } from "../types/userTypes";
 import { defaultMessage } from "../utils/constants";
 
 const MessageSession = () => {
@@ -40,7 +40,7 @@ const MessageSession = () => {
 
   const M_SendMessage = (
     e: FormEvent<HTMLFormElement>,
-    messageSession: MessageSession
+    messageSession: MessageSessionType
   ) => {
     e.preventDefault();
 
