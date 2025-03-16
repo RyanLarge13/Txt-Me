@@ -31,7 +31,7 @@ import { UserProvider } from "./context/userCtxt.tsx";
 
 const mode = import.meta.env.VITE_APP_MODE || "prod";
 
-if (mode === "dev") {
+if (mode === "null") {
   scan({
     enabled: true,
   });

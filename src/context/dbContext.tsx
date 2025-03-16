@@ -23,12 +23,7 @@ import { createContext, useContext } from "react";
 
 import useLogger from "../hooks/useLogger.ts";
 import { User } from "../types/configCtxtTypes.ts";
-import {
-  ContactSettings,
-  DBCtxtProps,
-  MessageSettings,
-  Theme,
-} from "../types/dbCtxtTypes.ts";
+import { ContactSettings, DBCtxtProps, MessageSettings, Theme } from "../types/dbCtxtTypes.ts";
 import { Contacts, Message } from "../types/userTypes.ts";
 
 const DatabaseContext = createContext({} as DBCtxtProps);
@@ -194,6 +189,14 @@ export const DatabaseProvider = ({
   // Put/Patch DB Data ----------------------------------------------------------------------------
   const updateUserInDB = async (user: User): Promise<IDBValidKey> =>
     (await getDB()).put("app", user, "user");
+
+  const IDB_AddContact = async (newContact: Contacts): Promise<void> => {
+    const db = await getDB();
+    const currentContacts = await db.get("contacts", "contacts");
+    const newContacts = Array.from(new Set([...currentContacts, newContact]));
+
+    db.put("contacts", newContacts);
+  };
   // Put/Patch DB Data ----------------------------------------------------------------------------
 
   return (
@@ -210,6 +213,7 @@ export const DatabaseProvider = ({
         getContactSettingsData,
         getPhoneNumber,
         updateUserInDB,
+        IDB_AddContact,
       }}
     >
       {children}

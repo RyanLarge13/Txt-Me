@@ -59,4 +59,5 @@ export interface DBCtxtProps {
   getContactSettingsData: () => Promise<ContactSettings[]>;
   getPhoneNumber: () => Promise<string>;
   updateUserInDB: (user: User) => Promise<IDBValidKey>;
+  IDB_AddContact: (newContact: Contacts) => Promise<void>;
 }

@@ -48,13 +48,16 @@ const MessageSession = () => {
       tonumber: messageSession.number,
       sentat: new Date(),
     };
-    socket ? socket.emit("message", newMessage) : null;
+    socket ? socket.emit("text-message", newMessage) : null;
 
+    // Check first to see if the allMessages map has the key?? For safety
     allMessages.get(messageSession.number)?.messages.push(newMessage);
 
     const newMap = new Map(allMessages);
 
     setAllMessages(newMap);
+
+    setValue("");
   };
 
   return messageSession ? (

@@ -23,7 +23,8 @@ import io, { Socket } from "socket.io-client";
 
 import UserCtxt from "../context/userCtxt";
 import useLogger from "../hooks/useLogger";
-import { SocketMessage, SocketProps } from "../types/socketTypes";
+import { SocketProps } from "../types/socketTypes";
+import { Message } from "../types/userTypes";
 import { useDatabase } from "./dbContext";
 
 export const SocketContext = createContext({} as SocketProps);
@@ -105,6 +106,9 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       handleError(error);
     });
     socketRef.on("text-message", (socketMessage) => {
+      console.log(
+        "Message from the server!!! Socket message from other client with socketMessage attached"
+      );
       handleTextMessage(socketMessage);
     });
   };
@@ -131,15 +135,19 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     }, 10000);
   };
 
-  const handleTextMessage = (socketMessage: SocketMessage): void => {
+  const handleTextMessage = (socketMessage: Message): void => {
     if (socketMessage) {
       log.devLog("Message from socket", socketMessage);
 
-      allMessages
-        .get(socketMessage.fromid)
-        ?.messages.push
-        // add in socket message
-        ();
+      if (!allMessages.has(socketMessage.fromnumber)) {
+        allMessages.set(socketMessage.fromnumber, {
+          contact: null,
+          // Contacts set to null for now until i fetch contacts from the server and correctly store them in the local DB
+          messages: [socketMessage],
+        });
+      } else {
+        allMessages.get(socketMessage.fromnumber)?.messages.push(socketMessage);
+      }
 
       // Trigger rerender. But for who? The entire <Profile /> component? Sounds a bit much
       const newMap = new Map(allMessages);

@@ -33,7 +33,7 @@ export const UserProvider = ({
   children: ReactNode;
 }): JSX.Element => {
   // State and state hooks --------------------------------------------------------------
-  const { getContactsData, getMessagesData } = useDatabase();
+  const { getContactsData, getMessagesData, IDB_AddContact } = useDatabase();
   const { getUserData } = useConfig();
   const log = useLogger();
 
@@ -110,6 +110,17 @@ export const UserProvider = ({
       // Possibly need to implement a tracking system to make
       // sure that users devices stay correctly synced
       setContacts(contacts);
+      // For now just add what contacts you get back from the server into the local DB
+      try {
+        contacts.forEach(async (c: Contacts) => {
+          await IDB_AddContact(c);
+        });
+      } catch (err) {
+        log.logError(
+          "Error adding contacts from server to the local database.",
+          err
+        );
+      }
     } catch (err) {
       log.logAllError("Failed to fetch contacts from server", err);
     }
