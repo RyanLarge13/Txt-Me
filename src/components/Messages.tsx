@@ -68,7 +68,7 @@ const Messages = () => {
         </form>
         <AnimatePresence>
           <Contacts />
-          {noFoundContacts && (
+          {noFoundContacts ? (
             <>
               <img
                 src={SearchIcon}
@@ -79,7 +79,7 @@ const Messages = () => {
                 Sorry, no contacts were returned from your search
               </p>
             </>
-          )}
+          ) : null}
         </AnimatePresence>
       </div>
     </motion.section>

@@ -20,14 +20,8 @@ import { AxiosResponse } from "axios";
 import { createContext, ReactNode, useEffect, useState } from "react";
 
 import useLogger from "../hooks/useLogger.ts";
-import {
-  AllMessages,
-  Contacts,
-  Message,
-  MessageSessionType,
-  UserCtxtProps,
-} from "../types/userTypes.ts";
-import { API_FetchUserData } from "../utils/api.ts";
+import { Contacts, Message, MessageSessionType, UserCtxtProps } from "../types/userTypes.ts";
+import { API_FetchUserData, API_GetContacts } from "../utils/api.ts";
 import { useConfig } from "./configContext.tsx";
 import { useDatabase } from "./dbContext.tsx";
 
@@ -73,30 +67,52 @@ export const UserProvider = ({
     messages: Message[],
     contacts: Contacts[]
   ): void => {
-    const newMap: AllMessages = new Map();
+    // const newMap: AllMessages = new Map();
 
-    messages.forEach((m: Message) => {
-      if (!newMap.has(m.fromnumber)) {
-        const contact = contacts.find((c) => c.number === m.fromnumber);
+    log.devLog(
+      "In build message map. User Context. Messages: ",
+      messages,
+      "Contacts: ",
+      contacts
+    );
 
-        if (!contact) {
-          log.devLog(
-            "No contact in the db from this number when building message map",
-            contact,
-            `Number: ${m.fromnumber}`
-          );
-        }
+    // messages.forEach((m: Message) => {
+    //   if (!newMap.has(m.fromnumber)) {
+    //     const contact = contacts.find((c) => c.number === m.fromnumber);
 
-        newMap.set(m.fromnumber, {
-          contact: contact || null,
-          messages: [m],
-        });
-      } else {
-        newMap.get(m.fromnumber)?.messages.push(m);
-      }
-    });
+    //     if (!contact) {
+    //       log.devLog(
+    //         "No contact in the db from this number when building message map",
+    //         contact,
+    //         `Number: ${m.fromnumber}`
+    //       );
+    //     }
 
-    setAllMessages(newMap);
+    //     newMap.set(m.fromnumber, {
+    //       contact: contact || null,
+    //       messages: [m],
+    //     });
+    //   } else {
+    //     newMap.get(m.fromnumber)?.messages.push(m);
+    //   }
+    // });
+
+    // setAllMessages(newMap);
+  };
+
+  const M_FetchLatestContacts = async (): Promise<void> => {
+    try {
+      const response = await API_GetContacts(token);
+
+      const contacts = response.data?.data?.contacts || [];
+
+      // Handle any deletion or additions to contacts
+      // Possibly need to implement a tracking system to make
+      // sure that users devices stay correctly synced
+      setContacts(contacts);
+    } catch (err) {
+      log.logAllError("Failed to fetch contacts from server", err);
+    }
   };
 
   const M_FetchLocalMessagesAndContacts = async () => {
@@ -114,6 +130,8 @@ export const UserProvider = ({
     try {
       const userDataResponse: AxiosResponse = await API_FetchUserData(token);
       log.devLog("Fetched user data from server", userDataResponse);
+
+      await M_FetchLatestContacts();
 
       // Update the Local Database
       // Update app state
