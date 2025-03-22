@@ -23,8 +23,14 @@ import { createContext, useContext } from "react";
 
 import useLogger from "../hooks/useLogger.ts";
 import { User } from "../types/configCtxtTypes.ts";
-import { ContactSettings, DBCtxtProps, MessageSettings, Theme } from "../types/dbCtxtTypes.ts";
+import {
+  ContactSettings,
+  DBCtxtProps,
+  MessageSettings,
+  Theme,
+} from "../types/dbCtxtTypes.ts";
 import { Contacts, Message } from "../types/userTypes.ts";
+import { defaultAppSettings } from "../utils/constants.ts";
 
 const DatabaseContext = createContext({} as DBCtxtProps);
 
@@ -40,6 +46,7 @@ export const DatabaseProvider = ({
   const buildAppConfig = async (db: IDBPDatabase) => {
     const appSettings = {
       initialized: true,
+      authToken: "",
       locked: false,
       passwordType: "pin",
       showOnline: false,
@@ -156,7 +163,8 @@ export const DatabaseProvider = ({
   };
 
   const initDatabase = async (db: IDBPDatabase) => {
-    const userInitialized = await db.get("app", "settings");
+    const userInitialized =
+      (await db.get("app", "settings")) || defaultAppSettings;
 
     log.devLog(`User from indexedDB`, userInitialized);
 
@@ -189,13 +197,39 @@ export const DatabaseProvider = ({
   // Put/Patch DB Data ----------------------------------------------------------------------------
   const updateUserInDB = async (user: User): Promise<IDBValidKey> =>
     (await getDB()).put("app", user, "user");
+  const updateContactsInDB = async (
+    contacts: Contacts[]
+  ): Promise<IDBValidKey> =>
+    (await getDB()).put("contacts", contacts, "contacts");
 
   const IDB_AddContact = async (newContact: Contacts): Promise<void> => {
-    const db = await getDB();
-    const currentContacts = await db.get("contacts", "contacts");
-    const newContacts = Array.from(new Set([...currentContacts, newContact]));
+    const currentContacts = await getContactsData();
+    log.devLog(
+      "Contacts returned from IDB when adding server contacts to local database",
+      currentContacts
+    );
 
-    db.put("contacts", newContacts);
+    const newContacts = currentContacts.filter(
+      (c: Contacts) => c.contactid !== newContact.contactid
+    );
+
+    log.devLog(
+      "Here are the filtered contacts that will be added to the local indexedDB contacts array along with current contacts and newContact from server",
+      currentContacts,
+      newContact,
+      newContacts
+    );
+
+    log.devLog(
+      "This is what the array will look like when finally updating the db with the new contacts",
+      [...newContacts, newContact]
+    );
+
+    try {
+      await updateContactsInDB([...newContacts, newContact]);
+    } catch (err) {
+      log.devLog("Error adding new contacts to local idb database", err);
+    }
   };
   // Put/Patch DB Data ----------------------------------------------------------------------------
 

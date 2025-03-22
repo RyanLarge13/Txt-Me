@@ -20,7 +20,12 @@ import { AxiosResponse } from "axios";
 import { createContext, ReactNode, useEffect, useState } from "react";
 
 import useLogger from "../hooks/useLogger.ts";
-import { Contacts, Message, MessageSessionType, UserCtxtProps } from "../types/userTypes.ts";
+import {
+  Contacts,
+  Message,
+  MessageSessionType,
+  UserCtxtProps,
+} from "../types/userTypes.ts";
 import { API_FetchUserData, API_GetContacts } from "../utils/api.ts";
 import { useConfig } from "./configContext.tsx";
 import { useDatabase } from "./dbContext.tsx";
@@ -113,6 +118,7 @@ export const UserProvider = ({
       // For now just add what contacts you get back from the server into the local DB
       try {
         contacts.forEach(async (c: Contacts) => {
+          log.devLog("Adding contact from server to the local IDB database");
           await IDB_AddContact(c);
         });
       } catch (err) {

@@ -16,14 +16,21 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import React, { FormEvent, useContext, useRef, useState } from "react";
+import React, {
+  FormEvent,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { IoSend } from "react-icons/io5";
 import { TiMessages } from "react-icons/ti";
 
 import UserCtxt from "../context/userCtxt";
+import useLogger from "../hooks/useLogger";
 import useSocket from "../hooks/useSocket";
 import useUserData from "../hooks/useUserData";
-import { MessageSessionType } from "../types/userTypes";
+import { Message, MessageSessionType } from "../types/userTypes";
 import { defaultMessage } from "../utils/constants";
 
 const MessageSession = () => {
@@ -31,9 +38,30 @@ const MessageSession = () => {
 
   const [value, setValue] = useState("");
   const [phoneNumber] = useUserData("phoneNumber");
+  const [sessionMessages, setSessionMessages] = useState<Message[]>(
+    messageSession?.messages || []
+  );
 
   const messagesRef = useRef<HTMLDivElement | null>(null);
   const { socket } = useSocket();
+  const log = useLogger();
+
+  useEffect(() => {
+    if (messageSession) {
+      log.devLog(
+        "message session exists inside of useEffect being called after a change and update to allMessages map state"
+      );
+      const newMessageList =
+        allMessages.get(messageSession?.number)?.messages || [];
+
+      log.devLog(
+        "Here are the messages that are being returned from the map after fetching messages by messagesSession.number",
+        newMessageList
+      );
+
+      setSessionMessages(newMessageList);
+    }
+  }, [allMessages]);
 
   const M_SendMessage = (
     e: FormEvent<HTMLFormElement>,
@@ -51,7 +79,14 @@ const MessageSession = () => {
     socket ? socket.emit("text-message", newMessage) : null;
 
     // Check first to see if the allMessages map has the key?? For safety
-    allMessages.get(messageSession.number)?.messages.push(newMessage);
+    if (!allMessages.has(messageSession.number)) {
+      allMessages.set(messageSession.number, {
+        contact: messageSession.contact,
+        messages: [newMessage],
+      });
+    } else {
+      allMessages.get(messageSession.number)?.messages.push(newMessage);
+    }
 
     const newMap = new Map(allMessages);
 
@@ -60,18 +95,20 @@ const MessageSession = () => {
     setValue("");
   };
 
-  return messageSession ? (
+  return messageSession !== null ? (
     <div
       ref={messagesRef}
       className="h-full w-full overflow-y-auto py-20 scroll-smooth"
     >
-      <div className="p-5 fixed top-0 z-10 right-0 left-0 bg-black">
-        <p>{messageSession.contact?.name || messageSession.number}</p>
+      <div className="p-2 fixed top-0 z-10 right-0 left-0 bg-black">
+        <p className="mb-1">
+          {messageSession.contact?.name || messageSession.number}
+        </p>
         <p>{messageSession.contact?.number || ""}</p>
       </div>
-      {messageSession.messages.length > 0 ? (
+      {sessionMessages.length > 0 ? (
         <div className="flex flex-col justify-start px-10 py-20 gap-y-5 min-h-full">
-          {messageSession.messages.map((message, index) => (
+          {sessionMessages.map((message, index) => (
             <div
               key={index}
               className={`${

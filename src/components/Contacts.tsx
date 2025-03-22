@@ -30,7 +30,7 @@ const Contacts = () => {
 
   const navigate = useNavigate();
 
-  const startMessage = (contact: ContactsType) => {
+  const M_StartMessage = (contact: ContactsType) => {
     const messages = allMessages.get(contact.number)?.messages;
 
     setMessageSession({
@@ -59,7 +59,7 @@ const Contacts = () => {
         contacts.map((contact: ContactsType) => (
           <div
             key={contact.contactid}
-            onClick={() => startMessage(contact)}
+            onClick={() => M_StartMessage(contact)}
             className="flex justify-between items-center py-5 bg-black"
           >
             {contact.avatar ? (

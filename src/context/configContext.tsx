@@ -79,7 +79,10 @@ export const ConfigProvider = ({
     const db = await getDB();
     const appInfo = await initDatabase(db);
 
-    log.devLog(appInfo);
+    log.devLog(
+      "app info returned from the index db initialization method",
+      appInfo
+    );
 
     if (appInfo) {
       setAppData(appInfo);
@@ -93,7 +96,7 @@ export const ConfigProvider = ({
     const themeData = await getThemeData();
 
     if (themeData) {
-      setTheme(themeData);
+      setTheme(themeData[0]);
     }
   };
 

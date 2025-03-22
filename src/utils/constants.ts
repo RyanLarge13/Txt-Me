@@ -36,3 +36,11 @@ export const defaultMessage = {
   fromnumber: "",
   tonumber: "",
 };
+
+export const defaultAppSettings = {
+  initialized: false,
+  authToken: "",
+  locked: false,
+  passwordType: "pin",
+  showOnline: false,
+};

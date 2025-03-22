@@ -20,8 +20,14 @@ import React from "react";
 import { TiMessages } from "react-icons/ti";
 import { useNavigate } from "react-router-dom";
 
+import { useConfig } from "../context/configContext";
+import { getInitials } from "../utils/helpers";
+
 const ProfileNav = (): JSX.Element => {
+  const { getUserData } = useConfig();
   const navigate = useNavigate();
+
+  const username = getUserData("username");
 
   return (
     <header
@@ -41,7 +47,7 @@ const ProfileNav = (): JSX.Element => {
         onClick={() => navigate("/profile/account")}
         className="rounded-full bg-slate-800 text-primary w-9 h-9"
       >
-        RL
+        {getInitials(username)}
       </button>
     </header>
   );

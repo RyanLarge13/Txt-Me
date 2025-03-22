@@ -5,6 +5,7 @@ import { Contacts, Message } from "./userTypes";
 
 export type AppSettings = {
   initialized: boolean;
+  authToken: string;
   locked: boolean;
   passwordType: string;
   showOnline: boolean;
