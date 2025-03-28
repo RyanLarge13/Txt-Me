@@ -21,6 +21,7 @@ import { createContext, ReactNode, useEffect, useState } from "react";
 
 import useLogger from "../hooks/useLogger.ts";
 import {
+  AllMessages,
   Contacts,
   Message,
   MessageSessionType,
@@ -72,7 +73,7 @@ export const UserProvider = ({
     messages: Message[],
     contacts: Contacts[]
   ): void => {
-    // const newMap: AllMessages = new Map();
+    const newMap: AllMessages = new Map();
 
     log.devLog(
       "In build message map. User Context. Messages: ",
@@ -81,28 +82,28 @@ export const UserProvider = ({
       contacts
     );
 
-    // messages.forEach((m: Message) => {
-    //   if (!newMap.has(m.fromnumber)) {
-    //     const contact = contacts.find((c) => c.number === m.fromnumber);
+    messages.forEach((m: Message) => {
+      if (!newMap.has(m.fromnumber)) {
+        const contact = contacts.find((c) => c.number === m.fromnumber);
 
-    //     if (!contact) {
-    //       log.devLog(
-    //         "No contact in the db from this number when building message map",
-    //         contact,
-    //         `Number: ${m.fromnumber}`
-    //       );
-    //     }
+        if (!contact) {
+          log.logAllError(
+            "No contact in the db from this number when building message map. Check server",
+            contact,
+            `Number: ${m.fromnumber}`
+          );
+        }
 
-    //     newMap.set(m.fromnumber, {
-    //       contact: contact || null,
-    //       messages: [m],
-    //     });
-    //   } else {
-    //     newMap.get(m.fromnumber)?.messages.push(m);
-    //   }
-    // });
+        newMap.set(m.fromnumber, {
+          contact: contact || null,
+          messages: [m],
+        });
+      } else {
+        newMap.get(m.fromnumber)?.messages.push(m);
+      }
+    });
 
-    // setAllMessages(newMap);
+    setAllMessages(newMap);
   };
 
   const M_FetchLatestContacts = async (): Promise<void> => {
