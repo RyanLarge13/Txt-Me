@@ -57,10 +57,10 @@ const ChatsMenu = () => {
       initial={{ opacity: 0, x: -100 }}
       exit={{ opacity: 0, x: -100 }}
       animate={{ opacity: 1, x: 0 }}
-      className="flex fixed top-14 left-0 right-0 md:right-[75%] z-40 bottom-0
+      className="flex flex-col fixed top-14 left-0 right-0 md:right-[75%] z-40 bottom-0
       overflow-y-auto bg-[#000]"
     >
-      <div className="sticky top-40 mx-5 w-full">
+      <div className="sticky top-20 mx-5 right-0 left-0">
         <button
           onClick={() => {
             setMessageSession(null);
@@ -71,36 +71,34 @@ const ChatsMenu = () => {
           New Chat
         </button>
       </div>
-      {allMessages
-        ? Array.from(allMessages).map(([fromNumber, messageSession], index) => (
-            <div
-              key={index}
-              onClick={() => createMessageSession(fromNumber, messageSession)}
-              className="flex justify-between items-center relative"
-            >
-              <div className="rounded-full w-30 h-30 flex justify-center items-center">
-                <p className="text-xl">
-                  {messageSession.contact
-                    ? messageSession.contact.name[0].toUpperCase()
-                    : fromNumber}
-                </p>
-              </div>
-              <p>{messageSession?.contact?.nickname || ""}</p>
-              {/* Lets check date accordingly first before attempting render */}
-              {/* <p className="absolute top-1 right-1">
-                {new Date(
-                  messageSession.messages[
-                    messageSession.messages.length - 1
-                  ].sentat
-                ).toLocaleTimeString("en-US", {
-                  hour: "numeric",
-                  minute: "numeric",
-                  dayPeriod: "short",
-                })}
-              </p> */}
+      <div className="text-white w-full h-full">
+        {Array.from(allMessages).map(([fromNumber, messageSession]) => (
+          <div
+            key={fromNumber}
+            onClick={() => createMessageSession(fromNumber, messageSession)}
+            className="flex justify-between items-center relative outline-1 outline outline-red-300"
+          >
+            <div className="rounded-full w-30 h-30 flex justify-center items-center">
+              <p className="text-xl">
+                {messageSession.contact
+                  ? messageSession.contact.name[0].toUpperCase()
+                  : fromNumber}
+              </p>
             </div>
-          ))
-        : null}
+            <p>{messageSession?.contact?.nickname || ""}</p>
+            <p className="absolute top-1 right-1">
+              {new Date(
+                messageSession.messages[messageSession.messages.length - 1]
+                  ?.sentat || new Date()
+              ).toLocaleTimeString("en-US", {
+                hour: "numeric",
+                minute: "numeric",
+                dayPeriod: "short",
+              })}
+            </p>
+          </div>
+        ))}
+      </div>
     </motion.nav>
   );
 };

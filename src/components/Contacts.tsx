@@ -26,18 +26,34 @@ import { Contacts as ContactsType } from "../types/userTypes";
 import { getInitials } from "../utils/helpers";
 
 const Contacts = () => {
-  const { contacts, setMessageSession, allMessages } = useContext(UserCtxt);
+  const { contacts, allMessages, setMessageSession, setAllMessages } =
+    useContext(UserCtxt);
 
   const navigate = useNavigate();
 
   const M_StartMessage = (contact: ContactsType) => {
-    const messages = allMessages.get(contact.number)?.messages;
+    if (allMessages.has(contact.number)) {
+      // Immediately set message session to the contact stored and messages found
+      // and nothing else
+      setMessageSession({
+        number: contact.number,
+        contact: contact,
+        messages: allMessages.get(contact.number)?.messages || [],
+      });
+    } else {
+      // First update our map and then create the message session
+      allMessages.set(contact.number, {
+        contact: contact,
+        messages: [],
+      });
 
-    setMessageSession({
-      number: contact.number,
-      contact: contact,
-      messages: messages || [],
-    });
+      setAllMessages(new Map(allMessages));
+      setMessageSession({
+        number: contact.number,
+        contact: contact,
+        messages: [],
+      });
+    }
 
     navigate("/profile");
   };
