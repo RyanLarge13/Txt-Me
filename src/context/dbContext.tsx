@@ -29,7 +29,7 @@ import {
   MessageSettings,
   Theme,
 } from "../types/dbCtxtTypes.ts";
-import { Contacts, Message } from "../types/userTypes.ts";
+import { Contacts, Message, MessageSessionType } from "../types/userTypes.ts";
 import { defaultAppSettings } from "../utils/constants.ts";
 
 const DatabaseContext = createContext({} as DBCtxtProps);
@@ -43,7 +43,7 @@ export const DatabaseProvider = ({
 }) => {
   const log = useLogger();
 
-  const buildAppConfig = async (db: IDBPDatabase) => {
+  const buildAppConfig = async (db: IDBPDatabase): Promise<void> => {
     const appSettings = {
       initialized: true,
       authToken: "",
@@ -64,7 +64,7 @@ export const DatabaseProvider = ({
     await db.put("app", appUser, "user");
   };
 
-  const buildThemeConfig = async (db: IDBPDatabase) => {
+  const buildThemeConfig = async (db: IDBPDatabase): Promise<void> => {
     const theme = {
       darkMode: true,
       accent: "#fff",
@@ -78,7 +78,7 @@ export const DatabaseProvider = ({
     await db.put("theme", theme, "theme");
   };
 
-  const buildMessagesAndContacts = async (db: IDBPDatabase) => {
+  const buildMessagesAndContacts = async (db: IDBPDatabase): Promise<void> => {
     const messages: Message[] = [];
     const contacts: Contacts[] = [];
 
@@ -86,7 +86,7 @@ export const DatabaseProvider = ({
     await db.put("contacts", contacts, "contacts");
   };
 
-  const buildMessageSettings = async (db: IDBPDatabase) => {
+  const buildMessageSettings = async (db: IDBPDatabase): Promise<void> => {
     const messageSettings = {
       showImg: true,
       showLatestMessage: true,
@@ -101,7 +101,7 @@ export const DatabaseProvider = ({
     await db.put("messageSettings", messageSettings, "messageSettings");
   };
 
-  const buildContactSettings = async (db: IDBPDatabase) => {
+  const buildContactSettings = async (db: IDBPDatabase): Promise<void> => {
     const contactSettings = {
       showImage: true,
       showLatestMessages: true,
@@ -111,6 +111,16 @@ export const DatabaseProvider = ({
     };
 
     await db.put("contactSettings", contactSettings, "contactSettings");
+  };
+
+  const buildMessageSession = async (db: IDBPDatabase): Promise<void> => {
+    const lastSession: MessageSessionType = {
+      number: "-1",
+      messages: [],
+      contact: null,
+    };
+
+    await db.put("messageSession", lastSession, "messageSession");
   };
 
   const addDefaultConfiguration = async (db: IDBPDatabase) => {
@@ -142,6 +152,12 @@ export const DatabaseProvider = ({
     } catch (err) {
       log.logAllError(`Building contacts config. \nError: ${err}`);
     }
+
+    try {
+      await buildMessageSession(db);
+    } catch (err) {
+      log.logAllError("Building messageSession default config. Error: ", err);
+    }
   };
 
   const getDB = async () => {
@@ -156,6 +172,7 @@ export const DatabaseProvider = ({
           db.createObjectStore("contacts");
           db.createObjectStore("messageSettings");
           db.createObjectStore("contactSettings");
+          db.createObjectStore("messageSession");
         },
       }
     );
@@ -192,6 +209,8 @@ export const DatabaseProvider = ({
     (await getDB()).getAll("contactSettings");
   const getPhoneNumber = async (): Promise<string> =>
     (await getDB()).get("app", "user").then((settings) => settings.phoneNumber);
+  const IDB_GetLastMessageSession = async (): Promise<MessageSessionType> =>
+    (await getDB()).get("messageSession", "messageSession");
   // Get DB Data --------------------------------------------------------------------------------
 
   // Put/Patch DB Data ----------------------------------------------------------------------------
@@ -231,13 +250,20 @@ export const DatabaseProvider = ({
       log.devLog("Error adding new contacts to local idb database", err);
     }
   };
+
+  const IDB_UpdateMessageSession = async (
+    newSession: MessageSessionType
+  ): Promise<IDBValidKey> =>
+    (await getDB()).put("messageSession", newSession, "messageSession");
   // Put/Patch DB Data ----------------------------------------------------------------------------
 
   return (
     <DatabaseContext.Provider
       value={{
-        getDB,
         initDatabase,
+
+        // Getters ------------------------------
+        getDB,
         getAppUserData,
         getAppData,
         getThemeData,
@@ -246,8 +272,12 @@ export const DatabaseProvider = ({
         getMessageSettingsData,
         getContactSettingsData,
         getPhoneNumber,
+        IDB_GetLastMessageSession,
+
+        // Setters ------------------------------
         updateUserInDB,
         IDB_AddContact,
+        IDB_UpdateMessageSession,
       }}
     >
       {children}

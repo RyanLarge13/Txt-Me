@@ -1,7 +1,7 @@
 import { IDBPDatabase } from "idb";
 
 import { User } from "./configCtxtTypes";
-import { Contacts, Message } from "./userTypes";
+import { Contacts, Message, MessageSessionType } from "./userTypes";
 
 export type AppSettings = {
   initialized: boolean;
@@ -61,4 +61,8 @@ export interface DBCtxtProps {
   getPhoneNumber: () => Promise<string>;
   updateUserInDB: (user: User) => Promise<IDBValidKey>;
   IDB_AddContact: (newContact: Contacts) => Promise<void>;
+  IDB_UpdateMessageSession: (
+    newSession: MessageSessionType
+  ) => Promise<IDBValidKey>;
+  IDB_GetLastMessageSession: () => Promise<MessageSessionType>;
 }

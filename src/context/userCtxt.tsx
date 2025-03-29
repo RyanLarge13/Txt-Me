@@ -28,6 +28,7 @@ import {
   UserCtxtProps,
 } from "../types/userTypes.ts";
 import { API_FetchUserData, API_GetContacts } from "../utils/api.ts";
+import { valPhoneNumber } from "../utils/validator.ts";
 import { useConfig } from "./configContext.tsx";
 import { useDatabase } from "./dbContext.tsx";
 
@@ -39,7 +40,12 @@ export const UserProvider = ({
   children: ReactNode;
 }): JSX.Element => {
   // State and state hooks --------------------------------------------------------------
-  const { getContactsData, getMessagesData, IDB_AddContact } = useDatabase();
+  const {
+    getContactsData,
+    getMessagesData,
+    IDB_AddContact,
+    IDB_GetLastMessageSession,
+  } = useDatabase();
   const { getUserData } = useConfig();
   const log = useLogger();
 
@@ -60,6 +66,7 @@ export const UserProvider = ({
       );
 
       M_FetchLocalMessagesAndContacts();
+      M_FetchStoredSession();
       M_FetchNetworkMessagesAndContacts();
     } else {
       log.devLog("Skipping fetch, no auth token present. User must login");
@@ -133,7 +140,7 @@ export const UserProvider = ({
     }
   };
 
-  const M_FetchLocalMessagesAndContacts = async () => {
+  const M_FetchLocalMessagesAndContacts = async (): Promise<void> => {
     const messages: Message[] = (await getMessagesData()) || [];
     const contacts: Contacts[] = (await getContactsData()) || [];
 
@@ -144,7 +151,36 @@ export const UserProvider = ({
     M_BuildMessagesMap(messages, contacts);
   };
 
-  const M_FetchNetworkMessagesAndContacts = async () => {
+  const M_FetchStoredSession = async (): Promise<void> => {
+    try {
+      const lastSession = await IDB_GetLastMessageSession();
+
+      if (!lastSession) {
+        throw new Error("Message session from IndexDB returned undefined");
+      }
+
+      if (lastSession.number === "-1") {
+        return;
+      }
+
+      if (!valPhoneNumber(lastSession.number)) {
+        throw new Error(
+          `When pulling stored message session from indexedDB, lastSession.number returned an invalid number. Number: ${lastSession.number}`
+        );
+      }
+
+      // Maybe let us perform a few more checks before continuing with setting
+      // a message session to data we don't know is correct????!!!!!!!!!!!!!
+      setMessageSession(lastSession);
+    } catch (err) {
+      log.logAllError(
+        "Error fetching stored message session from IndexedDB",
+        err
+      );
+    }
+  };
+
+  const M_FetchNetworkMessagesAndContacts = async (): Promise<void> => {
     try {
       const userDataResponse: AxiosResponse = await API_FetchUserData(token);
       log.devLog("Fetched user data from server", userDataResponse);

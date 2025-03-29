@@ -21,25 +21,51 @@ import React, { useContext } from "react";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { useNavigate } from "react-router-dom";
 
+import { useDatabase } from "../context/dbContext";
 import UserCtxt from "../context/userCtxt";
-import { Contacts as ContactsType } from "../types/userTypes";
+import useLogger from "../hooks/useLogger";
+import {
+  Contacts as ContactsType,
+  MessageSessionType,
+} from "../types/userTypes";
 import { getInitials } from "../utils/helpers";
 
 const Contacts = () => {
   const { contacts, allMessages, setMessageSession, setAllMessages } =
     useContext(UserCtxt);
+  const { IDB_UpdateMessageSession } = useDatabase();
 
   const navigate = useNavigate();
+  const log = useLogger();
+
+  // You have the same member function in/for ChatsMenu.tsx
+  // Consider adding it to a common utils file or helper
+  const M_StoreSession = async (
+    newSession: MessageSessionType
+  ): Promise<void> => {
+    try {
+      await IDB_UpdateMessageSession(newSession);
+    } catch (err) {
+      log.logAllError(
+        "Error saving new session to indexedDB when clicking contact",
+        err
+      );
+    }
+  };
 
   const M_StartMessage = (contact: ContactsType) => {
+    const newSessionDefault: MessageSessionType = {
+      number: contact.number,
+      contact: contact,
+      messages: [],
+    };
+
     if (allMessages.has(contact.number)) {
       // Immediately set message session to the contact stored and messages found
       // and nothing else
-      setMessageSession({
-        number: contact.number,
-        contact: contact,
-        messages: allMessages.get(contact.number)?.messages || [],
-      });
+      newSessionDefault.messages =
+        allMessages.get(contact.number)?.messages || [];
+      setMessageSession(newSessionDefault);
     } else {
       // First update our map and then create the message session
       allMessages.set(contact.number, {
@@ -48,12 +74,10 @@ const Contacts = () => {
       });
 
       setAllMessages(new Map(allMessages));
-      setMessageSession({
-        number: contact.number,
-        contact: contact,
-        messages: [],
-      });
+      setMessageSession(newSessionDefault);
     }
+
+    M_StoreSession(newSessionDefault);
 
     navigate("/profile");
   };

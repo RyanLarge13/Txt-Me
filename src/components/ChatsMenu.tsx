@@ -20,17 +20,34 @@ import { motion } from "framer-motion";
 import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { useDatabase } from "../context/dbContext";
 import UserCtxt from "../context/userCtxt";
 import useLogger from "../hooks/useLogger";
-import { Contacts, Message } from "../types/userTypes";
+import { Contacts, Message, MessageSessionType } from "../types/userTypes";
 
 const ChatsMenu = () => {
   const { setMessageSession, allMessages } = useContext(UserCtxt);
+  const { IDB_UpdateMessageSession } = useDatabase();
 
   const navigate = useNavigate();
   const log = useLogger();
 
-  const createMessageSession = (
+  // You have the same member function in/for Contacts.tsx
+  // Consider adding it to a common utils file or helper
+  const M_StoreMessageSession = async (
+    newSession: MessageSessionType
+  ): Promise<void> => {
+    try {
+      await IDB_UpdateMessageSession(newSession);
+    } catch (err) {
+      log.logAllError(
+        "Error storing message session in indexDB when clicking in chats menu",
+        err
+      );
+    }
+  };
+
+  const M_CreateMessageSession = (
     fromNumber: string,
     session: {
       contact: Contacts | null;
@@ -44,11 +61,16 @@ const ChatsMenu = () => {
       log.devLog("No contact for this message session");
     }
 
-    setMessageSession({
+    const newSession = {
       number: contact?.number || fromNumber,
       contact: contact !== null ? contact : null,
       messages: messages,
-    });
+    };
+
+    setMessageSession(newSession);
+
+    M_StoreMessageSession(newSession);
+
     navigate("/profile");
   };
 
@@ -75,7 +97,7 @@ const ChatsMenu = () => {
         {Array.from(allMessages).map(([fromNumber, messageSession]) => (
           <div
             key={fromNumber}
-            onClick={() => createMessageSession(fromNumber, messageSession)}
+            onClick={() => M_CreateMessageSession(fromNumber, messageSession)}
             className="flex justify-between items-center relative outline-1 outline outline-red-300"
           >
             <div className="rounded-full w-30 h-30 flex justify-center items-center">
