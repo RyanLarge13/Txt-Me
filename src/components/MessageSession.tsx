@@ -63,7 +63,7 @@ const MessageSession = () => {
 
       setSessionMessages(newMessageList);
     }
-  }, [allMessages]);
+  }, [allMessages, messageSession]);
 
   // Another method found in another part of code (socketCtxt) almost identical. Consider consolidating
   const M_AddMessageToIndexedDB = async (newMessage: Message) => {
