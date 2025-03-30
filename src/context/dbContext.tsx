@@ -255,6 +255,13 @@ export const DatabaseProvider = ({
     newSession: MessageSessionType
   ): Promise<IDBValidKey> =>
     (await getDB()).put("messageSession", newSession, "messageSession");
+
+  const IDB_AddMessage = async (newMessage: Message): Promise<void> => {
+    const storedMessages = (await getMessagesData()) || [];
+
+    const newMessages = [...storedMessages, newMessage];
+    (await getDB()).put("messages", newMessages, "messages");
+  };
   // Put/Patch DB Data ----------------------------------------------------------------------------
 
   return (
@@ -278,6 +285,7 @@ export const DatabaseProvider = ({
         updateUserInDB,
         IDB_AddContact,
         IDB_UpdateMessageSession,
+        IDB_AddMessage,
       }}
     >
       {children}

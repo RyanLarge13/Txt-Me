@@ -30,7 +30,7 @@ import { useDatabase } from "./dbContext";
 export const SocketContext = createContext({} as SocketProps);
 
 export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
-  const { getPhoneNumber } = useDatabase();
+  const { getPhoneNumber, IDB_AddMessage } = useDatabase();
   const { allMessages, contacts, setAllMessages } = useContext(UserCtxt);
   const log = useLogger();
 
@@ -39,7 +39,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
   // useEffects -----------------------------------------------------
   useEffect(() => {
-    queryPhoneNumber();
+    M_QueryPhoneNumber();
 
     // Remove socket and disconnect
     return () => {
@@ -52,11 +52,11 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   // useEffects -------------------------------------------------------
 
   // Local Scop Context Methods ---------------------------------------
-  const queryPhoneNumber = async () => {
+  const M_QueryPhoneNumber = async () => {
     const phoneNumber = await getPhoneNumber();
     try {
       if (phoneNumber && socketRef) {
-        setUpSocket(phoneNumber);
+        M_SetUpSocket(phoneNumber);
         return;
       }
       log.devLog(
@@ -69,7 +69,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const setUpSocket = (number: string): void => {
+  const M_SetUpSocket = (number: string): void => {
     const socketURL = import.meta.env.VITE_API_SOCKET_URL || "";
     if (!socketURL) {
       log.logAllError(
@@ -87,42 +87,42 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       },
     });
 
-    attachListeners(socketRef.current);
+    M_AttachListeners(socketRef.current);
   };
 
-  const attachListeners = (socketRef: Socket | null): void => {
+  const M_AttachListeners = (socketRef: Socket | null): void => {
     if (!socketRef) {
       return;
     }
 
     // Attach listeners and call appropriate methods
     socketRef.on("connect", () => {
-      handleConnect();
+      M_HandleConnect();
     });
     socketRef.on("disconnect", () => {
-      handleDisconnect();
+      M_HandleDisconnect();
     });
     socketRef.on("connect_error", (error) => {
-      handleError(error);
+      M_HandleError(error);
     });
     socketRef.on("text-message", (socketMessage) => {
       console.log(
         "Message from the server!!! Socket message from other client with socketMessage attached"
       );
-      handleTextMessage(socketMessage);
+      M_HandleTextMessage(socketMessage);
     });
   };
 
   // Socket Methods ---------------------------------------------------
-  const handleConnect = (): void => {
+  const M_HandleConnect = (): void => {
     log.devLog("Connected to server via socket");
   };
 
-  const handleDisconnect = (): void => {
+  const M_HandleDisconnect = (): void => {
     log.devLog("Socket disconnected from the server");
   };
 
-  const handleError = (error: Error): void => {
+  const M_HandleError = (error: Error): void => {
     log.logAllError("Socket connection error", error);
 
     // Call timeout to reconnect 10s
@@ -135,7 +135,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     }, 10000);
   };
 
-  const handleTextMessage = (socketMessage: Message): void => {
+  const M_HandleTextMessage = (socketMessage: Message): void => {
     if (socketMessage) {
       log.devLog("Message from socket", socketMessage);
 
@@ -153,7 +153,9 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
       // Trigger rerender. But for who? The entire <Profile /> component? Sounds a bit much
       const newMap = new Map(allMessages);
+
       setAllMessages(newMap);
+      M_AddMessageToIndexedDB(socketMessage);
     } else {
       log.devLogDebug(
         "Socket message came through with unknown data type",
@@ -161,8 +163,17 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       );
     }
   };
-  // Socket Methods ---------------------------------------------------
-  // Local Scop Context Methods ---------------------------------------
+
+  const M_AddMessageToIndexedDB = async (newMessage: Message) => {
+    try {
+      await IDB_AddMessage(newMessage);
+    } catch (err) {
+      log.logAllError(
+        "Error adding message to indexedDB sending from client",
+        err
+      );
+    }
+  };
 
   return (
     <SocketContext.Provider value={{ socket: socketRef.current }}>

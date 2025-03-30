@@ -26,6 +26,7 @@ import React, {
 import { IoSend } from "react-icons/io5";
 import { TiMessages } from "react-icons/ti";
 
+import { useDatabase } from "../context/dbContext";
 import UserCtxt from "../context/userCtxt";
 import useLogger from "../hooks/useLogger";
 import useSocket from "../hooks/useSocket";
@@ -35,6 +36,7 @@ import { defaultMessage } from "../utils/constants";
 
 const MessageSession = () => {
   const { messageSession, allMessages, setAllMessages } = useContext(UserCtxt);
+  const { IDB_AddMessage } = useDatabase();
 
   const [value, setValue] = useState("");
   const [phoneNumber] = useUserData("phoneNumber");
@@ -62,6 +64,18 @@ const MessageSession = () => {
       setSessionMessages(newMessageList);
     }
   }, [allMessages]);
+
+  // Another method found in another part of code (socketCtxt) almost identical. Consider consolidating
+  const M_AddMessageToIndexedDB = async (newMessage: Message) => {
+    try {
+      await IDB_AddMessage(newMessage);
+    } catch (err) {
+      log.logAllError(
+        "Error adding message to indexedDB sending from client",
+        err
+      );
+    }
+  };
 
   const M_SendMessage = (
     e: FormEvent<HTMLFormElement>,
@@ -91,8 +105,8 @@ const MessageSession = () => {
     const newMap = new Map(allMessages);
 
     setAllMessages(newMap);
-
     setValue("");
+    M_AddMessageToIndexedDB(newMessage);
   };
 
   return messageSession !== null ? (
