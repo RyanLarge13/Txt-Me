@@ -24,6 +24,7 @@ import { useDatabase } from "../context/dbContext";
 import UserCtxt from "../context/userCtxt";
 import useLogger from "../hooks/useLogger";
 import { Contacts, Message, MessageSessionType } from "../types/userTypes";
+import { getInitials } from "../utils/helpers.ts";
 
 const ChatsMenu = () => {
   const { setMessageSession, allMessages } = useContext(UserCtxt);
@@ -57,6 +58,14 @@ const ChatsMenu = () => {
     const contact = session.contact;
     const messages = session.messages;
 
+    log.devLog(
+      "Creating a new message session from chats menu. Logging messages and contact that is involved in chats menu session click",
+      "contact: ",
+      contact,
+      "Messages: ",
+      messages
+    );
+
     if (!contact) {
       log.devLog("No contact for this message session");
     }
@@ -82,7 +91,7 @@ const ChatsMenu = () => {
       className="flex flex-col fixed top-14 left-0 right-0 md:right-[75%] z-40 bottom-0
       overflow-y-auto bg-[#000]"
     >
-      <div className="sticky top-20 mx-5 right-0 left-0">
+      <div className="sticky top-10 mx-5 right-0 left-0">
         <button
           onClick={() => {
             setMessageSession(null);
@@ -93,32 +102,39 @@ const ChatsMenu = () => {
           New Chat
         </button>
       </div>
-      <div className="text-white w-full h-full">
+      <div className="text-white w-full h-full mt-20">
         {Array.from(allMessages).map(([fromNumber, messageSession]) => (
-          <div
+          <button
             key={fromNumber}
             onClick={() => M_CreateMessageSession(fromNumber, messageSession)}
-            className="flex justify-between items-center relative outline-1 outline outline-red-300"
+            className="flex justify-between items-center relative p-3 bg-[#222] border-b-black border-b h-[80px] w-full hover:bg-[#333]"
           >
-            <div className="rounded-full w-30 h-30 flex justify-center items-center">
+            {/* Contact avatar and name */}
+            <div className="flex flex-col justify-center items-start">
               <p className="text-xl">
                 {messageSession.contact
-                  ? messageSession.contact.name[0].toUpperCase()
+                  ? getInitials(messageSession.contact.name)
                   : fromNumber}
               </p>
+              <p>{messageSession?.contact?.nickname || ""}</p>
             </div>
-            <p>{messageSession?.contact?.nickname || ""}</p>
-            <p className="absolute top-1 right-1">
-              {new Date(
-                messageSession.messages[messageSession.messages.length - 1]
-                  ?.sentat || new Date()
-              ).toLocaleTimeString("en-US", {
-                hour: "numeric",
-                minute: "numeric",
-                dayPeriod: "short",
-              })}
-            </p>
-          </div>
+            {/* Last message and time */}
+            <div className="flex flex-col justify-end items-end">
+              <p>
+                {messageSession?.messages[messageSession.messages.length - 1]
+                  ?.message || ""}
+              </p>
+              <p>
+                {new Date(
+                  messageSession.messages[messageSession.messages.length - 1]
+                    ?.sentat || new Date()
+                ).toLocaleTimeString("en-US", {
+                  hour: "numeric",
+                  minute: "numeric",
+                })}
+              </p>
+            </div>
+          </button>
         ))}
       </div>
     </motion.nav>

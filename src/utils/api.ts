@@ -129,3 +129,11 @@ export const API_AddContact = (
   return res;
 };
 // Contact related requests --------------------------------------
+
+// Message related requests --------------------------------------
+// Not implemented on server yet
+export const API_GetMessages = (token: string): Promise<AxiosResponse> => {
+  const res = Axios.get("", { headers: { Authorization: `Bearer ${token}` } });
+  return res;
+};
+// Message related requests --------------------------------------

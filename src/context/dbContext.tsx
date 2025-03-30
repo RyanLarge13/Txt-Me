@@ -216,7 +216,7 @@ export const DatabaseProvider = ({
   // Put/Patch DB Data ----------------------------------------------------------------------------
   const updateUserInDB = async (user: User): Promise<IDBValidKey> =>
     (await getDB()).put("app", user, "user");
-  const updateContactsInDB = async (
+  const M_UpdateContactsInDB = async (
     contacts: Contacts[]
   ): Promise<IDBValidKey> =>
     (await getDB()).put("contacts", contacts, "contacts");
@@ -245,7 +245,7 @@ export const DatabaseProvider = ({
     );
 
     try {
-      await updateContactsInDB([...newContacts, newContact]);
+      await M_UpdateContactsInDB([...newContacts, newContact]);
     } catch (err) {
       log.devLog("Error adding new contacts to local idb database", err);
     }
@@ -256,11 +256,11 @@ export const DatabaseProvider = ({
   ): Promise<IDBValidKey> =>
     (await getDB()).put("messageSession", newSession, "messageSession");
 
-  const IDB_AddMessage = async (newMessage: Message): Promise<void> => {
+  const IDB_AddMessage = async (newMessage: Message): Promise<IDBValidKey> => {
     const storedMessages = (await getMessagesData()) || [];
 
     const newMessages = [...storedMessages, newMessage];
-    (await getDB()).put("messages", newMessages, "messages");
+    return (await getDB()).put("messages", newMessages, "messages");
   };
   // Put/Patch DB Data ----------------------------------------------------------------------------
 

@@ -50,6 +50,7 @@ export const UserProvider = ({
   const log = useLogger();
 
   const token = getUserData("authToken");
+  const myPhoneNumber = getUserData("phoneNumber");
 
   const [contacts, setContacts] = useState<Contacts[]>([]);
   const [allMessages, setAllMessages] = useState(new Map());
@@ -90,9 +91,9 @@ export const UserProvider = ({
     );
 
     messages.forEach((m: Message) => {
-      if (!newMap.has(m.fromnumber)) {
-        const contact = contacts.find((c) => c.number === m.fromnumber);
+      const contact = contacts.find((c) => c.number === m.fromnumber);
 
+      if (!newMap.has(m.fromnumber)) {
         if (!contact) {
           log.logAllError(
             "No contact in the db from this number when building message map. Check server",
@@ -101,12 +102,34 @@ export const UserProvider = ({
           );
         }
 
-        newMap.set(m.fromnumber, {
-          contact: contact || null,
-          messages: [m],
-        });
+        if (m.fromnumber === myPhoneNumber) {
+          if (!newMap.has(m.tonumber)) {
+            newMap.set(m.tonumber, {
+              contact: contact || null,
+              messages: [m],
+            });
+          } else {
+            newMap.get(m.tonumber)?.messages.push(m);
+          }
+        } else {
+          newMap.set(m.fromnumber, {
+            contact: contact || null,
+            messages: [m],
+          });
+        }
       } else {
-        newMap.get(m.fromnumber)?.messages.push(m);
+        if (m.fromnumber === myPhoneNumber) {
+          if (!newMap.has(m.tonumber)) {
+            newMap.set(m.tonumber, {
+              contact: contact || null,
+              messages: [m],
+            });
+          } else {
+            newMap.get(m.tonumber)?.messages.push(m);
+          }
+        } else {
+          newMap.get(m.fromnumber)?.messages.push(m);
+        }
       }
     });
 
@@ -137,6 +160,21 @@ export const UserProvider = ({
       }
     } catch (err) {
       log.logAllError("Failed to fetch contacts from server", err);
+    }
+  };
+
+  const M_FetchLatestMessages = async () => {
+    try {
+      // const response = await API_GetMessages(token);
+      // log.devLog(response);
+      log.devLog(
+        "Well, going to get messages from here at some point from the server"
+      );
+    } catch (err) {
+      log.logAllError(
+        "Error from the server when fetching latest messages from userCtxt.tsx",
+        err
+      );
     }
   };
 
@@ -181,11 +219,14 @@ export const UserProvider = ({
   };
 
   const M_FetchNetworkMessagesAndContacts = async (): Promise<void> => {
+    // This local try catch block catches the main userDataResponse. Not contacts and
+    // messages fetch
     try {
       const userDataResponse: AxiosResponse = await API_FetchUserData(token);
       log.devLog("Fetched user data from server", userDataResponse);
 
       await M_FetchLatestContacts();
+      await M_FetchLatestMessages();
 
       // Update the Local Database
       // Update app state
