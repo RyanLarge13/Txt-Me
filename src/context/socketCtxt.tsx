@@ -136,6 +136,12 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const M_HandleTextMessage = (socketMessage: Message): void => {
+    /*
+    TODO:
+      DEBUG:
+        1. When setting up a new message session from a socket message where the session does not currently exist, I seem to be incorrectly setting the contact information for the message session when pushing to allMessages. Inspect how you are retrieving contact information on new message session creations
+    */
+
     if (socketMessage) {
       log.devLog("Message from socket", socketMessage);
 

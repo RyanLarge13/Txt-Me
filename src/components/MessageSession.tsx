@@ -29,14 +29,17 @@ import { TiMessages } from "react-icons/ti";
 import { useDatabase } from "../context/dbContext";
 import UserCtxt from "../context/userCtxt";
 import useLogger from "../hooks/useLogger";
+import useNotifActions from "../hooks/useNotifActions";
 import useSocket from "../hooks/useSocket";
 import useUserData from "../hooks/useUserData";
 import { Message, MessageSessionType } from "../types/userTypes";
 import { defaultMessage } from "../utils/constants";
+import { valPhoneNumber } from "../utils/validator";
 
 const MessageSession = () => {
   const { messageSession, allMessages, setAllMessages } = useContext(UserCtxt);
   const { IDB_AddMessage } = useDatabase();
+  const { addErrorNotif } = useNotifActions();
 
   const [value, setValue] = useState("");
   const [phoneNumber] = useUserData("phoneNumber");
@@ -53,6 +56,8 @@ const MessageSession = () => {
       log.devLog(
         "message session exists inside of useEffect being called after a change and update to allMessages map state"
       );
+
+      // Query messages from allMessages map because messageSession is not being updated on every text received or sent only allMessages is being updated
       const newMessageList =
         allMessages.get(messageSession?.number)?.messages || [];
 
@@ -65,6 +70,7 @@ const MessageSession = () => {
     }
   }, [allMessages, messageSession]);
 
+  // @Consider ----------------------
   // Another method found in another part of code (socketCtxt) almost identical. Consider consolidating
   const M_AddMessageToIndexedDB = async (newMessage: Message) => {
     try {
@@ -81,7 +87,29 @@ const MessageSession = () => {
     e: FormEvent<HTMLFormElement>,
     messageSession: MessageSessionType
   ) => {
+    /*
+    TODO:
+      IMPLEMENT:
+        1. If phoneNumber fails to be present check indexDB for the phone number instead of showing cannot send message error. Could potentially remove all of this if I find the issue of why phoneNumber is and empty string
+        
+        2. If no bugs are found and phoneNumber can potentially be null "" or undefined then possibly add an option in the notification to query for the phone number in a user friendly prompt inside the NotifActions array
+      DEBUG:  
+        1. Make sure fromnumber aka: your own number associated with the current users account exists and is valid before trying to send a message. phoneNumber seems to not exists in some kind of situation. Possibly because the login is not updating the user object correctly?
+    */
     e.preventDefault();
+
+    log.devLogDebug("Checking if phone number exists", phoneNumber);
+
+    // If the current users phoneNumber cannot be found for some reason, prompt them to refresh the screen.
+    if (!phoneNumber || !valPhoneNumber(phoneNumber).valid) {
+      addErrorNotif(
+        "Failed To Send",
+        "We could not send your message. Please refresh and try again",
+        true,
+        [{ text: "refresh", func: (): void => window.location.reload() }]
+      );
+      return;
+    }
 
     const newMessage = {
       ...defaultMessage,

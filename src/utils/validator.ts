@@ -16,6 +16,12 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
+/*
+TODO:
+  DEBUG:
+    1. Validating pin that start with 0. Possibly running into issues with a defining length to check for
+*/
+
 interface EscapeMap {
   [key: string]: string;
 }

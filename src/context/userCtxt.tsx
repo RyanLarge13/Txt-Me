@@ -60,6 +60,12 @@ export const UserProvider = ({
 
   // useEffect hooks -------------------------------------------------------------------
   useEffect(() => {
+    log.devLog(
+      "Decoy useEffect to see if this context is being rerendered unnecessarily"
+    );
+  }, []);
+
+  useEffect(() => {
     // Fetch user data and contacts to update
     if (token) {
       log.devLog(
@@ -140,15 +146,15 @@ export const UserProvider = ({
     try {
       const response = await API_GetContacts(token);
 
-      const contacts = response.data?.data?.contacts || [];
+      const serverContacts = response.data?.data?.contacts || [];
 
       // Handle any deletion or additions to contacts
       // Possibly need to implement a tracking system to make
       // sure that users devices stay correctly synced
-      setContacts(contacts);
+      setContacts(serverContacts);
       // For now just add what contacts you get back from the server into the local DB
       try {
-        contacts.forEach(async (c: Contacts) => {
+        serverContacts.forEach(async (c: Contacts) => {
           log.devLog("Adding contact from server to the local IDB database");
           await IDB_AddContact(c);
         });

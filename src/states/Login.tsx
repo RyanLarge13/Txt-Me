@@ -35,6 +35,7 @@ import useNotifActions from "../hooks/useNotifActions.ts";
 import { API_PinEmail, API_PinPhone } from "../utils/api.ts";
 import { valEmail, valPhoneNumber } from "../utils/validator.ts";
 
+// This small component helps create an interactive, reactive and efficient input field without causing unnecessary rerenders
 const ValueInput = React.memo(
   ({
     retrieveValue,
@@ -89,6 +90,7 @@ const LoginPhone = (): JSX.Element => {
     return true;
   };
 
+  // Handle phone pin sends the phone number provided to the server to send a pin as a text message for authentication
   const handlePhonePin = useCallback(
     async (e: FormEvent<HTMLFormElement>): Promise<void> => {
       e.preventDefault();
@@ -199,6 +201,7 @@ const LoginEmail = (): JSX.Element => {
     return true;
   };
 
+  // Handle phone pin sends the email provided to the server to send a pin as a text message for authentication
   const handleEmailPin = useCallback(
     async (e: FormEvent<HTMLFormElement>): Promise<void> => {
       e.preventDefault();

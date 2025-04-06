@@ -22,6 +22,7 @@ import { MdMarkEmailRead } from "react-icons/md";
 import { useNavigate, useParams } from "react-router-dom";
 import { ClipLoader } from "react-spinners";
 
+import ValueInput from "../components/ValueInput.tsx";
 import { useConfig } from "../context/configContext.tsx";
 import { useDatabase } from "../context/dbContext.tsx";
 import useLogger from "../hooks/useLogger.ts";
@@ -30,34 +31,6 @@ import useUserData from "../hooks/useUserData.ts";
 import { API_VerifyEmail, API_VerifyEmailLogin } from "../utils/api";
 import { defaultUser } from "../utils/constants.js";
 import { valEmail, valInt } from "../utils/validator.ts";
-
-const ValueInput = React.memo(
-  ({
-    retrieveValue,
-    placeholder,
-    type,
-  }: {
-    retrieveValue: (value: string) => void;
-    placeholder: string;
-    type: string;
-  }): JSX.Element => {
-    const [value, setValue] = useState("");
-
-    return (
-      <input
-        autoFocus={true}
-        onChange={(e) => {
-          retrieveValue(e.target.value);
-          setValue(e.target.value);
-        }}
-        type={type}
-        value={value}
-        className="focus:outline-none py-2 my-1 bg-[transparent] w-full"
-        placeholder={placeholder}
-      />
-    );
-  }
-);
 
 const EmailVerify = (): JSX.Element => {
   const { setUser } = useConfig();
@@ -101,6 +74,11 @@ const EmailVerify = (): JSX.Element => {
   };
 
   const verifyPin = (): boolean => {
+    /*
+    TODO: 
+      DEBUG: 
+        1. Find out if Number(pin) where pin starts with a 0 is causing an error here when doing length checks
+    */
     const pinNumber = Number(emailPin.current);
     if (!pinNumber || isNaN(pinNumber)) {
       addErrorNotif(
@@ -220,7 +198,7 @@ const EmailVerify = (): JSX.Element => {
         );
       }
 
-      setUser((prev) => ({ ...prev, authToken: serverUser.authToken }));
+      setUser((prev) => ({ ...prev, authToken: serverToken }));
 
       try {
         await updateUserInDB({ ...serverUser, authToken: serverToken });
