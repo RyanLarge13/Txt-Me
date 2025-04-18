@@ -85,7 +85,7 @@ export const UserProvider = ({
 
   const M_BuildMessagesMap = (
     messages: Message[],
-    contacts: Contacts[]
+    dbContacts: Contacts[]
   ): void => {
     const newMap: AllMessages = new Map();
 
@@ -93,12 +93,19 @@ export const UserProvider = ({
       "In build message map. User Context. Messages: ",
       messages,
       "Contacts: ",
-      contacts
+      dbContacts
     );
 
     messages.forEach((m: Message) => {
-      const contact = contacts.find((c) => c.number === m.fromnumber);
+      // Look for both to and from number. Incase the way the message was stored?? Not sure if this is necessary
+      const contact = dbContacts.find(
+        (c) => c.number === m.fromnumber || m.tonumber
+      );
 
+      /*
+        TODO:
+          1. Clean this up. Not so many if / else blocks
+      */
       if (!newMap.has(m.fromnumber)) {
         if (!contact) {
           log.logAllError(
@@ -171,6 +178,7 @@ export const UserProvider = ({
 
   const M_FetchLatestMessages = async () => {
     try {
+      // Why is this commented out?
       // const response = await API_GetMessages(token);
       // log.devLog(response);
       log.devLog(
@@ -186,13 +194,17 @@ export const UserProvider = ({
 
   const M_FetchLocalMessagesAndContacts = async (): Promise<void> => {
     const messages: Message[] = (await getMessagesData()) || [];
-    const contacts: Contacts[] = (await getContactsData()) || [];
+    const dbContacts: Contacts[] = (await getContactsData()) || [];
 
-    log.devLog("Messages and contacts data from IndexedDB", messages, contacts);
+    log.devLog(
+      "Messages and contacts data from IndexedDB",
+      messages,
+      dbContacts
+    );
 
     // Add messages and contact to state
-    setContacts(contacts);
-    M_BuildMessagesMap(messages, contacts);
+    setContacts(dbContacts);
+    M_BuildMessagesMap(messages, dbContacts);
   };
 
   const M_FetchStoredSession = async (): Promise<void> => {
