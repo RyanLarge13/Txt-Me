@@ -38,7 +38,7 @@ import { valPhoneNumber } from "../utils/validator";
 
 const MessageSession = () => {
   const { messageSession, allMessages, setAllMessages } = useContext(UserCtxt);
-  const { IDB_AddMessage, getPhoneNumber } = useDatabase();
+  const { IDB_AddMessage } = useDatabase();
   const { addErrorNotif } = useNotifActions();
 
   const [value, setValue] = useState("");
@@ -47,7 +47,7 @@ const MessageSession = () => {
   );
 
   // Using let variable to possibly update phone number if when sending message phone number is null undefined or an empty string. I would like to get rid of this later and switch back to const instead of let for consistency. I should not have to query for a phone number again
-  let [phoneNumber] = useUserData("phoneNumber");
+  const [phoneNumber] = useUserData("phoneNumber");
 
   const messagesRef = useRef<HTMLDivElement | null>(null);
   const { socket } = useSocket();
@@ -89,15 +89,12 @@ const MessageSession = () => {
     e: FormEvent<HTMLFormElement>,
     messageSession: MessageSessionType
   ) => {
-    const updatePhoneNumber = async () => {
-      phoneNumber = await getPhoneNumber();
-    };
+    e.preventDefault();
 
     if (phoneNumber === "") {
       log.devLog(
         "Phone number is an empty string when attempting to send a new message. Setting phoneNumber"
       );
-      updatePhoneNumber();
     }
     /*
     TODO:
@@ -111,18 +108,31 @@ const MessageSession = () => {
         1. So far phoneNumber is checked twice, but the first time it is checked the phone number is re-queried from IndexDB before throwing an error to the user @see updatePhoneNumber && IMPLEMENT 1.
       
     */
-    e.preventDefault();
 
-    log.devLogDebug("Checking if phone number exists", phoneNumber);
+    log.devLog("Checking if phone number exists", phoneNumber);
 
     // If the current users phoneNumber cannot be found for some reason, prompt them to refresh the screen.
-    if (!phoneNumber || !valPhoneNumber(phoneNumber).valid) {
+    if (!phoneNumber) {
       addErrorNotif(
         "Failed To Send",
         "We could not send your message. Please refresh and try again",
         true,
         [{ text: "refresh", func: (): void => window.location.reload() }]
       );
+      return;
+    }
+
+    const validPhone = valPhoneNumber(phoneNumber);
+
+    if (!validPhone.valid) {
+      /*
+      TODO:
+        IMPLEMENT:
+          1. Prompt the user to update their phone number??
+       */
+      addErrorNotif("Failed To Send", validPhone.reason, true, [
+        { text: "refresh", func: (): void => window.location.reload() },
+      ]);
       return;
     }
 

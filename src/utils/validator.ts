@@ -201,7 +201,7 @@ export const valPhoneNumber = (phoneNumber: string): ValidationReturnType => {
   const isValidPhone = valStr({
     string: phoneNumber,
     maxLength: 14,
-    minLength: 12,
+    minLength: 10,
     customRegex: phoneRegex,
     customEscapeMap: {
       "(": "",
