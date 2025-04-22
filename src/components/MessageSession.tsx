@@ -16,13 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import React, {
-  FormEvent,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { FormEvent, useContext, useEffect, useRef, useState } from "react";
 import { IoSend } from "react-icons/io5";
 import { TiMessages } from "react-icons/ti";
 
@@ -46,7 +40,10 @@ const MessageSession = () => {
     messageSession?.messages || []
   );
 
-  // Using let variable to possibly update phone number if when sending message phone number is null undefined or an empty string. I would like to get rid of this later and switch back to const instead of let for consistency. I should not have to query for a phone number again
+  // Using let variable to possibly update phone number if when
+  // sending message phone number is null undefined or an empty string.
+  // I would like to get rid of this later and switch back to const instead
+  // of let for consistency. I should not have to query for a phone number again
   const [phoneNumber] = useUserData("phoneNumber");
 
   const messagesRef = useRef<HTMLDivElement | null>(null);
@@ -59,7 +56,9 @@ const MessageSession = () => {
         "message session exists inside of useEffect being called after a change and update to allMessages map state"
       );
 
-      // Query messages from allMessages map because messageSession is not being updated on every text received or sent only allMessages is being updated
+      // Query messages from allMessages map because messageSession is not
+      // being updated on every text received or sent only allMessages is being
+      // updated
       const newMessageList =
         allMessages.get(messageSession?.number)?.messages || [];
 
@@ -72,8 +71,12 @@ const MessageSession = () => {
     }
   }, [allMessages, messageSession]);
 
-  // @Consider ----------------------
-  // Another method found in another part of code (socketCtxt) almost identical. Consider consolidating
+  /*
+      TODO:
+        CONSIDER:
+          1. Another method found in another part of code (socketCtxt) almost identical. 
+          Consider consolidating
+       */
   const M_AddMessageToIndexedDB = async (newMessage: Message) => {
     try {
       await IDB_AddMessage(newMessage);
@@ -90,37 +93,29 @@ const MessageSession = () => {
     messageSession: MessageSessionType
   ) => {
     e.preventDefault();
-
-    if (phoneNumber === "") {
-      log.devLog(
-        "Phone number is an empty string when attempting to send a new message. Setting phoneNumber"
-      );
-    }
     /*
     TODO:
       IMPLEMENT:
-        X - 1. If phoneNumber fails to be present check indexDB for the phone number instead of showing cannot send message error. Could potentially remove all of this if I find the issue of why phoneNumber is and empty string
+        X - 1. If phoneNumber fails to be present check indexDB for the phone number instead of 
+        showing cannot send message error. Could potentially remove all of this if I find the 
+        issue of why phoneNumber is and empty string
         
-        2. If no bugs are found and phoneNumber can potentially be null "" or undefined then possibly add an option in the notification to query for the phone number in a user friendly prompt inside the NotifActions array
+        2. If no bugs are found and phoneNumber can potentially be null "" or undefined 
+        then possibly add an option in the notification to query for the phone number in a user 
+        friendly prompt inside the NotifActions array
       DEBUG:  
-        1. Make sure fromnumber aka: your own number associated with the current users account exists and is valid before trying to send a message. phoneNumber seems to not exists in some kind of situation. Possibly because the login is not updating the user object correctly?
+        1. Make sure fromnumber aka: your own number associated with the current users 
+        account exists and is valid before trying to send a message. phoneNumber seems to not 
+        exists in some kind of situation. Possibly because the login is not updating the user 
+        object correctly?
       DONE:
-        1. So far phoneNumber is checked twice, but the first time it is checked the phone number is re-queried from IndexDB before throwing an error to the user @see updatePhoneNumber && IMPLEMENT 1.
+        1. So far phoneNumber is checked twice, but the first time it is checked the phone number 
+        is re-queried from IndexDB before throwing an error to the user 
+        @see updatePhoneNumber && IMPLEMENT 1.
       
     */
 
     log.devLog("Checking if phone number exists", phoneNumber);
-
-    // If the current users phoneNumber cannot be found for some reason, prompt them to refresh the screen.
-    if (!phoneNumber) {
-      addErrorNotif(
-        "Failed To Send",
-        "We could not send your message. Please refresh and try again",
-        true,
-        [{ text: "refresh", func: (): void => window.location.reload() }]
-      );
-      return;
-    }
 
     const validPhone = valPhoneNumber(phoneNumber);
 

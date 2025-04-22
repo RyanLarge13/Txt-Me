@@ -164,9 +164,20 @@ const EmailVerify = (): JSX.Element => {
     }
   };
 
+  // This function takes the pin sent to the users email and verifies that that pin is correct
+  // and logs in the user sending back the auth and user details from the server
   const handleEmailLogin = async (
     e: FormEvent<HTMLFormElement>
   ): Promise<void> => {
+    /*
+     TODO:
+      IMPLEMENT: 
+        1. Confirm the storage of server user is correct and consistent.
+
+        2. Make sure ram is being updated correctly with the user information. User phone number comes back 
+        as an empty string after first login.
+     */
+
     setLoading(true);
     e.preventDefault();
 

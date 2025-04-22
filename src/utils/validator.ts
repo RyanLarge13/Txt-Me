@@ -62,10 +62,9 @@ export const valStr = ({
     '"': "&quot;",
     "'": "&#039;",
   },
-
   inputName = "value",
 }: StrParams): ValidationReturnType => {
-  string.trim();
+  string = string.trim();
   if (typeof string !== "string") {
     return { valid: false, reason: `${inputName} must be of type string` };
   }
@@ -82,7 +81,7 @@ export const valStr = ({
   if (!nonDangerousPatterns) {
     return { valid: false, reason: `Invalid ${inputName}` };
   }
-  string.replace(
+  string = string.replace(
     new RegExp(`[${Object.keys(customEscapeMap).join("")}]`),
     (match) => customEscapeMap[match]
   );
@@ -197,7 +196,34 @@ export const valPhoneNumber = (phoneNumber: string): ValidationReturnType => {
   if (typeof phoneNumber !== "string") {
     return { valid: false, reason: "Phone number must be a string" };
   }
-  const phoneRegex = /^(\(\d{3}\)-\d{3}-\d{4}|\d{3}-\d{3}-\d{4})$/;
+
+  /*
+  TODO:
+    NOTE: 
+    The regex below only accepts certain formats which. Commenting out for now to accept more formats until
+    the server, indexedDB and state are fully synced and compatible with formats around the world.
+    Examples that will pass with the commented out regex below:
+    123-123-1234
+    (123)-123-1234
+    const phoneRegex = /^(\(\d{3}\)-\d{3}-\d{4}|\d{3}-\d{3}-\d{4})$/;
+
+    IMPLEMENT: 
+      1. Synchronize server, indexedDB and in memory phone number storage and processing.
+  */
+
+  /* 
+  Examples that will pass with the current implemented regex pattern below:
+    7029811370
+    702-981-1370
+    (702)-981-1370
+    (702) 981-1370
+    702 981 1370
+    702.981.1370
+    +1 (702) 981-1370
+    1-702-981-1370
+  */
+  const phoneRegex = /^(\+?1[\s.-]?)?(\(?\d{3}\)?)[\s.-]?\d{3}[\s.-]?\d{4}$/;
+
   const isValidPhone = valStr({
     string: phoneNumber,
     maxLength: 14,
