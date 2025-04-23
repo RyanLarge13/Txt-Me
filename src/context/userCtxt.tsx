@@ -104,17 +104,30 @@ export const UserProvider = ({
 
       /*
         TODO:
-          1. Clean this up. Not so many if / else blocks
+          IMPLEMENT:
+            1. Clean this up. Not so many if / else blocks
       */
-      if (!newMap.has(m.fromnumber)) {
-        if (!contact) {
-          log.logAllError(
-            "No contact in the db from this number when building message map. Check server",
-            contact,
-            `Number: ${m.fromnumber}`
-          );
-        }
+      if (!contact) {
+        log.logAllError(
+          "No contact in the db from this number when building message map. Check server",
+          contact,
+          `Number: ${m.fromnumber}`
+        );
+      }
 
+      // Phone number for user MUST be present
+      if (!myPhoneNumber || myPhoneNumber === "") {
+        log.logAllError(
+          "No stored phone number present for the user, cannot compare message with stored number. Users phone number: ",
+          myPhoneNumber
+        );
+
+        throw new Error(
+          "No phone number present for user. Check server and how you are storing the phone number"
+        );
+      }
+
+      if (!newMap.has(m.fromnumber)) {
         if (m.fromnumber === myPhoneNumber) {
           if (!newMap.has(m.tonumber)) {
             newMap.set(m.tonumber, {
@@ -146,6 +159,7 @@ export const UserProvider = ({
       }
     });
 
+    log.devLog("Map after building it with available data", newMap);
     setAllMessages(newMap);
   };
 
@@ -245,6 +259,10 @@ export const UserProvider = ({
 
       await M_FetchLatestContacts();
       await M_FetchLatestMessages();
+
+      // setTimeout(() => {
+      //   log.devLog("After timeout, here is the all messages map", allMessages);
+      // }, 5000);
 
       // Update the Local Database
       // Update app state

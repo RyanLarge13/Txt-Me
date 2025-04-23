@@ -146,6 +146,11 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       log.devLog("Message from socket", socketMessage);
 
       if (!allMessages.has(socketMessage.fromnumber)) {
+        log.devLog(
+          "allMessages map does not contain the phone number for some reason",
+          socketMessage.fromnumber
+        );
+
         allMessages.set(socketMessage.fromnumber, {
           contact:
             contacts.find(
@@ -154,6 +159,10 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
           messages: [socketMessage],
         });
       } else {
+        log.devLog(
+          "allMessages does contain from number. Pushing message to array"
+        );
+
         allMessages.get(socketMessage.fromnumber)?.messages.push(socketMessage);
       }
 
