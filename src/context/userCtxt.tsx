@@ -17,7 +17,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { AxiosResponse } from "axios";
-import { createContext, ReactNode, useEffect, useState } from "react";
+import {
+  createContext,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 
 import useLogger from "../hooks/useLogger.ts";
 import {
@@ -99,7 +105,7 @@ export const UserProvider = ({
     messages.forEach((m: Message) => {
       // Look for both to and from number. Incase the way the message was stored?? Not sure if this is necessary
       const contact = dbContacts.find(
-        (c) => c.number === m.fromnumber || m.tonumber
+        (c) => c.number === m.fromnumber || c.number === m.tonumber
       );
 
       /*
@@ -127,35 +133,17 @@ export const UserProvider = ({
         );
       }
 
-      if (!newMap.has(m.fromnumber)) {
-        if (m.fromnumber === myPhoneNumber) {
-          if (!newMap.has(m.tonumber)) {
-            newMap.set(m.tonumber, {
-              contact: contact || null,
-              messages: [m],
-            });
-          } else {
-            newMap.get(m.tonumber)?.messages.push(m);
-          }
-        } else {
-          newMap.set(m.fromnumber, {
-            contact: contact || null,
-            messages: [m],
-          });
-        }
+      // Check for the phone number possibly being the current users
+      const targetNumber =
+        m.fromnumber === myPhoneNumber ? m.tonumber : m.fromnumber;
+
+      if (!newMap.has(targetNumber)) {
+        newMap.set(targetNumber, {
+          contact: contact || null,
+          messages: [m],
+        });
       } else {
-        if (m.fromnumber === myPhoneNumber) {
-          if (!newMap.has(m.tonumber)) {
-            newMap.set(m.tonumber, {
-              contact: contact || null,
-              messages: [m],
-            });
-          } else {
-            newMap.get(m.tonumber)?.messages.push(m);
-          }
-        } else {
-          newMap.get(m.fromnumber)?.messages.push(m);
-        }
+        newMap.get(targetNumber)?.messages.push(m);
       }
     });
 
@@ -273,6 +261,12 @@ export const UserProvider = ({
 
   // Local Scope Context Functions --------------------------------------------------
 
+  // Getters ---------------------------------------
+  const getAllMessages = useCallback(() => {
+    return allMessages;
+  }, [allMessages]);
+  // Getters ---------------------------------------
+
   return (
     <UserCtxt.Provider
       // Please keep static state on top half and set state hooks on lower half
@@ -280,6 +274,7 @@ export const UserProvider = ({
         contacts,
         messageSession,
         allMessages,
+        getAllMessages,
         setAllMessages,
         setMessageSession,
         setContacts,

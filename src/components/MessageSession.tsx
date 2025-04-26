@@ -16,7 +16,13 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import React, { FormEvent, useContext, useEffect, useRef, useState } from "react";
+import React, {
+  FormEvent,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { IoSend } from "react-icons/io5";
 import { TiMessages } from "react-icons/ti";
 
@@ -53,7 +59,8 @@ const MessageSession = () => {
   useEffect(() => {
     if (messageSession) {
       log.devLog(
-        "message session exists inside of useEffect being called after a change and update to allMessages map state"
+        "message session exists inside of useEffect being called after a change and update to allMessages map state",
+        messageSession
       );
 
       // Query messages from allMessages map because messageSession is not

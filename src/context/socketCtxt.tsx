@@ -18,7 +18,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 /// <reference types="vite/client" />
 
-import React, { createContext, useContext, useEffect, useRef } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+} from "react";
 import io, { Socket } from "socket.io-client";
 
 import UserCtxt from "../context/userCtxt";
@@ -48,7 +54,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         socketRef.current.disconnect();
       }
     };
-  }, [socketRef]);
+  }, [socketRef, allMessages]);
   // useEffects -------------------------------------------------------
 
   // Local Scop Context Methods ---------------------------------------
@@ -135,59 +141,64 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     }, 10000);
   };
 
-  const M_HandleTextMessage = (socketMessage: Message): void => {
-    const newMap = new Map();
-    /*
+  const M_HandleTextMessage = useCallback(
+    (socketMessage: Message): void => {
+      /*
     TODO:
       DEBUG:
         1. When setting up a new message session from a socket message where the session does not currently exist, I seem to be incorrectly setting the contact information for the message session when pushing to allMessages. Inspect how you are retrieving contact information on new message session creations
     */
 
-    if (socketMessage) {
-      log.devLog("Message from socket", socketMessage);
+      if (socketMessage) {
+        log.devLog("Message from socket", socketMessage);
 
-      if (!allMessages.has(socketMessage.fromnumber)) {
-        log.devLog(
-          "allMessages map does not contain the phone number for some reason",
-          socketMessage.fromnumber,
-          allMessages
-        );
+        // Call getter to ensure fresh allMessages map out of state
 
-        newMap.set(socketMessage.fromnumber, {
-          contact:
-            contacts.find(
-              (c: Contacts) => c.number === socketMessage.fromnumber
-            ) || null,
-          messages: [socketMessage],
-        });
+        if (!allMessages.has(socketMessage.fromnumber)) {
+          log.devLog(
+            "allMessages map does not contain the phone number for some reason",
+            socketMessage.fromnumber,
+            allMessages
+          );
+
+          allMessages.set(socketMessage.fromnumber, {
+            contact:
+              contacts.find(
+                (c: Contacts) => c.number === socketMessage.fromnumber
+              ) || null,
+            messages: [socketMessage],
+          });
+        } else {
+          log.devLog(
+            "newAllMessages does contain from number. Pushing message to array"
+          );
+
+          const session = allMessages.get(socketMessage.fromnumber);
+          if (session) {
+            // Create a new array instead of mutating the old one
+            const updatedMessages = [...session.messages, socketMessage];
+
+            allMessages.set(socketMessage.fromnumber, {
+              ...session,
+              messages: updatedMessages,
+            });
+          }
+        }
+
+        // Trigger rerender. But for who? The entire <Profile /> component? Sounds a bit much
+        const newMap = new Map(allMessages);
+
+        setAllMessages(newMap);
+        M_AddMessageToIndexedDB(socketMessage);
       } else {
-        log.devLog(
-          "allMessages does contain from number. Pushing message to array"
+        log.devLogDebug(
+          "Socket message came through with unknown data type",
+          socketMessage
         );
-        const mesgs = allMessages.get(socketMessage.fromnumber)?.messages || [];
-        mesgs.push(socketMessage);
-
-        newMap.set(socketMessage.fromnumber, {
-          contact:
-            contacts.find(
-              (c: Contacts) => c.number === socketMessage.fromnumber
-            ) || null,
-          messages: mesgs,
-        });
       }
-
-      // Trigger rerender. But for who? The entire <Profile /> component? Sounds a bit much
-      // const newMap: AllMessages = new Map(allMessages);
-
-      setAllMessages(newMap);
-      M_AddMessageToIndexedDB(socketMessage);
-    } else {
-      log.devLogDebug(
-        "Socket message came through with unknown data type",
-        socketMessage
-      );
-    }
-  };
+    },
+    [allMessages]
+  );
 
   const M_AddMessageToIndexedDB = async (newMessage: Message) => {
     try {

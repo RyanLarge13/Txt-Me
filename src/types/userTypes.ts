@@ -59,6 +59,7 @@ export interface UserCtxtProps {
   setContacts: Dispatch<SetStateAction<Contacts[] | []>>;
   setMessageSession: Dispatch<SetStateAction<MessageSessionType | null>>;
   setAllMessages: Dispatch<SetStateAction<AllMessages>>;
+  getAllMessages: () => AllMessages;
   contacts: Contacts[] | [];
   messageSession: MessageSessionType | null;
   allMessages: AllMessages;
