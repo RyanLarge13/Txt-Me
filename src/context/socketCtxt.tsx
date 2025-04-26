@@ -136,6 +136,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const M_HandleTextMessage = (socketMessage: Message): void => {
+    const newMap = new Map();
     /*
     TODO:
       DEBUG:
@@ -148,10 +149,11 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       if (!allMessages.has(socketMessage.fromnumber)) {
         log.devLog(
           "allMessages map does not contain the phone number for some reason",
-          socketMessage.fromnumber
+          socketMessage.fromnumber,
+          allMessages
         );
 
-        allMessages.set(socketMessage.fromnumber, {
+        newMap.set(socketMessage.fromnumber, {
           contact:
             contacts.find(
               (c: Contacts) => c.number === socketMessage.fromnumber
@@ -162,12 +164,20 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         log.devLog(
           "allMessages does contain from number. Pushing message to array"
         );
+        const mesgs = allMessages.get(socketMessage.fromnumber)?.messages || [];
+        mesgs.push(socketMessage);
 
-        allMessages.get(socketMessage.fromnumber)?.messages.push(socketMessage);
+        newMap.set(socketMessage.fromnumber, {
+          contact:
+            contacts.find(
+              (c: Contacts) => c.number === socketMessage.fromnumber
+            ) || null,
+          messages: mesgs,
+        });
       }
 
       // Trigger rerender. But for who? The entire <Profile /> component? Sounds a bit much
-      const newMap = new Map(allMessages);
+      // const newMap: AllMessages = new Map(allMessages);
 
       setAllMessages(newMap);
       M_AddMessageToIndexedDB(socketMessage);
