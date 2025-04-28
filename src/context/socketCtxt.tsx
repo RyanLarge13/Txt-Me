@@ -23,7 +23,7 @@ import React, {
   useCallback,
   useContext,
   useEffect,
-  useRef,
+  useRef
 } from "react";
 import io, { Socket } from "socket.io-client";
 
@@ -42,6 +42,8 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
   // UseRef for socket to avoid unwanted rerenders
   const socketRef = useRef<Socket | null>(null);
+  // Freshers allMessages data made available for M_HandleTextMessage
+  const allMessagesRef = useRef(allMessages);
 
   // useEffects -----------------------------------------------------
   useEffect(() => {
@@ -54,7 +56,12 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         socketRef.current.disconnect();
       }
     };
-  }, [socketRef, allMessages]);
+  }, [socketRef]);
+
+  // Make sure we always have the freshest allMessages data from UserCtxt inside of the attached socket listener M_HandleTextMessage
+  useEffect(() => {
+    allMessagesRef.current = allMessages;
+  }, [allMessages]);
   // useEffects -------------------------------------------------------
 
   // Local Scop Context Methods ---------------------------------------
@@ -82,15 +89,15 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         "No socket url specified! Check server or development env variable immediately",
         socketURL
       );
-      return;
+      throw new Error("Check ENV file for socket url");
     }
 
     socketRef.current = io(socketURL, {
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
       query: {
-        number: number,
-      },
+        number: number
+      }
     });
 
     M_AttachListeners(socketRef.current);
@@ -108,10 +115,10 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     socketRef.on("disconnect", () => {
       M_HandleDisconnect();
     });
-    socketRef.on("connect_error", (error) => {
+    socketRef.on("connect_error", error => {
       M_HandleError(error);
     });
-    socketRef.on("text-message", (socketMessage) => {
+    socketRef.on("text-message", socketMessage => {
       console.log(
         "Message from the server!!! Socket message from other client with socketMessage attached"
       );
@@ -148,45 +155,46 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       DEBUG:
         1. When setting up a new message session from a socket message where the session does not currently exist, I seem to be incorrectly setting the contact information for the message session when pushing to allMessages. Inspect how you are retrieving contact information on new message session creations
     */
+      const currentAllMessages = allMessagesRef.current;
 
       if (socketMessage) {
         log.devLog("Message from socket", socketMessage);
 
         // Call getter to ensure fresh allMessages map out of state
 
-        if (!allMessages.has(socketMessage.fromnumber)) {
+        if (!currentAllMessages.has(socketMessage.fromnumber)) {
           log.devLog(
             "allMessages map does not contain the phone number for some reason",
             socketMessage.fromnumber,
-            allMessages
+            currentAllMessages
           );
 
-          allMessages.set(socketMessage.fromnumber, {
+          currentAllMessages.set(socketMessage.fromnumber, {
             contact:
               contacts.find(
                 (c: Contacts) => c.number === socketMessage.fromnumber
               ) || null,
-            messages: [socketMessage],
+            messages: [socketMessage]
           });
         } else {
           log.devLog(
             "newAllMessages does contain from number. Pushing message to array"
           );
 
-          const session = allMessages.get(socketMessage.fromnumber);
+          const session = currentAllMessages.get(socketMessage.fromnumber);
           if (session) {
             // Create a new array instead of mutating the old one
             const updatedMessages = [...session.messages, socketMessage];
 
-            allMessages.set(socketMessage.fromnumber, {
+            currentAllMessages.set(socketMessage.fromnumber, {
               ...session,
-              messages: updatedMessages,
+              messages: updatedMessages
             });
           }
         }
 
         // Trigger rerender. But for who? The entire <Profile /> component? Sounds a bit much
-        const newMap = new Map(allMessages);
+        const newMap = new Map(currentAllMessages);
 
         setAllMessages(newMap);
         M_AddMessageToIndexedDB(socketMessage);
@@ -197,7 +205,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         );
       }
     },
-    [allMessages]
+    [contacts, setAllMessages, IDB_AddMessage]
   );
 
   const M_AddMessageToIndexedDB = async (newMessage: Message) => {
