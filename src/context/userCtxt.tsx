@@ -17,23 +17,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { AxiosResponse } from "axios";
-import {
-  createContext,
-  ReactNode,
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
+import { createContext, ReactNode, useEffect, useState } from "react";
 
 import useLogger from "../hooks/useLogger.ts";
 import {
-  AllMessages,
-  Contacts,
-  Message,
-  MessageSessionType,
-  UserCtxtProps,
+    AllMessages, Contacts, Message, MessageSessionType, UserCtxtProps
 } from "../types/userTypes.ts";
-import { API_FetchUserData, API_GetContacts } from "../utils/api.ts";
+import { API_FetchUserData, API_GetContacts, API_GetMessages } from "../utils/api.ts";
 import { valPhoneNumber } from "../utils/validator.ts";
 import { useConfig } from "./configContext.tsx";
 import { useDatabase } from "./dbContext.tsx";
@@ -47,8 +37,8 @@ export const UserProvider = ({
 }): JSX.Element => {
   // State and state hooks --------------------------------------------------------------
   const {
-    getContactsData,
-    getMessagesData,
+    IDB_GetContactsData,
+    IDB_GetMessagesData,
     IDB_AddContact,
     IDB_GetLastMessageSession,
   } = useDatabase();
@@ -151,11 +141,24 @@ export const UserProvider = ({
     setAllMessages(newMap);
   };
 
+  const M_AddServerMessagesToMap = (serverMessages: Message[]) => {
+    log.devLog("Messages from server: ", serverMessages);
+  };
+
   const M_FetchLatestContacts = async (): Promise<void> => {
     try {
       const response = await API_GetContacts(token);
 
-      const serverContacts = response.data?.data?.contacts || [];
+      let serverContacts = response.data?.data?.contacts;
+
+      if (!serverContacts) {
+        log.logAllError(
+          "Error. Check response object. Check server to see why it is not returning at least an empty array",
+          response
+        );
+
+        serverContacts = [];
+      }
 
       // Handle any deletion or additions to contacts
       // Possibly need to implement a tracking system to make
@@ -180,12 +183,20 @@ export const UserProvider = ({
 
   const M_FetchLatestMessages = async () => {
     try {
-      // Why is this commented out?
-      // const response = await API_GetMessages(token);
-      // log.devLog(response);
-      log.devLog(
-        "Well, going to get messages from here at some point from the server"
-      );
+      const response = await API_GetMessages(token);
+
+      let serverMessages = response.data?.data?.messages;
+
+      if (!serverMessages) {
+        log.logAllError(
+          "Error. check response object. Also check server getMessages control method. Sending back no data for messages",
+          response
+        );
+
+        serverMessages = [];
+      }
+
+      M_AddServerMessagesToMap(serverMessages);
     } catch (err) {
       log.logAllError(
         "Error from the server when fetching latest messages from userCtxt.tsx",
@@ -195,8 +206,8 @@ export const UserProvider = ({
   };
 
   const M_FetchLocalMessagesAndContacts = async (): Promise<void> => {
-    const messages: Message[] = (await getMessagesData()) || [];
-    const dbContacts: Contacts[] = (await getContactsData()) || [];
+    const messages: Message[] = (await IDB_GetMessagesData()) || [];
+    const dbContacts: Contacts[] = (await IDB_GetContactsData()) || [];
 
     log.devLog(
       "Messages and contacts data from IndexedDB",
@@ -227,8 +238,6 @@ export const UserProvider = ({
         );
       }
 
-      // Maybe let us perform a few more checks before continuing with setting
-      // a message session to data we don't know is correct????!!!!!!!!!!!!!
       setMessageSession(lastSession);
     } catch (err) {
       log.logAllError(
@@ -245,27 +254,20 @@ export const UserProvider = ({
       const userDataResponse: AxiosResponse = await API_FetchUserData(token);
       log.devLog("Fetched user data from server", userDataResponse);
 
+      /*
+        TODO:
+          CONSIDER:
+            1. Should I call these and return the server data here to update app state 
+            and DB state within this method for latest contacts and latest messages or no? 
+      */
       await M_FetchLatestContacts();
       await M_FetchLatestMessages();
-
-      // setTimeout(() => {
-      //   log.devLog("After timeout, here is the all messages map", allMessages);
-      // }, 5000);
-
-      // Update the Local Database
-      // Update app state
     } catch (err) {
       log.logAllError("Error when fetching user data", err);
     }
   };
 
   // Local Scope Context Functions --------------------------------------------------
-
-  // Getters ---------------------------------------
-  const getAllMessages = useCallback(() => {
-    return allMessages;
-  }, [allMessages]);
-  // Getters ---------------------------------------
 
   return (
     <UserCtxt.Provider
@@ -274,7 +276,6 @@ export const UserProvider = ({
         contacts,
         messageSession,
         allMessages,
-        getAllMessages,
         setAllMessages,
         setMessageSession,
         setContacts,

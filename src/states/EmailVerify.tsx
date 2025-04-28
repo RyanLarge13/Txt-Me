@@ -36,7 +36,7 @@ const EmailVerify = (): JSX.Element => {
   const { setUser } = useConfig();
   const { addErrorNotif, addSuccessNotif, handleAPIErrorNotif } =
     useNotifActions();
-  const { updateUserInDB } = useDatabase();
+  const { IDB_UpdateUserInDB } = useDatabase();
 
   // const [emailPin, setEmailPin] = useState("");
   const [loading, setLoading] = useState(false);
@@ -212,7 +212,7 @@ const EmailVerify = (): JSX.Element => {
       setUser((prev) => ({ ...prev, authToken: serverToken }));
 
       try {
-        await updateUserInDB({ ...serverUser, authToken: serverToken });
+        await IDB_UpdateUserInDB({ ...serverUser, authToken: serverToken });
       } catch (err) {
         log.logAllError(
           "Error storing new token in Local DB after login email was called",

@@ -23,6 +23,7 @@ import { InteractiveCtxtTypes, MenuTitle } from "../types/interactiveCtxtTypes";
 
 const InteractiveCtxt = createContext({} as InteractiveCtxtTypes);
 
+// All of the global interactive state that should be shared across multiple components ---------------------------
 export const InteractiveProvider = ({
   children,
 }: {

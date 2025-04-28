@@ -18,13 +18,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 /// <reference types="vite/client" />
 
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef
-} from "react";
+import React, { createContext, useCallback, useContext, useEffect, useRef } from "react";
 import io, { Socket } from "socket.io-client";
 
 import UserCtxt from "../context/userCtxt";
@@ -36,7 +30,7 @@ import { useDatabase } from "./dbContext";
 export const SocketContext = createContext({} as SocketProps);
 
 export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
-  const { getPhoneNumber, IDB_AddMessage } = useDatabase();
+  const { IDB_GetPhoneNumber, IDB_AddMessage } = useDatabase();
   const { allMessages, contacts, setAllMessages } = useContext(UserCtxt);
   const log = useLogger();
 
@@ -66,7 +60,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Local Scop Context Methods ---------------------------------------
   const M_QueryPhoneNumber = async () => {
-    const phoneNumber = await getPhoneNumber();
+    const phoneNumber = await IDB_GetPhoneNumber();
     try {
       if (phoneNumber && socketRef) {
         M_SetUpSocket(phoneNumber);
@@ -96,8 +90,8 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
       query: {
-        number: number
-      }
+        number: number,
+      },
     });
 
     M_AttachListeners(socketRef.current);
@@ -115,10 +109,10 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     socketRef.on("disconnect", () => {
       M_HandleDisconnect();
     });
-    socketRef.on("connect_error", error => {
+    socketRef.on("connect_error", (error) => {
       M_HandleError(error);
     });
-    socketRef.on("text-message", socketMessage => {
+    socketRef.on("text-message", (socketMessage) => {
       console.log(
         "Message from the server!!! Socket message from other client with socketMessage attached"
       );
@@ -174,7 +168,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
               contacts.find(
                 (c: Contacts) => c.number === socketMessage.fromnumber
               ) || null,
-            messages: [socketMessage]
+            messages: [socketMessage],
           });
         } else {
           log.devLog(
@@ -188,7 +182,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
             currentAllMessages.set(socketMessage.fromnumber, {
               ...session,
-              messages: updatedMessages
+              messages: updatedMessages,
             });
           }
         }

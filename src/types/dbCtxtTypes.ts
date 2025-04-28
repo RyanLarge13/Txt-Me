@@ -49,17 +49,17 @@ export type ContactSettings = {
 };
 
 export interface DBCtxtProps {
-  getDB: () => Promise<IDBPDatabase>;
-  initDatabase: (db: IDBPDatabase) => Promise<AppSettings>;
-  getAppUserData: () => Promise<DBUser>;
-  getAppData: () => Promise<AppSettings>;
-  getThemeData: () => Promise<Theme[]>;
-  getMessagesData: () => Promise<Message[]>;
-  getContactsData: () => Promise<Contacts[]>;
-  getMessageSettingsData: () => Promise<MessageSettings[]>;
-  getContactSettingsData: () => Promise<ContactSettings[]>;
-  getPhoneNumber: () => Promise<string>;
-  updateUserInDB: (user: User) => Promise<IDBValidKey>;
+  IDB_GetDB: () => Promise<IDBPDatabase>;
+  IDB_InitDatabase: (db: IDBPDatabase) => Promise<AppSettings>;
+  IDB_GetAppUserData: () => Promise<DBUser>;
+  IDB_GetAppData: () => Promise<AppSettings>;
+  IDB_GetThemeData: () => Promise<Theme[]>;
+  IDB_GetMessagesData: () => Promise<Message[]>;
+  IDB_GetContactsData: () => Promise<Contacts[]>;
+  IDB_GetMessageSettingsData: () => Promise<MessageSettings[]>;
+  IDB_GetContactSettingsData: () => Promise<ContactSettings[]>;
+  IDB_GetPhoneNumber: () => Promise<string>;
+  IDB_UpdateUserInDB: (user: User) => Promise<IDBValidKey>;
   IDB_AddContact: (newContact: Contacts) => Promise<void>;
   IDB_UpdateMessageSession: (
     newSession: MessageSessionType

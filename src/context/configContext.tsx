@@ -16,22 +16,10 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {
-  createContext,
-  ReactNode,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from "react";
 
 import useLogger from "../hooks/useLogger";
-import {
-  AppData,
-  ConfigContextType,
-  Theme,
-  User,
-} from "../types/configCtxtTypes";
+import { AppData, ConfigContextType, Theme, User } from "../types/configCtxtTypes";
 import { useDatabase } from "./dbContext";
 
 export const ConfigContext = createContext({} as ConfigContextType);
@@ -41,7 +29,8 @@ export const ConfigProvider = ({
 }: {
   children: ReactNode;
 }): JSX.Element => {
-  const { getDB, initDatabase, getThemeData, getAppUserData } = useDatabase();
+  const { IDB_GetDB, IDB_InitDatabase, IDB_GetThemeData, IDB_GetAppUserData } =
+    useDatabase();
 
   const [appData, setAppData] = useState<AppData>({
     initialized: true,
@@ -76,8 +65,8 @@ export const ConfigProvider = ({
   }, []);
 
   const openDBBAndInit = async () => {
-    const db = await getDB();
-    const appInfo = await initDatabase(db);
+    const db = await IDB_GetDB();
+    const appInfo = await IDB_InitDatabase(db);
 
     log.devLog(
       "app info returned from the index db initialization method",
@@ -93,7 +82,7 @@ export const ConfigProvider = ({
   };
 
   const fetchLocalThemeData = async () => {
-    const themeData = await getThemeData();
+    const themeData = await IDB_GetThemeData();
 
     if (themeData) {
       setTheme(themeData[0]);
@@ -101,7 +90,7 @@ export const ConfigProvider = ({
   };
 
   const fetchLocalUserData = async () => {
-    const user = await getAppUserData();
+    const user = await IDB_GetAppUserData();
 
     if (user) {
       setUser(user);

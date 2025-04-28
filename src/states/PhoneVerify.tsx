@@ -59,7 +59,7 @@ const ValueInput = React.memo(
 );
 
 const PhoneVerify = (): JSX.Element => {
-  const { updateUserInDB } = useDatabase();
+  const { IDB_UpdateUserInDB } = useDatabase();
   const { getUserData, setUser } = useConfig();
   const { addErrorNotif, handleAPIErrorNotif, addSuccessNotif } =
     useNotifActions();
@@ -164,7 +164,7 @@ const PhoneVerify = (): JSX.Element => {
       setUser({ ...serverUser, authToken: serverToken });
 
       try {
-        await updateUserInDB({ ...serverUser, authToken: serverToken });
+        await IDB_UpdateUserInDB({ ...serverUser, authToken: serverToken });
       } catch (err) {
         log.logAllError(
           "Error storing new token in Local DB after login phone was called",

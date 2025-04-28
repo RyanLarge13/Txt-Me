@@ -23,12 +23,7 @@ import { createContext, useContext } from "react";
 
 import useLogger from "../hooks/useLogger.ts";
 import { User } from "../types/configCtxtTypes.ts";
-import {
-  ContactSettings,
-  DBCtxtProps,
-  MessageSettings,
-  Theme,
-} from "../types/dbCtxtTypes.ts";
+import { ContactSettings, DBCtxtProps, MessageSettings, Theme } from "../types/dbCtxtTypes.ts";
 import { Contacts, Message, MessageSessionType } from "../types/userTypes.ts";
 import { defaultAppSettings } from "../utils/constants.ts";
 
@@ -160,7 +155,7 @@ export const DatabaseProvider = ({
     }
   };
 
-  const getDB = async () => {
+  const IDB_GetDB = async () => {
     const db = await openDB(
       import.meta.env.VITE_INDEX_DB_NAME,
       import.meta.env.VITE_INDEX_DB_V,
@@ -179,7 +174,7 @@ export const DatabaseProvider = ({
     return db;
   };
 
-  const initDatabase = async (db: IDBPDatabase) => {
+  const IDB_InitDatabase = async (db: IDBPDatabase) => {
     const userInitialized =
       (await db.get("app", "settings")) || defaultAppSettings;
 
@@ -195,34 +190,36 @@ export const DatabaseProvider = ({
   };
 
   // Get DB Data --------------------------------------------------------------------------------
-  const getAppData = async () => (await getDB()).get("app", "settings");
-  const getAppUserData = async () => (await getDB()).get("app", "user");
-  const getThemeData = async (): Promise<Theme[]> =>
-    (await getDB()).getAll("theme");
-  const getMessagesData = async (): Promise<Message[]> =>
-    (await getDB()).get("messages", "messages");
-  const getContactsData = async (): Promise<Contacts[]> =>
-    (await getDB()).get("contacts", "contacts");
-  const getMessageSettingsData = async (): Promise<MessageSettings[]> =>
-    (await getDB()).getAll("messageSettings");
-  const getContactSettingsData = async (): Promise<ContactSettings[]> =>
-    (await getDB()).getAll("contactSettings");
-  const getPhoneNumber = async (): Promise<string> =>
-    (await getDB()).get("app", "user").then((settings) => settings.phoneNumber);
+  const IDB_GetAppData = async () => (await IDB_GetDB()).get("app", "settings");
+  const IDB_GetAppUserData = async () => (await IDB_GetDB()).get("app", "user");
+  const IDB_GetThemeData = async (): Promise<Theme[]> =>
+    (await IDB_GetDB()).getAll("theme");
+  const IDB_GetMessagesData = async (): Promise<Message[]> =>
+    (await IDB_GetDB()).get("messages", "messages");
+  const IDB_GetContactsData = async (): Promise<Contacts[]> =>
+    (await IDB_GetDB()).get("contacts", "contacts");
+  const IDB_GetMessageSettingsData = async (): Promise<MessageSettings[]> =>
+    (await IDB_GetDB()).getAll("messageSettings");
+  const IDB_GetContactSettingsData = async (): Promise<ContactSettings[]> =>
+    (await IDB_GetDB()).getAll("contactSettings");
+  const IDB_GetPhoneNumber = async (): Promise<string> =>
+    (await IDB_GetDB())
+      .get("app", "user")
+      .then((settings) => settings.phoneNumber);
   const IDB_GetLastMessageSession = async (): Promise<MessageSessionType> =>
-    (await getDB()).get("messageSession", "messageSession");
+    (await IDB_GetDB()).get("messageSession", "messageSession");
   // Get DB Data --------------------------------------------------------------------------------
 
   // Put/Patch DB Data ----------------------------------------------------------------------------
-  const updateUserInDB = async (user: User): Promise<IDBValidKey> =>
-    (await getDB()).put("app", user, "user");
+  const IDB_UpdateUserInDB = async (user: User): Promise<IDBValidKey> =>
+    (await IDB_GetDB()).put("app", user, "user");
   const M_UpdateContactsInDB = async (
     contacts: Contacts[]
   ): Promise<IDBValidKey> =>
-    (await getDB()).put("contacts", contacts, "contacts");
+    (await IDB_GetDB()).put("contacts", contacts, "contacts");
 
   const IDB_AddContact = async (newContact: Contacts): Promise<void> => {
-    const currentContacts = await getContactsData();
+    const currentContacts = await IDB_GetContactsData();
     log.devLog(
       "Contacts returned from IDB when adding server contacts to local database",
       currentContacts
@@ -254,35 +251,35 @@ export const DatabaseProvider = ({
   const IDB_UpdateMessageSession = async (
     newSession: MessageSessionType
   ): Promise<IDBValidKey> =>
-    (await getDB()).put("messageSession", newSession, "messageSession");
+    (await IDB_GetDB()).put("messageSession", newSession, "messageSession");
 
   const IDB_AddMessage = async (newMessage: Message): Promise<IDBValidKey> => {
-    const storedMessages = (await getMessagesData()) || [];
+    const storedMessages = (await IDB_GetMessagesData()) || [];
 
     const newMessages = [...storedMessages, newMessage];
-    return (await getDB()).put("messages", newMessages, "messages");
+    return (await IDB_GetDB()).put("messages", newMessages, "messages");
   };
   // Put/Patch DB Data ----------------------------------------------------------------------------
 
   return (
     <DatabaseContext.Provider
       value={{
-        initDatabase,
+        IDB_InitDatabase,
 
         // Getters ------------------------------
-        getDB,
-        getAppUserData,
-        getAppData,
-        getThemeData,
-        getMessagesData,
-        getContactsData,
-        getMessageSettingsData,
-        getContactSettingsData,
-        getPhoneNumber,
+        IDB_GetDB,
+        IDB_GetAppUserData,
+        IDB_GetAppData,
+        IDB_GetThemeData,
+        IDB_GetMessagesData,
+        IDB_GetContactsData,
+        IDB_GetMessageSettingsData,
+        IDB_GetContactSettingsData,
+        IDB_GetPhoneNumber,
         IDB_GetLastMessageSession,
 
         // Setters ------------------------------
-        updateUserInDB,
+        IDB_UpdateUserInDB,
         IDB_AddContact,
         IDB_UpdateMessageSession,
         IDB_AddMessage,
