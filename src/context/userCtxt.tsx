@@ -21,9 +21,17 @@ import { createContext, ReactNode, useEffect, useState } from "react";
 
 import useLogger from "../hooks/useLogger.ts";
 import {
-    AllMessages, Contacts, Message, MessageSessionType, UserCtxtProps
+  AllMessages,
+  Contacts,
+  Message,
+  MessageSessionType,
+  UserCtxtProps
 } from "../types/userTypes.ts";
-import { API_FetchUserData, API_GetContacts, API_GetMessages } from "../utils/api.ts";
+import {
+  API_FetchUserData,
+  API_GetContacts,
+  API_GetMessages
+} from "../utils/api.ts";
 import { valPhoneNumber } from "../utils/validator.ts";
 import { useConfig } from "./configContext.tsx";
 import { useDatabase } from "./dbContext.tsx";
@@ -31,7 +39,7 @@ import { useDatabase } from "./dbContext.tsx";
 const UserCtxt = createContext({} as UserCtxtProps);
 
 export const UserProvider = ({
-  children,
+  children
 }: {
   children: ReactNode;
 }): JSX.Element => {
@@ -40,7 +48,7 @@ export const UserProvider = ({
     IDB_GetContactsData,
     IDB_GetMessagesData,
     IDB_AddContact,
-    IDB_GetLastMessageSession,
+    IDB_GetLastMessageSession
   } = useDatabase();
   const { getUserData } = useConfig();
   const log = useLogger();
@@ -95,7 +103,7 @@ export const UserProvider = ({
     messages.forEach((m: Message) => {
       // Look for both to and from number. Incase the way the message was stored?? Not sure if this is necessary
       const contact = dbContacts.find(
-        (c) => c.number === m.fromnumber || c.number === m.tonumber
+        c => c.number === m.fromnumber || c.number === m.tonumber
       );
 
       /*
@@ -130,7 +138,7 @@ export const UserProvider = ({
       if (!newMap.has(targetNumber)) {
         newMap.set(targetNumber, {
           contact: contact || null,
-          messages: [m],
+          messages: [m]
         });
       } else {
         newMap.get(targetNumber)?.messages.push(m);
@@ -143,6 +151,17 @@ export const UserProvider = ({
 
   const M_AddServerMessagesToMap = (serverMessages: Message[]) => {
     log.devLog("Messages from server: ", serverMessages);
+
+    /*
+      TODO:
+        NOTE: 
+          1. Might not build out this function. 
+          Turn it into a synchronization method instead that 
+          will run in the background service worker? 
+        CONSIDER:
+          1. Only grab messages that don't exist yet on the client. 
+          Implement tracking system? 
+    */
   };
 
   const M_FetchLatestContacts = async (): Promise<void> => {
@@ -183,9 +202,15 @@ export const UserProvider = ({
 
   const M_FetchLatestMessages = async () => {
     try {
-      const response = await API_GetMessages(token);
+      /*
+        TODO:
+          NOTE: 
+            1. Commenting out network request until tracking system is in place
+      */
+      // const response = await API_GetMessages(token);
 
-      let serverMessages = response.data?.data?.messages;
+      // let serverMessages = response.data?.data?.messages;
+      let serverMessages = [];
 
       if (!serverMessages) {
         log.logAllError(
@@ -278,7 +303,7 @@ export const UserProvider = ({
         allMessages,
         setAllMessages,
         setMessageSession,
-        setContacts,
+        setContacts
       }}
     >
       {children}
