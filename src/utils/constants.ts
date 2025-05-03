@@ -44,3 +44,16 @@ export const defaultAppSettings = {
   passwordType: "pin",
   showOnline: false,
 };
+
+export const defaultContact = {
+  contactid: 0,
+  name: "",
+  email: "",
+  number: "",
+  createdat: "",
+  space: "",
+  nickname: "",
+  address: "",
+  website: "",
+  avatar: null,
+};

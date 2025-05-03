@@ -17,23 +17,29 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { motion } from "framer-motion";
-import React, { useContext } from "react";
+import React, { useCallback, useContext, useRef } from "react";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { useNavigate } from "react-router-dom";
 
 import { useDatabase } from "../context/dbContext";
 import UserCtxt from "../context/userCtxt";
 import useLogger from "../hooks/useLogger";
+import useNotifActions from "../hooks/useNotifActions";
 import {
   Contacts as ContactsType,
   MessageSessionType,
 } from "../types/userTypes";
+import { defaultContact } from "../utils/constants";
 import { getInitials } from "../utils/helpers";
+import ValueInput from "./ValueInput";
 
 const Contacts = () => {
   const { contacts, allMessages, setMessageSession, setAllMessages } =
     useContext(UserCtxt);
+  const { addErrorNotif } = useNotifActions();
   const { IDB_UpdateMessageSession } = useDatabase();
+
+  const typedPhoneNumberRef = useRef("");
 
   const navigate = useNavigate();
   const log = useLogger();
@@ -55,10 +61,29 @@ const Contacts = () => {
 
   const M_StartMessage = (contact: ContactsType) => {
     const newSessionDefault: MessageSessionType = {
-      number: contact.number,
-      contact: contact,
+      number: "",
+      contact: null,
       messages: [],
     };
+
+    // Default contact id from constants provides a default contactid of 0
+    if (contact.contactid === 0 && typedPhoneNumberRef.current === "") {
+      addErrorNotif(
+        "Missing Number",
+        "Please at least provide a phone number",
+        false,
+        []
+      );
+      return;
+    }
+
+    if (contact.contactid === 0) {
+      newSessionDefault.number = typedPhoneNumberRef.current;
+      newSessionDefault.contact = null;
+    } else {
+      newSessionDefault.number = contact.number;
+      newSessionDefault.contact = contact;
+    }
 
     if (allMessages.has(contact.number)) {
       // Immediately set message session to the contact stored and messages found
@@ -89,6 +114,23 @@ const Contacts = () => {
       animate={{ y: 0, opacity: 1 }}
       className="mt-20 w-full"
     >
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          M_StartMessage({
+            ...defaultContact,
+            number: typedPhoneNumberRef.current,
+          });
+        }}
+      >
+        <ValueInput
+          retrieveValue={useCallback((value) => {
+            typedPhoneNumberRef.current = value;
+          }, [])}
+          placeholder="Type a phone number ..."
+          type="text"
+        />
+      </form>
       <button
         onClick={() => navigate("/profile/newcontact")}
         className="bg-primary text-[#000] p-3 w-full rounded-sm"

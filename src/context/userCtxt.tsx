@@ -25,13 +25,9 @@ import {
   Contacts,
   Message,
   MessageSessionType,
-  UserCtxtProps
+  UserCtxtProps,
 } from "../types/userTypes.ts";
-import {
-  API_FetchUserData,
-  API_GetContacts,
-  API_GetMessages
-} from "../utils/api.ts";
+import { API_FetchUserData, API_GetContacts } from "../utils/api.ts";
 import { valPhoneNumber } from "../utils/validator.ts";
 import { useConfig } from "./configContext.tsx";
 import { useDatabase } from "./dbContext.tsx";
@@ -39,7 +35,7 @@ import { useDatabase } from "./dbContext.tsx";
 const UserCtxt = createContext({} as UserCtxtProps);
 
 export const UserProvider = ({
-  children
+  children,
 }: {
   children: ReactNode;
 }): JSX.Element => {
@@ -48,7 +44,7 @@ export const UserProvider = ({
     IDB_GetContactsData,
     IDB_GetMessagesData,
     IDB_AddContact,
-    IDB_GetLastMessageSession
+    IDB_GetLastMessageSession,
   } = useDatabase();
   const { getUserData } = useConfig();
   const log = useLogger();
@@ -103,7 +99,7 @@ export const UserProvider = ({
     messages.forEach((m: Message) => {
       // Look for both to and from number. Incase the way the message was stored?? Not sure if this is necessary
       const contact = dbContacts.find(
-        c => c.number === m.fromnumber || c.number === m.tonumber
+        (c) => c.number === m.fromnumber || c.number === m.tonumber
       );
 
       /*
@@ -138,7 +134,7 @@ export const UserProvider = ({
       if (!newMap.has(targetNumber)) {
         newMap.set(targetNumber, {
           contact: contact || null,
-          messages: [m]
+          messages: [m],
         });
       } else {
         newMap.get(targetNumber)?.messages.push(m);
@@ -210,12 +206,12 @@ export const UserProvider = ({
       // const response = await API_GetMessages(token);
 
       // let serverMessages = response.data?.data?.messages;
-      let serverMessages = [];
+      let serverMessages: Message[] = [];
 
       if (!serverMessages) {
         log.logAllError(
-          "Error. check response object. Also check server getMessages control method. Sending back no data for messages",
-          response
+          "Error. check response object. Also check server getMessages control method. Sending back no data for messages"
+          // response
         );
 
         serverMessages = [];
@@ -303,7 +299,7 @@ export const UserProvider = ({
         allMessages,
         setAllMessages,
         setMessageSession,
-        setContacts
+        setContacts,
       }}
     >
       {children}

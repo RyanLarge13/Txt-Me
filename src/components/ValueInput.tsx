@@ -3,6 +3,7 @@ import React, { useState } from "react";
 // Build an input field that will stop causing unnecessary rerenders while still providing custom, reactive, interactive input fields
 const ValueInput = React.memo(
   ({
+    // retrieveValue is meant to be a callback function that sets the value of a userRef as to stop unnecessary rerenders at top level
     retrieveValue,
     placeholder,
     type,

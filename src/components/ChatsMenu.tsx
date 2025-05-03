@@ -20,6 +20,7 @@ import { motion } from "framer-motion";
 import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { useConfig } from "../context/configContext.tsx";
 import { useDatabase } from "../context/dbContext";
 import UserCtxt from "../context/userCtxt";
 import useLogger from "../hooks/useLogger";
@@ -29,6 +30,7 @@ import { getInitials } from "../utils/helpers.ts";
 const ChatsMenu = () => {
   const { setMessageSession, allMessages } = useContext(UserCtxt);
   const { IDB_UpdateMessageSession } = useDatabase();
+  const { getUserData } = useConfig();
 
   const navigate = useNavigate();
   const log = useLogger();
@@ -120,7 +122,14 @@ const ChatsMenu = () => {
             </div>
             {/* Last message and time */}
             <div className="flex flex-col justify-end items-end">
-              <p>
+              <p
+                className={`${
+                  messageSession?.messages[messageSession.messages.length - 1]
+                    .fromnumber === getUserData("phoneNumber")
+                    ? "text-primary"
+                    : "text-secondary"
+                }`}
+              >
                 {messageSession?.messages[messageSession.messages.length - 1]
                   ?.message || ""}
               </p>
