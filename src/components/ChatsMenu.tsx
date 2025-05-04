@@ -85,6 +85,23 @@ const ChatsMenu = () => {
     navigate("/profile");
   };
 
+  const M_IsUnread = (messageSession: {
+    contact: Contacts | null;
+    messages: Message[];
+  }) => {
+    const lastMessage =
+      messageSession.messages[messageSession.messages.length - 1];
+
+    if (
+      lastMessage.fromnumber !== getUserData("phoneNumber") &&
+      !lastMessage.read
+    ) {
+      return "border-t-2 border-t-primary";
+    } else {
+      return "";
+    }
+  };
+
   return (
     <motion.nav
       initial={{ opacity: 0, x: -100 }}
@@ -109,7 +126,10 @@ const ChatsMenu = () => {
           <button
             key={fromNumber}
             onClick={() => M_CreateMessageSession(fromNumber, messageSession)}
-            className="flex justify-between items-center relative p-3 bg-[#222] border-b-black border-b h-[80px] w-full hover:bg-[#333]"
+            className={`flex justify-between items-center relative p-3 bg-[#222] border-b-black border-b h-[80px] w-full hover:bg-[#333] ${
+              // If the last message is not sent by the user and is unread
+              M_IsUnread(messageSession)
+            }`}
           >
             {/* Contact avatar and name */}
             <div className="flex flex-col justify-center items-start">

@@ -17,7 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import React, { motion } from "framer-motion";
-import { FormEvent } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import {
   FaAddressCard,
   FaCamera,
@@ -25,15 +25,71 @@ import {
   FaUser,
   FaUserTag,
 } from "react-icons/fa";
-import { FaMobileScreen } from "react-icons/fa6";
+import { FaMobileScreen, FaUserGroup } from "react-icons/fa6";
 import { MdEmail } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 
+import useLogger from "../hooks/useLogger";
+
+/*
+  TODO:
+    IMPLEMENT:
+      1. Save the current contact in like a draft state inside indexedDB
+      when navigating away from the new contact state or by pressing cancel
+*/
 const NewContact = (): JSX.Element => {
   const navigate = useNavigate();
+  const log = useLogger();
 
-  const addContact = (e: FormEvent<HTMLFormElement>) => {
+  /*
+    TODO:
+      IMPLEMENT:
+        1. Make a more complex avatar image state with image type checking 
+        and other data to make sure the user uploads a good image
+  */
+  const [avatarImage, setAvatarImage] = useState(null);
+  const [groupText, setGroupText] = useState("");
+  const [autoComplete, setAutoComplete] = useState({
+    show: groupText ? true : false,
+    names: [],
+  });
+
+  useEffect((): void => {
+    if (groupText === "") {
+      setAutoComplete((prev) => {
+        return { ...prev, show: false };
+      });
+    } else {
+      /*
+        TODO:
+          IMPLEMENT:
+            1. Query for the groups that already exist for the user
+      */
+      setAutoComplete((prev) => {
+        return { ...prev, show: true };
+      });
+    }
+  }, [groupText]);
+
+  const M_AddContact = (e: FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
+
+    const formData = new FormData(e.currentTarget);
+
+    const data = Object.fromEntries(formData.entries());
+
+    log.devLog("Data from contact form: ", data);
+  };
+
+  // Handling the uploading of an Avatar image form input field, setting the image to state and showing it in the contact avatar window
+  const M_UploadAvatar = (e): void => {
+    const newAvatarFile = e?.target.files[0];
+    setAvatarImage(newAvatarFile);
+    log.devLog(newAvatarFile);
+  };
+
+  const M_SaveContactInDraft = async (): Promise<void> => {
+    navigate("/profile/contacts");
   };
 
   return (
@@ -47,14 +103,28 @@ const NewContact = (): JSX.Element => {
       }}
       className="fixed inset-0 z-[999] bg-[#000] overflow-y-auto small-scrollbar"
     >
-      <form onSubmit={addContact}>
+      <form onSubmit={M_AddContact}>
         <div className="flex justify-center items-center h-40 pt-20">
           <label
             className="rounded-full w-40 h-40 flex justify-center
      items-center bg-[#111] cursor-pointer"
           >
-            <input type="file" className="hidden" />
-            <FaCamera className="text-2xl text-primary" />
+            <input
+              type="file"
+              accept=".jpeg .png .svg .webp .jpg"
+              onChange={M_UploadAvatar}
+              name="avatar"
+              className="hidden"
+            />
+            {avatarImage !== null ? (
+              <img
+                src={URL.createObjectURL(avatarImage)}
+                alt="Avatar"
+                className="w-full h-full rounded-full object-cover"
+              />
+            ) : (
+              <FaCamera className="text-2xl text-primary" />
+            )}
           </label>
         </div>
         <div className="mt-40 px-5">
@@ -62,6 +132,7 @@ const NewContact = (): JSX.Element => {
             <FaUser />
             <input
               type="text"
+              name="name"
               className="bg-[#000] focus:outline-none"
               placeholder="Name"
             />
@@ -70,6 +141,7 @@ const NewContact = (): JSX.Element => {
             <FaUserTag />
             <input
               type="text"
+              name="nickname"
               className="bg-[#000] focus:outline-none"
               placeholder="Nickname"
             />
@@ -78,6 +150,7 @@ const NewContact = (): JSX.Element => {
             <FaMobileScreen />
             <input
               type="tel"
+              name="phonenumber"
               className="bg-[#000] focus:outline-none"
               placeholder="Mobile"
             />
@@ -86,6 +159,7 @@ const NewContact = (): JSX.Element => {
             <MdEmail />
             <input
               type="email"
+              name="email"
               className="bg-[#000] focus:outline-none"
               placeholder="Email"
             />
@@ -94,6 +168,7 @@ const NewContact = (): JSX.Element => {
             <FaAddressCard />
             <input
               type="text"
+              name="address"
               className="bg-[#000] focus:outline-none"
               placeholder="Address"
             />
@@ -102,16 +177,33 @@ const NewContact = (): JSX.Element => {
             <FaLink />
             <input
               type="url"
+              name="website"
               className="bg-[#000] focus:outline-none"
               placeholder="Website"
             />
+          </div>
+          <div className="relative">
+            <div className="flex gap-x-5 justify-start items-center w-full p-2 my-10 rounded-sm">
+              <FaUserGroup />
+              <input
+                type="text"
+                onChange={(e) => setGroupText(e.target.value)}
+                value={groupText}
+                name="group"
+                className="bg-[#000] focus:outline-none"
+                placeholder="Group"
+              />
+            </div>
+            {autoComplete.show ? (
+              <select className="w-full absolute bottom-[-25px] bg-tri"></select>
+            ) : null}
           </div>
         </div>
         <div className="flex justify-evenly items-center mb-10 mt-20">
           <button
             type="button"
             className="bg-secondary px-10 py-3 flex-[0.25] text-[#000]"
-            onClick={() => navigate("/profile/contacts")}
+            onClick={() => M_SaveContactInDraft()}
           >
             Cancel
           </button>
