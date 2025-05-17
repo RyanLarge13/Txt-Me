@@ -102,6 +102,10 @@ const ChatsMenu = () => {
     }
   };
 
+  const M_HandleContextMenu = (e, messageSession): void => {
+    console.log(e, messageSession);
+  };
+
   return (
     <motion.nav
       initial={{ opacity: 0, x: -100 }}
@@ -125,9 +129,10 @@ const ChatsMenu = () => {
         {Array.from(allMessages).map(([fromNumber, messageSession]) => (
           <button
             key={fromNumber}
+            onContextMenu={(e) => M_HandleContextMenu(e, messageSession)}
             onClick={() => M_CreateMessageSession(fromNumber, messageSession)}
             className={`flex justify-between items-center relative p-3 bg-[#222] border-b-black border-b h-[80px] w-full hover:bg-[#333] ${
-              // If the last message is not sent by the user and is unread
+              // If the last message is not sent by the user and is unread call this member method and change the top border color
               M_IsUnread(messageSession)
             }`}
           >

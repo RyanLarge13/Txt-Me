@@ -20,6 +20,7 @@ import React from "react";
 import { Outlet } from "react-router-dom";
 
 import BottomNav from "../components/BottomNav.tsx";
+import ContextMenu from "../components/ContextMenu.tsx";
 import MessageSession from "../components/MessageSession.tsx";
 import ProfileNav from "../components/ProfileNav.tsx";
 
@@ -27,6 +28,7 @@ const Profile = (): JSX.Element => {
   return (
     <main className="mt-20 text-[#fff]">
       <ProfileNav />
+      <ContextMenu />
       <div className="flex justify-center items-center absolute inset-0 outline outline-red-300">
         <MessageSession />
       </div>

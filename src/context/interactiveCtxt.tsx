@@ -19,7 +19,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 import React, { createContext, ReactNode, useState } from "react";
 import { MdAccountCircle } from "react-icons/md";
 
-import { InteractiveCtxtTypes, MenuTitle } from "../types/interactiveCtxtTypes";
+import {
+  ContextMenuShowType,
+  InteractiveCtxtTypes,
+  MenuTitle,
+} from "../types/interactiveCtxtTypes";
 
 const InteractiveCtxt = createContext({} as InteractiveCtxtTypes);
 
@@ -38,6 +42,12 @@ export const InteractiveProvider = ({
   const [settingsState, setSettingsState] = useState({
     page: "main",
   });
+  const [contextMenuShow, setContextMenuShow] = useState<ContextMenuShowType>({
+    show: false,
+    coords: { x: 0, y: 0 },
+    mainOptions: [],
+    options: [],
+  });
 
   return (
     <InteractiveCtxt.Provider
@@ -46,6 +56,8 @@ export const InteractiveProvider = ({
         setOpenChatsMenu,
         setTitle,
         setSettingsState,
+        setContextMenuShow,
+        contextMenuShow,
         openChatsMenu,
         newChat,
         title,
