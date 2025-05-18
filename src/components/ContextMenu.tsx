@@ -1,12 +1,18 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 import useContextMenu from "../hooks/useContextMenu";
 
-const ContextMenu = (): JSX.Element => {
+const ContextMenu = (): JSX.Element | null => {
   const contextMenu = useContextMenu();
 
+  const [show, setShow] = contextMenu.getValue("show") || false;
   const coords = contextMenu.getValue("coords");
   const options = contextMenu.getValue("options");
+
+  useEffect(() => {
+    const newShow = contextMenu.getValue("show");
+    setShow(newShow);
+  }, [contextMenu]);
 
   const handleOpClick = (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
@@ -16,7 +22,7 @@ const ContextMenu = (): JSX.Element => {
     func();
   };
 
-  return (
+  return show ? (
     <div
       className="fixed bg-black rounded-md shadow-md z-[999]"
       style={{ top: coords.y, left: coords.x }}
@@ -31,7 +37,7 @@ const ContextMenu = (): JSX.Element => {
         </button>
       ))}
     </div>
-  );
+  ) : null;
 };
 
 export default ContextMenu;
