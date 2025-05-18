@@ -18,12 +18,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import { motion } from "framer-motion";
 import React, { useContext } from "react";
+import { BsThreeDotsVertical } from "react-icons/bs";
 import { useNavigate } from "react-router-dom";
 
 import { useConfig } from "../context/configContext.tsx";
 import { useDatabase } from "../context/dbContext";
 import UserCtxt from "../context/userCtxt";
+import useContextMenu from "../hooks/useContextMenu.ts";
 import useLogger from "../hooks/useLogger";
+import { ContextMenuShowType } from "../types/interactiveCtxtTypes.ts";
 import { Contacts, Message, MessageSessionType } from "../types/userTypes";
 import { getInitials } from "../utils/helpers.ts";
 
@@ -34,6 +37,7 @@ const ChatsMenu = () => {
 
   const navigate = useNavigate();
   const log = useLogger();
+  const contextMenu = useContextMenu();
 
   // You have the same member function in/for Contacts.tsx
   // Consider adding it to a common utils file or helper
@@ -102,8 +106,29 @@ const ChatsMenu = () => {
     }
   };
 
-  const M_HandleContextMenu = (e, messageSession): void => {
-    console.log(e, messageSession);
+  const M_HandleContextMenu = (
+    e:
+      | React.MouseEvent<HTMLDivElement, MouseEvent>
+      | React.MouseEvent<HTMLButtonElement, MouseEvent>,
+    messageSession: MessageSessionType
+  ): void => {
+    e.preventDefault();
+
+    const newContextMenu: ContextMenuShowType = {
+      show: true,
+      title: "",
+      color: "",
+      coords: {
+        x: 0,
+        y: 0,
+      },
+      mainOptions: [],
+      options: [],
+    };
+
+    contextMenu.buildContextMenu(newContextMenu);
+
+    log.devLog("Message session in handle context menu", messageSession);
   };
 
   return (
@@ -127,9 +152,15 @@ const ChatsMenu = () => {
       </div>
       <div className="text-white w-full h-full mt-20">
         {Array.from(allMessages).map(([fromNumber, messageSession]) => (
-          <button
+          <div
             key={fromNumber}
-            onContextMenu={(e) => M_HandleContextMenu(e, messageSession)}
+            onContextMenu={(e) =>
+              M_HandleContextMenu(e, {
+                number: fromNumber,
+                contact: messageSession.contact,
+                messages: messageSession.messages,
+              })
+            }
             onClick={() => M_CreateMessageSession(fromNumber, messageSession)}
             className={`flex justify-between items-center relative p-3 bg-[#222] border-b-black border-b h-[80px] w-full hover:bg-[#333] ${
               // If the last message is not sent by the user and is unread call this member method and change the top border color
@@ -168,7 +199,19 @@ const ChatsMenu = () => {
                 })}
               </p>
             </div>
-          </button>
+            <button
+              className="absolute top-0 right-0"
+              onClick={(e) =>
+                M_HandleContextMenu(e, {
+                  number: fromNumber,
+                  contact: messageSession.contact,
+                  messages: messageSession.messages,
+                })
+              }
+            >
+              <BsThreeDotsVertical />
+            </button>
+          </div>
         ))}
       </div>
     </motion.nav>

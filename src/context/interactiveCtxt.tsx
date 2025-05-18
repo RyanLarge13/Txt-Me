@@ -44,6 +44,8 @@ export const InteractiveProvider = ({
   });
   const [contextMenuShow, setContextMenuShow] = useState<ContextMenuShowType>({
     show: false,
+    title: "",
+    color: "#fff",
     coords: { x: 0, y: 0 },
     mainOptions: [],
     options: [],

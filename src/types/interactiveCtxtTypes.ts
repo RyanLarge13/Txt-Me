@@ -16,6 +16,8 @@ export type ContextMenuOptions = {
 
 export type ContextMenuShowType = {
   show: boolean;
+  title: string;
+  color: string;
   coords: { x: number; y: number };
   mainOptions: ContextMenuOptions[];
   options: ContextMenuOptions[];
