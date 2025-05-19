@@ -11,12 +11,12 @@ export type SettingsState = {
 
 export type ContextMenuOptions = {
   txt: string;
+  icon: React.ReactNode;
   func: () => void;
 };
 
 export type ContextMenuShowType = {
   show: boolean;
-  title: string;
   color: string;
   coords: { x: number; y: number };
   mainOptions: ContextMenuOptions[];

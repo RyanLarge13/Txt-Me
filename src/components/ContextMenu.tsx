@@ -1,11 +1,11 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 import useContextMenu from "../hooks/useContextMenu";
 
 const ContextMenu = (): JSX.Element | null => {
   const contextMenu = useContextMenu();
 
-  const [show, setShow] = contextMenu.getValue("show") || false;
+  const [show, setShow] = useState(contextMenu.getValue("show") || false);
   const coords = contextMenu.getValue("coords");
   const options = contextMenu.getValue("options");
 

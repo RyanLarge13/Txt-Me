@@ -19,6 +19,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 import { motion } from "framer-motion";
 import React, { useContext } from "react";
 import { BsThreeDotsVertical } from "react-icons/bs";
+import { FaMailchimp, FaMessage, FaPerson, FaStar, FaTrash } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
 
 import { useConfig } from "../context/configContext.tsx";
@@ -116,14 +117,24 @@ const ChatsMenu = () => {
 
     const newContextMenu: ContextMenuShowType = {
       show: true,
-      title: "",
-      color: "",
+      color: "bg-tri",
       coords: {
-        x: 0,
-        y: 0,
+        x: e.clientX,
+        y: e.clientY,
       },
-      mainOptions: [],
-      options: [],
+      mainOptions: [
+        { txt: "Message", icon: <FaMessage />, func: () => {} },
+        { txt: "Contact", icon: <FaPerson />, func: () => {} },
+        { txt: "Mark Unread", icon: <FaMailchimp />, func: () => {} },
+        { txt: "Delete", icon: <FaTrash />, func: () => {} },
+      ],
+      options: [
+        { txt: "New Message", icon: <FaMessage />, func: () => {} },
+        { txt: "Favorite", icon: <FaStar />, func: () => {} },
+        { txt: "Hide", icon: <FaStar />, func: () => {} },
+        { txt: "Delete Old", icon: <FaStar />, func: () => {} },
+        { txt: "Save Images", icon: <FaStar />, func: () => {} },
+      ],
     };
 
     contextMenu.buildContextMenu(newContextMenu);
