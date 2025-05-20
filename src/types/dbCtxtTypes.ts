@@ -50,7 +50,7 @@ export type ContactSettings = {
 
 export type DraftType = {
   contact: {
-    contactid: number;
+    contactid: 0;
     name: string;
     email: string;
     number: string;
@@ -60,8 +60,8 @@ export type DraftType = {
     address: string;
     website: string;
     avatar: null | string;
-  };
-  message: {
+  } | null;
+  messages: {
     messageid: number;
     message: string;
     sent: boolean;
@@ -88,6 +88,7 @@ export interface DBCtxtProps {
   IDB_GetContactSettingsData: () => Promise<ContactSettings[]>;
   IDB_GetPhoneNumber: () => Promise<string>;
   IDB_UpdateUserInDB: (user: User) => Promise<IDBValidKey>;
+  IDB_UpdateContactInDraft: (contact: DraftType["contact"]) => Promise<void>;
   IDB_AddContact: (newContact: Contacts) => Promise<void>;
   IDB_UpdateMessageSession: (
     newSession: MessageSessionType

@@ -20,9 +20,7 @@ import React, { createContext, ReactNode, useState } from "react";
 import { MdAccountCircle } from "react-icons/md";
 
 import {
-  ContextMenuShowType,
-  InteractiveCtxtTypes,
-  MenuTitle,
+    ContextMenuShowType, InteractiveCtxtTypes, MenuTitle
 } from "../types/interactiveCtxtTypes";
 
 const InteractiveCtxt = createContext({} as InteractiveCtxtTypes);
@@ -44,7 +42,6 @@ export const InteractiveProvider = ({
   });
   const [contextMenuShow, setContextMenuShow] = useState<ContextMenuShowType>({
     show: false,
-    title: "",
     color: "#fff",
     coords: { x: 0, y: 0 },
     mainOptions: [],

@@ -23,7 +23,9 @@ import { FaMobileScreen, FaUserGroup } from "react-icons/fa6";
 import { MdEmail } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 
+import { useDatabase } from "../context/dbContext";
 import useLogger from "../hooks/useLogger";
+import { DraftType } from "../types/dbCtxtTypes";
 
 /*
   TODO:
@@ -32,8 +34,7 @@ import useLogger from "../hooks/useLogger";
       when navigating away from the new contact state or by pressing cancel
 */
 const NewContact = (): JSX.Element => {
-  const navigate = useNavigate();
-  const log = useLogger();
+  const { IDB_UpdateContactInDraft } = useDatabase();
 
   /*
     TODO:
@@ -47,6 +48,9 @@ const NewContact = (): JSX.Element => {
     show: groupText ? true : false,
     names: [],
   });
+
+  const navigate = useNavigate();
+  const log = useLogger();
 
   useEffect((): void => {
     if (groupText === "") {
@@ -65,6 +69,13 @@ const NewContact = (): JSX.Element => {
     }
   }, [groupText]);
 
+  // Save contact in drafts (IndexedDB) when navigating away
+  useEffect(() => {
+    window.addEventListener("popstate", M_SaveContactInDraft);
+
+    return () => window.removeEventListener("popstate", M_SaveContactInDraft);
+  }, []);
+
   const M_AddContact = (e: FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
 
@@ -75,7 +86,8 @@ const NewContact = (): JSX.Element => {
     log.devLog("Data from contact form: ", data);
   };
 
-  // Handling the uploading of an Avatar image form input field, setting the image to state and showing it in the contact avatar window
+  // Handling the uploading of an Avatar image form input field,
+  // setting the image to state and showing it in the contact avatar window
   const M_UploadAvatar = (e): void => {
     const newAvatarFile = e?.target.files[0];
     setAvatarImage(newAvatarFile);
@@ -83,6 +95,29 @@ const NewContact = (): JSX.Element => {
   };
 
   const M_SaveContactInDraft = async (): Promise<void> => {
+    try {
+      /*
+        TODO:
+          IMPLEMENT:
+            1. Change the way I handle form state so this object
+            can be updated appropriately
+      */
+      const contactToSaveAsDraft: DraftType["contact"] = {
+        contactid: 0,
+        name: "",
+        email: "",
+        number: "",
+        createdat: "",
+        space: "",
+        nickname: "",
+        address: "",
+        website: "",
+        avatar: null,
+      };
+      await IDB_UpdateContactInDraft(contactToSaveAsDraft);
+    } catch (err) {
+      log.logAllError("Error saving contact in drafts. Error: ", err);
+    }
     navigate("/profile/contacts");
   };
 

@@ -31,19 +31,24 @@ const ContextMenu = (): JSX.Element | null => {
   const options = contextMenu.getValue("options") || [];
   const mainOptions = contextMenu.getValue("mainOptions") || [];
   const contextMenuColor = contextMenu.getValue("color") || "#000";
-  /*
-    TODO:
-      IMPLEMENT:
-        1. Pull in color with contextMenu.getValue("color"); To use it  somewhere in the component
-  */
 
   useEffect(() => {
     const newShow = contextMenu.getValue("show");
     setShow(newShow);
   }, [contextMenu]);
 
+  /*
+    TODO:
+      IMPLEMENT:
+        1. Correct this so you can remove this useEffect 
+        above and update the hide context menu member component method. 
+        I should be able to have this state update by other 
+        method and construction
+        from other triggers
+  */
   const M_HideContextMenu = (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
+    setShow(false);
     contextMenu.hide();
   };
 

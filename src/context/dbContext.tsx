@@ -24,7 +24,7 @@ import { createContext, useContext } from "react";
 import useLogger from "../hooks/useLogger.ts";
 import { User } from "../types/configCtxtTypes.ts";
 import {
-    ContactSettings, DBCtxtProps, DraftType, MessageSettings, Theme
+    ContactSettings, DBCtxtProps, DBUser, DraftType, MessageSettings, Theme
 } from "../types/dbCtxtTypes.ts";
 import { Contacts, Message, MessageSessionType } from "../types/userTypes.ts";
 import { defaultAppSettings } from "../utils/constants.ts";
@@ -177,7 +177,7 @@ export const DatabaseProvider = ({
       import.meta.env.VITE_INDEX_DB_NAME,
       import.meta.env.VITE_INDEX_DB_V,
       {
-        upgrade(db) {
+        upgrade(db: IDBPDatabase) {
           db.createObjectStore("app");
           db.createObjectStore("theme");
           db.createObjectStore("messages");
@@ -225,7 +225,7 @@ export const DatabaseProvider = ({
   const IDB_GetPhoneNumber = async (): Promise<string> =>
     (await IDB_GetDB())
       .get("app", "user")
-      .then((settings) => settings.phoneNumber);
+      .then((settings: DBUser) => settings.phoneNumber);
   const IDB_GetLastMessageSession = async (): Promise<MessageSessionType> =>
     (await IDB_GetDB()).get("messageSession", "messageSession");
   // Get DB Data --------------------------------------------------------------------------------
@@ -279,6 +279,19 @@ export const DatabaseProvider = ({
     const newMessages = [...storedMessages, newMessage];
     return (await IDB_GetDB()).put("messages", newMessages, "messages");
   };
+
+  const IDB_UpdateContactInDraft = async (
+    contact: DraftType["contact"]
+  ): Promise<void> => {
+    const storedDrafts: DraftType = (await IDB_GetDrafts()) || {
+      contact: null,
+      messages: [],
+    };
+
+    const newDrafts = { ...storedDrafts, contact: contact };
+
+    (await IDB_GetDB()).put("drafts", newDrafts, "drafts");
+  };
   // Put/Patch DB Data ----------------------------------------------------------------------------
 
   return (
@@ -304,6 +317,7 @@ export const DatabaseProvider = ({
         IDB_AddContact,
         IDB_UpdateMessageSession,
         IDB_AddMessage,
+        IDB_UpdateContactInDraft,
       }}
     >
       {children}
