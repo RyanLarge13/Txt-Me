@@ -1,8 +1,7 @@
 import { useCallback, useContext } from "react";
 
 import InteractiveCtxt from "../context/interactiveCtxt";
-import { ContextMenuOption } from "../types/generalTypes";
-import { ContextMenuShowType } from "../types/interactiveCtxtTypes";
+import { ContextMenuOptions, ContextMenuShowType } from "../types/interactiveCtxtTypes";
 
 /*
   TODO:
@@ -15,10 +14,12 @@ import { ContextMenuShowType } from "../types/interactiveCtxtTypes";
         coords: { x: number; y: number };
         mainOptions: {
             txt: string;
+            icon: React.ReactNode;
             func: () => void;
         }[];
         options: {
             txt: string;
+            icon: React.ReactNode;
             func: () => void;
         }[];
       };
@@ -41,8 +42,14 @@ const useContextMenu = () => {
     });
   }, [contextMenuShow]);
 
+  const hide = useCallback(() => {
+    setContextMenuShow((prev) => {
+      return { ...prev, show: false };
+    });
+  }, [contextMenuShow]);
+
   const setMainOptions = useCallback(
-    (mainOptions: ContextMenuOption[]) => {
+    (mainOptions: ContextMenuOptions[]) => {
       if (mainOptions.length < 1) {
         throw new Error(
           "You must at least pass one option into setMainOption method"
@@ -56,7 +63,7 @@ const useContextMenu = () => {
   );
 
   const setOptions = useCallback(
-    (options: ContextMenuOption[]) => {
+    (options: ContextMenuOptions[]) => {
       if (options.length < 1) {
         throw new Error(
           "You must at least pass one option into setMainOption method"
@@ -99,21 +106,6 @@ const useContextMenu = () => {
     [contextMenuShow]
   );
 
-  const setTitle = useCallback(
-    (newTitle: string) => {
-      if (!newTitle) {
-        throw new Error(
-          "Please pass in a valid color string to update the color of the context menu"
-        );
-      }
-
-      setContextMenuShow((prev) => {
-        return { ...prev, title: newTitle };
-      });
-    },
-    [contextMenuShow]
-  );
-
   // Getters
   const getValue = useCallback(
     <T extends keyof ContextMenuShowType>(key: T) => {
@@ -127,11 +119,11 @@ const useContextMenu = () => {
     // Setters
     buildContextMenu,
     makeVisible,
+    hide,
     setMainOptions,
     setOptions,
     setCoords,
     setColor,
-    setTitle,
 
     // Getters
     getValue,
