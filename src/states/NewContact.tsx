@@ -16,15 +16,9 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import React, { motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { FormEvent, useEffect, useState } from "react";
-import {
-  FaAddressCard,
-  FaCamera,
-  FaLink,
-  FaUser,
-  FaUserTag,
-} from "react-icons/fa";
+import { FaAddressCard, FaCamera, FaLink, FaUser, FaUserTag } from "react-icons/fa";
 import { FaMobileScreen, FaUserGroup } from "react-icons/fa6";
 import { MdEmail } from "react-icons/md";
 import { useNavigate } from "react-router-dom";

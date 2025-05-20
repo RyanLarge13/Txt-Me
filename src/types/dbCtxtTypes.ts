@@ -48,8 +48,36 @@ export type ContactSettings = {
   order: string;
 };
 
+export type DraftType = {
+  contact: {
+    contactid: number;
+    name: string;
+    email: string;
+    number: string;
+    createdat: string;
+    space: string;
+    nickname: string;
+    address: string;
+    website: string;
+    avatar: null | string;
+  };
+  message: {
+    messageid: number;
+    message: string;
+    sent: boolean;
+    sentat: Date;
+    delivered: boolean;
+    deliveredat: Date | null;
+    read: boolean;
+    readat: Date | null;
+    fromnumber: string;
+    tonumber: string;
+  }[];
+};
+
 export interface DBCtxtProps {
   IDB_GetDB: () => Promise<IDBPDatabase>;
+  IDB_GetDrafts: () => Promise<DraftType>;
   IDB_InitDatabase: (db: IDBPDatabase) => Promise<AppSettings>;
   IDB_GetAppUserData: () => Promise<DBUser>;
   IDB_GetAppData: () => Promise<AppSettings>;
