@@ -19,16 +19,18 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 import { motion } from "framer-motion";
 import React, { useCallback, useContext, useRef } from "react";
 import { BsThreeDotsVertical } from "react-icons/bs";
+import { FaEdit } from "react-icons/fa";
+import {
+    Fa42Group, FaMessage, FaPerson, FaShare, FaStar, FaStop, FaTrash, FaVideo
+} from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
 
 import { useDatabase } from "../context/dbContext";
 import UserCtxt from "../context/userCtxt";
+import useContextMenu from "../hooks/useContextMenu";
 import useLogger from "../hooks/useLogger";
 import useNotifActions from "../hooks/useNotifActions";
-import {
-  Contacts as ContactsType,
-  MessageSessionType,
-} from "../types/userTypes";
+import { Contacts as ContactsType, MessageSessionType } from "../types/userTypes";
 import { defaultContact } from "../utils/constants";
 import { getInitials } from "../utils/helpers";
 import ValueInput from "./ValueInput";
@@ -43,6 +45,7 @@ const Contacts = () => {
 
   const navigate = useNavigate();
   const log = useLogger();
+  const contextMenu = useContextMenu();
 
   // You have the same member function in/for ChatsMenu.tsx
   // Consider adding it to a common utils file or helper
@@ -107,6 +110,36 @@ const Contacts = () => {
     navigate("/profile");
   };
 
+  const M_HandleContextMenu = (
+    e: React.MouseEvent<HTMLButtonElement>
+  ): void => {
+    e.preventDefault();
+
+    const newContextMenu = {
+      show: true,
+      color: "#fff",
+      coords: {
+        x: e.clientX,
+        y: e.clientY,
+      },
+      mainOptions: [
+        { txt: "Edit", icon: <FaEdit />, func: () => {} },
+        { txt: "New", icon: <FaPerson />, func: () => {} },
+        { txt: "Delete", icon: <FaTrash />, func: () => {} },
+        { txt: "Block", icon: <FaStop />, func: () => {} },
+      ],
+      options: [
+        { txt: "Favorite", icon: <FaStar />, func: () => {} },
+        { txt: "New Message", icon: <FaMessage />, func: () => {} },
+        { txt: "Video Chat", icon: <FaVideo />, func: () => {} },
+        { txt: "Group", icon: <Fa42Group />, func: () => {} },
+        { txt: "Share", icon: <FaShare />, func: () => {} },
+      ],
+    };
+
+    contextMenu.buildContextMenu(newContextMenu);
+  };
+
   return (
     <motion.div
       initial={{ y: "100%", opacity: 0 }}
@@ -158,7 +191,9 @@ const Contacts = () => {
               </p>
             )}
             <p>{contact.name}</p>
-            <BsThreeDotsVertical />
+            <button onClick={M_HandleContextMenu}>
+              <BsThreeDotsVertical />
+            </button>
           </div>
         ))
       ) : (
