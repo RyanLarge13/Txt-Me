@@ -113,7 +113,7 @@ const ChatsMenu = () => {
       | React.MouseEvent<HTMLButtonElement, MouseEvent>,
     messageSession: MessageSessionType
   ): void => {
-    e.preventDefault();
+    e.stopPropagation();
 
     const newContextMenu: ContextMenuShowType = {
       show: true,

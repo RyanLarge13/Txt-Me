@@ -113,7 +113,7 @@ const Contacts = () => {
   const M_HandleContextMenu = (
     e: React.MouseEvent<HTMLButtonElement>
   ): void => {
-    e.preventDefault();
+    e.stopPropagation();
 
     const newContextMenu = {
       show: true,
