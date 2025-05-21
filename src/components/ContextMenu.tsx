@@ -47,7 +47,7 @@ const ContextMenu = (): JSX.Element | null => {
 
   useEffect(() => {
     M_AdjustCoords();
-  }, [contextMenu]);
+  }, [show]);
 
   /*
     DESC:
@@ -73,7 +73,6 @@ const ContextMenu = (): JSX.Element | null => {
           clipped plus an extra 5 pixels
       */
       const leftDiff = defaultStyles.x + w - winWidth;
-      console.log("Ref");
       const topDiff = defaultStyles.y + h - winHeight;
       if (leftDiff >= 0) {
         defaultStyles.x -= leftDiff + 5;

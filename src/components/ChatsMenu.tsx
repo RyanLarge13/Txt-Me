@@ -180,14 +180,14 @@ const ChatsMenu = () => {
               })
             }
             onClick={() => M_CreateMessageSession(fromNumber, messageSession)}
-            className={`flex justify-between items-center relative px-3 pr-12 py-4 bg-[#222] border-b-black border-b h-[80px] w-full hover:bg-[#333] ${
+            className={`flex justify-between items-center relative bg-[#222] border-b-black border-b h-[80px] w-full duration-200 hover:bg-[#333] ${
               // If the last message is not sent by the user and is
               // unread call this member method and change the top border color
               M_IsUnread(messageSession)
             }`}
           >
             {/* Contact avatar and name */}
-            <div className="flex flex-col justify-center items-start">
+            <div className="flex flex-col justify-center items-start basis-1/6 p-3">
               <p className="text-xl">
                 {messageSession.contact
                   ? getInitials(messageSession.contact.name)
@@ -196,7 +196,7 @@ const ChatsMenu = () => {
               <p>{messageSession?.contact?.nickname || ""}</p>
             </div>
             {/* Last message and time */}
-            <div className="flex flex-col justify-end items-end">
+            <div className="flex flex-col justify-center py-2 items-end h-full pr-5">
               <p
                 className={`${
                   messageSession?.messages[messageSession.messages.length - 1]
@@ -205,8 +205,9 @@ const ChatsMenu = () => {
                     : "text-secondary"
                 }`}
               >
-                {messageSession?.messages[messageSession.messages.length - 1]
-                  ?.message || ""}
+                {/* {messageSession?.messages[messageSession.messages.length - 1]
+                  ?.message || ""} */}
+                fjdkshafjkdhsakjlfhjdksahlfjkdshajkflhdsjkalhfjkdslhfjkdsahfjkdslahfjkdsah
               </p>
               <p className="text-xs">
                 {new Date(
@@ -219,7 +220,7 @@ const ChatsMenu = () => {
               </p>
             </div>
             <button
-              className="absolute top-1 text-lg right-1 z-20 p-3"
+              className="p-3"
               onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
                 M_HandleContextMenu(e, {
                   // Pass in the "number" key and its value to satisfy type
