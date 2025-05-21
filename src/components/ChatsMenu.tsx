@@ -19,7 +19,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 import { motion } from "framer-motion";
 import React, { useContext } from "react";
 import { BsThreeDotsVertical } from "react-icons/bs";
-import { FaMailchimp, FaMessage, FaPerson, FaStar, FaTrash } from "react-icons/fa6";
+import {
+  FaMailchimp,
+  FaMessage,
+  FaPerson,
+  FaStar,
+  FaTrash,
+} from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
 
 import { useConfig } from "../context/configContext.tsx";
@@ -113,6 +119,7 @@ const ChatsMenu = () => {
       | React.MouseEvent<HTMLButtonElement, MouseEvent>,
     messageSession: MessageSessionType
   ): void => {
+    e.preventDefault();
     e.stopPropagation();
 
     const newContextMenu: ContextMenuShowType = {
@@ -173,7 +180,7 @@ const ChatsMenu = () => {
               })
             }
             onClick={() => M_CreateMessageSession(fromNumber, messageSession)}
-            className={`flex justify-between items-center relative px-3 py-4 bg-[#222] border-b-black border-b h-[80px] w-full hover:bg-[#333] ${
+            className={`flex justify-between items-center relative px-3 pr-12 py-4 bg-[#222] border-b-black border-b h-[80px] w-full hover:bg-[#333] ${
               // If the last message is not sent by the user and is
               // unread call this member method and change the top border color
               M_IsUnread(messageSession)
@@ -201,7 +208,7 @@ const ChatsMenu = () => {
                 {messageSession?.messages[messageSession.messages.length - 1]
                   ?.message || ""}
               </p>
-              <p>
+              <p className="text-xs">
                 {new Date(
                   messageSession.messages[messageSession.messages.length - 1]
                     ?.sentat || new Date()

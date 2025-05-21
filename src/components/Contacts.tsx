@@ -21,7 +21,14 @@ import React, { useCallback, useContext, useRef } from "react";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { FaEdit } from "react-icons/fa";
 import {
-    Fa42Group, FaMessage, FaPerson, FaShare, FaStar, FaStop, FaTrash, FaVideo
+  Fa42Group,
+  FaMessage,
+  FaPerson,
+  FaShare,
+  FaStar,
+  FaStop,
+  FaTrash,
+  FaVideo,
 } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
 
@@ -30,7 +37,10 @@ import UserCtxt from "../context/userCtxt";
 import useContextMenu from "../hooks/useContextMenu";
 import useLogger from "../hooks/useLogger";
 import useNotifActions from "../hooks/useNotifActions";
-import { Contacts as ContactsType, MessageSessionType } from "../types/userTypes";
+import {
+  Contacts as ContactsType,
+  MessageSessionType,
+} from "../types/userTypes";
 import { defaultContact } from "../utils/constants";
 import { getInitials } from "../utils/helpers";
 import ValueInput from "./ValueInput";
@@ -113,6 +123,7 @@ const Contacts = () => {
   const M_HandleContextMenu = (
     e: React.MouseEvent<HTMLButtonElement>
   ): void => {
+    e.preventDefault();
     e.stopPropagation();
 
     const newContextMenu = {

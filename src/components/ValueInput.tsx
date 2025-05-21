@@ -7,16 +7,18 @@ const ValueInput = React.memo(
     retrieveValue,
     placeholder,
     type,
+    autoFocus = false,
   }: {
     retrieveValue: (value: string) => void;
     placeholder: string;
     type: string;
+    autoFocus?: boolean;
   }): JSX.Element => {
     const [value, setValue] = useState("");
 
     return (
       <input
-        autoFocus={true}
+        autoFocus={autoFocus}
         onChange={(e) => {
           retrieveValue(e.target.value);
           setValue(e.target.value);
