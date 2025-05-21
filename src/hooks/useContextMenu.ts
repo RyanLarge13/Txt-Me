@@ -1,7 +1,10 @@
 import { useCallback, useContext } from "react";
 
 import InteractiveCtxt from "../context/interactiveCtxt";
-import { ContextMenuOptions, ContextMenuShowType } from "../types/interactiveCtxtTypes";
+import {
+  ContextMenuOptions,
+  ContextMenuShowType,
+} from "../types/interactiveCtxtTypes";
 
 /*
     NOTE:
@@ -77,7 +80,13 @@ const useContextMenu = () => {
 
   const setCoords = useCallback(
     (newCoords: { x: number; y: number }) => {
-      if (!newCoords.x || !newCoords.y) {
+      /*
+        NOTE:
+          Soft double equals to check for other non existent values related 
+          to undefined with type coercion
+          such as mull. But not 0. x and y both CAN be 0
+      */
+      if (newCoords.x == undefined || newCoords.y == undefined) {
         throw new Error(
           "Please pass in both an x and y coordinate to update the position of the context menu"
         );

@@ -24,14 +24,17 @@ import React, {
   useState,
 } from "react";
 import { IoSend } from "react-icons/io5";
+import { MdFace } from "react-icons/md";
 import { TiMessages } from "react-icons/ti";
 
 import { useDatabase } from "../context/dbContext";
 import UserCtxt from "../context/userCtxt";
+import useContextMenu from "../hooks/useContextMenu";
 import useLogger from "../hooks/useLogger";
 import useNotifActions from "../hooks/useNotifActions";
 import useSocket from "../hooks/useSocket";
 import useUserData from "../hooks/useUserData";
+import { ContextMenuShowType } from "../types/interactiveCtxtTypes";
 import { Message, MessageSessionType } from "../types/userTypes";
 import { defaultMessage } from "../utils/constants";
 import { valPhoneNumber } from "../utils/validator";
@@ -53,8 +56,18 @@ const MessageSession = () => {
   const [phoneNumber] = useUserData("phoneNumber");
 
   const messagesRef = useRef<HTMLDivElement | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+
   const { socket } = useSocket();
   const log = useLogger();
+  const contextMenu = useContextMenu();
+
+  /*
+    NOTE:
+      Defining a static line height to feed the auto
+      height adjuster for the textarea element
+  */
+  const lineHeight = 18;
 
   useEffect(() => {
     if (messageSession) {
@@ -77,6 +90,37 @@ const MessageSession = () => {
       setSessionMessages(newMessageList);
     }
   }, [allMessages, messageSession]);
+
+  /*
+    DESC:
+      useEffect to scroll the message rendering parent
+      to the bottom for the latest messages
+  */
+  useEffect(() => {
+    if (messagesRef.current) {
+      const elem = messagesRef.current;
+
+      const rect = elem.getBoundingClientRect();
+      const height = rect.height;
+      elem.scrollTo(0, height);
+    }
+  }, [messagesRef, sessionMessages]);
+
+  /*
+    DESC:
+      useEffect to control the dynamical height changes of the textarea as
+      the user types
+  */
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = "auto";
+      textarea.style.height = `${Math.min(
+        textarea.scrollHeight - 14,
+        lineHeight * 5
+      )}px`;
+    }
+  }, [value]);
 
   /*
       TODO:
@@ -164,22 +208,46 @@ const MessageSession = () => {
     M_AddMessageToIndexedDB(newMessage);
   };
 
+  const M_HandleContextMenu = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const newContextMenu: ContextMenuShowType = {
+      show: true,
+      color: "#222",
+      coords: { x: e.clientX, y: e.clientY },
+      mainOptions: [
+        { txt: "My Icon", icon: <MdFace />, func: () => {} },
+        { txt: "My Icon", icon: <MdFace />, func: () => {} },
+        { txt: "My Icon", icon: <MdFace />, func: () => {} },
+        { txt: "My Icon", icon: <MdFace />, func: () => {} },
+      ],
+      options: [
+        { txt: "My Icon", icon: <MdFace />, func: () => {} },
+        { txt: "My Icon", icon: <MdFace />, func: () => {} },
+        { txt: "My Icon", icon: <MdFace />, func: () => {} },
+        { txt: "My Icon", icon: <MdFace />, func: () => {} },
+        { txt: "My Icon", icon: <MdFace />, func: () => {} },
+      ],
+    };
+
+    contextMenu.buildContextMenu(newContextMenu);
+  };
+
   return messageSession !== null ? (
-    <div
-      ref={messagesRef}
-      className="h-full w-full overflow-y-auto py-20 scroll-smooth"
-    >
-      <div className="p-2 fixed top-0 z-10 right-0 left-0 bg-black">
-        <p className="mb-1">
+    <div ref={messagesRef} className="h-full w-full overflow-y-auto pb-20">
+      <div className="p-5 text-sm fixed flex justify-between items-center top-0 z-[999] right-0 left-0 bg-black">
+        <p className="hover:text-primary duration-200 cursor-pointer">
           {messageSession.contact?.name || messageSession.number}
         </p>
-        <p>{messageSession.contact?.number || ""}</p>
+        <p className="text-tri">{messageSession.contact?.number || ""}</p>
       </div>
       {sessionMessages.length > 0 ? (
         <div className="flex flex-col justify-start px-10 py-20 gap-y-5 min-h-full">
           {sessionMessages.map((message, index) => (
             <div
               key={index}
+              onContextMenu={M_HandleContextMenu}
               className={`${
                 message.fromnumber === phoneNumber
                   ? "bg-tri self-end"
@@ -198,14 +266,20 @@ const MessageSession = () => {
         className="bg-black fixed bottom-[60px] left-0 right-0 py-5 px-2 flex justify-between items-center gap-x-2"
       >
         <textarea
+          ref={textareaRef}
           name="message"
           id="message"
-          rows={1}
           cols={50}
           value={value}
           onChange={(e) => setValue(e.target.value)}
           placeholder="text message"
-          className="px-3 py-2 h-auto w-full bg-[#222] rounded-full whitespace-pre-wrap break-words outline-none focus:outline-none"
+          className="px-3 py-2 w-full h-[38px] bg-[#222] rounded-md duration-200 whitespace-pre-wrap break-words outline-none resize-none"
+          style={{
+            overflow: "hidden",
+            lineHeight: `${lineHeight}px`,
+            maxHeight: `${lineHeight * 5}px`,
+            minHeight: `${lineHeight}px`,
+          }}
         ></textarea>
         <button
           type="submit"

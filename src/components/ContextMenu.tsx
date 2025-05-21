@@ -1,10 +1,7 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 
 import useContextMenu from "../hooks/useContextMenu";
-import {
-  ContextMenuOptions,
-  ContextMenuShowType,
-} from "../types/interactiveCtxtTypes";
+import { ContextMenuOptions } from "../types/interactiveCtxtTypes";
 
 const BackDrop = ({
   z = 999,
@@ -29,12 +26,8 @@ const BackDrop = ({
 const ContextMenu = (): JSX.Element | null => {
   const contextMenu = useContextMenu();
 
-  const [coords, setCoords] = useState<ContextMenuShowType["coords"]>(
-    contextMenu.getValue("coords") || { x: 0, y: 0 }
-  );
-
   // Import context menu data amd provide default values if failures appear
-  // const coords = contextMenu.getValue("coords") || { x: 0, y: 0 };
+  const coords = contextMenu.getValue("coords") || { x: 0, y: 0 };
   const options = contextMenu.getValue("options") || [];
   const mainOptions = contextMenu.getValue("mainOptions") || [];
 
@@ -47,16 +40,14 @@ const ContextMenu = (): JSX.Element | null => {
 
   const contextMenuRef = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => {
-    if (contextMenuRef.current) {
-      M_AdjustCoords();
-    }
-  }, [contextMenuRef.current]);
-
   const M_HideContextMenu = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
     contextMenu.hide();
   };
+
+  useEffect(() => {
+    M_AdjustCoords();
+  }, [contextMenu]);
 
   /*
     DESC:
@@ -82,22 +73,23 @@ const ContextMenu = (): JSX.Element | null => {
           clipped plus an extra 5 pixels
       */
       const leftDiff = defaultStyles.x + w - winWidth;
+      console.log("Ref");
       const topDiff = defaultStyles.y + h - winHeight;
-      if (leftDiff > 0) {
+      if (leftDiff >= 0) {
         defaultStyles.x -= leftDiff + 5;
       }
-      if (defaultStyles.x < 0) {
+      if (defaultStyles.x <= 0) {
         defaultStyles.x += Math.abs(defaultStyles.x) + 5;
       }
-      if (topDiff > 0) {
+      if (topDiff >= 0) {
         defaultStyles.y -= topDiff + 5;
       }
-      if (defaultStyles.y < 0) {
+      if (defaultStyles.y <= 0) {
         defaultStyles.y += Math.abs(defaultStyles.y) + 5;
       }
     }
 
-    setCoords(defaultStyles);
+    contextMenu.setCoords(defaultStyles);
   };
 
   return show ? (
