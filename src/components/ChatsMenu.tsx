@@ -19,7 +19,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 import { motion } from "framer-motion";
 import React, { useContext } from "react";
 import { BsThreeDotsVertical } from "react-icons/bs";
-import { FaMailchimp, FaMessage, FaPerson, FaStar, FaTrash } from "react-icons/fa6";
+import {
+  FaMailchimp,
+  FaMessage,
+  FaPerson,
+  FaStar,
+  FaTrash,
+} from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
 
 import { useConfig } from "../context/configContext.tsx";
@@ -181,8 +187,8 @@ const ChatsMenu = () => {
             }`}
           >
             {/* Contact avatar and name */}
-            <div className="flex flex-col justify-center items-start basis-1/6 p-3">
-              <p className="text-xl">
+            <div className="flex flex-col justify-center items-center basis-1/6 p-3">
+              <p className="text-lg w-8 flex aspect-square justify-center items-center rounded-full bg-gray-400">
                 {messageSession.contact
                   ? getInitials(messageSession.contact.name)
                   : fromNumber}
@@ -190,9 +196,9 @@ const ChatsMenu = () => {
               <p>{messageSession?.contact?.nickname || ""}</p>
             </div>
             {/* Last message and time */}
-            <div className="flex flex-col justify-center py-2 items-end h-full basis-2/3 overflow-x-clip pr-5">
+            <div className="flex flex-col justify-center py-2 items-end h-full basis-3/5 overflow-hidden pr-5">
               <p
-                className={`${
+                className={`self-start w-full truncate ${
                   messageSession?.messages[messageSession.messages.length - 1]
                     .fromnumber === getUserData("phoneNumber")
                     ? "text-primary"
@@ -213,7 +219,7 @@ const ChatsMenu = () => {
               </p>
             </div>
             <button
-              className="p-3 basis-1/6"
+              className="p-3"
               onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
                 M_HandleContextMenu(e, {
                   // Pass in the "number" key and its value to satisfy type

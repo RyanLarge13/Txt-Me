@@ -2,7 +2,15 @@ import React, { useState } from "react";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { FaEdit } from "react-icons/fa";
 import {
-    Fa42Group, FaMessage, FaPerson, FaPhone, FaShare, FaStar, FaStop, FaTrash, FaVideo
+  Fa42Group,
+  FaMessage,
+  FaPerson,
+  FaPhone,
+  FaShare,
+  FaStar,
+  FaStop,
+  FaTrash,
+  FaVideo,
 } from "react-icons/fa6";
 
 import useContextMenu from "../hooks/useContextMenu";
@@ -60,30 +68,32 @@ const Contact = ({
   };
 
   return (
-    <div
-      onClick={() => setExpand((prev) => !prev)}
-      className="flex justify-between items-center py-5 bg-black"
-    >
-      {contact.avatar ? (
-        <img
-          src={contact?.avatar}
-          alt="avatar"
-          width={30}
-          height={30}
-          className="w-[30px] h-[30px] rounded-full object-contain"
-        />
-      ) : (
-        <p className="flex justify-center items-center w-[40px] h-[40px] text-black rounded-full bg-slate-400">
-          {getInitials(contact.name || "")}
-        </p>
-      )}
-      <p>{contact.name}</p>
-      <button onClick={M_HandleContextMenu}>
-        <BsThreeDotsVertical />
-      </button>
+    <div className="flex flex-col justify-start items-center">
+      <div
+        onClick={() => setExpand((prev) => !prev)}
+        className="flex justify-between items-center py-5 bg-black w-full"
+      >
+        {contact.avatar ? (
+          <img
+            src={contact?.avatar}
+            alt="avatar"
+            width={30}
+            height={30}
+            className="w-[30px] h-[30px] rounded-full object-contain"
+          />
+        ) : (
+          <p className="flex justify-center items-center w-[40px] h-[40px] text-black rounded-full bg-slate-400">
+            {getInitials(contact.name || "")}
+          </p>
+        )}
+        <p>{contact.name}</p>
+        <button onClick={M_HandleContextMenu}>
+          <BsThreeDotsVertical />
+        </button>
+      </div>
       {/* Expandable contact information on click */}
       <div
-        className={`duration-200 ${
+        className={`duration-200 w-full ${
           expand
             ? "h-10 opacity-100 pointer-events-auto"
             : "h-0 pointer-events-none opacity-0"
@@ -104,21 +114,21 @@ const Contact = ({
         <div className="flex justify-between items-center">
           <button
             onClick={() => {}}
-            className="basis-1/3 aspect-square flex flex-col justify-center items-center"
+            className="basis-1/3 aspect-square hover:bg-tri duration-200 hover:text-white text-black rounded-full bg-primary m-6 text-xs gap-y-1 flex flex-col justify-center items-center"
           >
             <p>Call</p>
             <FaPhone />
           </button>
           <button
             onClick={(e) => M_HandleStartMessage(e, contact)}
-            className="basis-1/3 aspect-square flex flex-col justify-center items-center"
+            className="basis-1/3 aspect-square hover:bg-tri duration-200 hover:text-white text-black rounded-full bg-primary m-6 text-xs gap-y-1 flex flex-col justify-center items-center"
           >
             <p>Message</p>
             <FaMessage />
           </button>
           <button
             onClick={() => {}}
-            className="basis-1/3 aspect-square flex flex-col justify-center items-center"
+            className="basis-1/3 aspect-square hover:bg-tri duration-200 hover:text-white text-black rounded-full bg-primary m-6 text-xs gap-y-1 flex flex-col justify-center items-center"
           >
             <p>Video</p>
             <FaVideo />
