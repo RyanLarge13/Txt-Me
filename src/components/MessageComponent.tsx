@@ -65,11 +65,15 @@ const MessageComponent = ({ message }: { message: Message }): JSX.Element => {
         } text-xs`}
       >
         {isFromMe ? sentDate : deliveredDate}
-        <span
-          className={`${message.delivered ? "text-primary" : "text-secondary"}`}
-        >
-          {message.delivered ? <FaCheckCircle /> : <FaClock />}
-        </span>
+        {isFromMe ? (
+          <span
+            className={`${
+              message.delivered ? "text-primary" : "text-secondary"
+            }`}
+          >
+            {message.delivered ? <FaCheckCircle /> : <FaClock />}
+          </span>
+        ) : null}
       </p>
       <div
         onContextMenu={M_HandleContextMenu}

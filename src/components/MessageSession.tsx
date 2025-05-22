@@ -219,7 +219,7 @@ const MessageSession = () => {
       <MessageInfoTopBar messageSession={messageSession} />
       {/* Name and number at top of message session view */}
       {sessionMessages.length > 0 ? (
-        <div className="flex flex-col justify-start px-10 py-20 gap-y-12 min-h-full">
+        <div className="flex flex-col justify-start px-10 py-20 gap-y-16 min-h-full">
           {sessionMessages.map((message: Message, index) => (
             <MessageComponent key={index} message={message} />
           ))}
