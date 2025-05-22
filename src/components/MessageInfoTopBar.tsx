@@ -11,7 +11,7 @@ const MessageInfoTopBar = ({
   const location = useLocation();
 
   return location.pathname === "/profile" ? (
-    <div className="p-5 text-sm mt-20 flex justify-between items-center bg-black">
+    <div className="p-5 text-sm flex fixed top-0 right-0 left-0 z-[999] justify-between items-center bg-black">
       <p className="hover:text-primary duration-200 cursor-pointer">
         {messageSession.contact?.name || messageSession.number}
       </p>

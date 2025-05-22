@@ -16,22 +16,27 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import React, { FormEvent, useContext, useEffect, useRef, useState } from "react";
+import React, {
+  FormEvent,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { IoSend } from "react-icons/io5";
-import { MdFace } from "react-icons/md";
 import { TiMessages } from "react-icons/ti";
+import { useLocation } from "react-router-dom";
 
 import { useDatabase } from "../context/dbContext";
 import UserCtxt from "../context/userCtxt";
-import useContextMenu from "../hooks/useContextMenu";
 import useLogger from "../hooks/useLogger";
 import useNotifActions from "../hooks/useNotifActions";
 import useSocket from "../hooks/useSocket";
 import useUserData from "../hooks/useUserData";
-import { ContextMenuShowType } from "../types/interactiveCtxtTypes";
 import { Message, MessageSessionType } from "../types/userTypes";
 import { defaultMessage } from "../utils/constants";
 import { valPhoneNumber } from "../utils/validator";
+import MessageComponent from "./MessageComponent";
 import MessageInfoTopBar from "./MessageInfoTopBar";
 
 const MessageSession = () => {
@@ -53,9 +58,9 @@ const MessageSession = () => {
   const messagesRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
+  const location = useLocation();
   const { socket } = useSocket();
   const log = useLogger();
-  const contextMenu = useContextMenu();
 
   /*
     NOTE:
@@ -203,51 +208,20 @@ const MessageSession = () => {
     M_AddMessageToIndexedDB(newMessage);
   };
 
-  const M_HandleContextMenu = (e: React.MouseEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    const newContextMenu: ContextMenuShowType = {
-      show: true,
-      color: "#222",
-      coords: { x: e.clientX, y: e.clientY },
-      mainOptions: [
-        { txt: "My Icon", icon: <MdFace />, func: () => {} },
-        { txt: "My Icon", icon: <MdFace />, func: () => {} },
-        { txt: "My Icon", icon: <MdFace />, func: () => {} },
-        { txt: "My Icon", icon: <MdFace />, func: () => {} },
-      ],
-      options: [
-        { txt: "My Icon", icon: <MdFace />, func: () => {} },
-        { txt: "My Icon", icon: <MdFace />, func: () => {} },
-        { txt: "My Icon", icon: <MdFace />, func: () => {} },
-        { txt: "My Icon", icon: <MdFace />, func: () => {} },
-        { txt: "My Icon", icon: <MdFace />, func: () => {} },
-      ],
-    };
-
-    contextMenu.buildContextMenu(newContextMenu);
-  };
-
   return messageSession !== null ? (
-    <div ref={messagesRef} className="h-full w-full overflow-y-auto pb-20">
+    <div
+      ref={messagesRef}
+      className={`h-full w-full overflow-y-auto pb-20 duration-200 ${
+        location.pathname === "/profile" ? "opacity-100" : "opacity-0"
+      }`}
+    >
       {/* Name and number at top of message session view */}
       <MessageInfoTopBar messageSession={messageSession} />
       {/* Name and number at top of message session view */}
       {sessionMessages.length > 0 ? (
-        <div className="flex flex-col justify-start px-10 py-20 gap-y-5 min-h-full">
-          {sessionMessages.map((message, index) => (
-            <div
-              key={index}
-              onContextMenu={M_HandleContextMenu}
-              className={`${
-                message.fromnumber === phoneNumber
-                  ? "bg-tri self-end"
-                  : "bg-secondary self-start"
-              } rounded-lg shadow-lg text-black p-3 outline-red-400 min-w-[50%]`}
-            >
-              <p>{message.message}</p>
-            </div>
+        <div className="flex flex-col justify-start px-10 py-20 gap-y-12 min-h-full">
+          {sessionMessages.map((message: Message, index) => (
+            <MessageComponent key={index} message={message} />
           ))}
         </div>
       ) : (

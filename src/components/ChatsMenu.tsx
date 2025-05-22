@@ -151,9 +151,9 @@ const ChatsMenu = () => {
 
   return (
     <motion.nav
-      initial={{ x: -100 }}
-      exit={{ x: -100 }}
-      animate={{ x: 0 }}
+      initial={{ opacity: 0, x: -100 }}
+      exit={{ opacity: 0, x: -100 }}
+      animate={{ opacity: 1, x: 0 }}
       className="flex flex-col fixed top-14 left-0 right-0 md:right-[75%] z-40 bottom-0
       overflow-y-auto bg-[#000]"
     >
