@@ -19,13 +19,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 import { motion } from "framer-motion";
 import React, { useContext } from "react";
 import { BsThreeDotsVertical } from "react-icons/bs";
-import {
-  FaMailchimp,
-  FaMessage,
-  FaPerson,
-  FaStar,
-  FaTrash,
-} from "react-icons/fa6";
+import { FaMailchimp, FaMessage, FaPerson, FaStar, FaTrash } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
 
 import { useConfig } from "../context/configContext.tsx";
@@ -151,9 +145,9 @@ const ChatsMenu = () => {
 
   return (
     <motion.nav
-      initial={{ opacity: 0, x: -100 }}
-      exit={{ opacity: 0, x: -100 }}
-      animate={{ opacity: 1, x: 0 }}
+      initial={{ x: -100 }}
+      exit={{ x: -100 }}
+      animate={{ x: 0 }}
       className="flex flex-col fixed top-14 left-0 right-0 md:right-[75%] z-40 bottom-0
       overflow-y-auto bg-[#000]"
     >
@@ -180,7 +174,7 @@ const ChatsMenu = () => {
               })
             }
             onClick={() => M_CreateMessageSession(fromNumber, messageSession)}
-            className={`flex justify-between items-center relative bg-[#222] border-b-black border-b h-[80px] w-full duration-200 hover:bg-[#333] ${
+            className={`flex justify-between items-center relative bg-[#222] border-b-black border-b h-[80px] max-w-full duration-200 hover:bg-[#333] ${
               // If the last message is not sent by the user and is
               // unread call this member method and change the top border color
               M_IsUnread(messageSession)
@@ -196,7 +190,7 @@ const ChatsMenu = () => {
               <p>{messageSession?.contact?.nickname || ""}</p>
             </div>
             {/* Last message and time */}
-            <div className="flex flex-col justify-center py-2 items-end h-full pr-5">
+            <div className="flex flex-col justify-center py-2 items-end h-full basis-2/3 overflow-x-clip pr-5">
               <p
                 className={`${
                   messageSession?.messages[messageSession.messages.length - 1]
@@ -205,9 +199,8 @@ const ChatsMenu = () => {
                     : "text-secondary"
                 }`}
               >
-                {/* {messageSession?.messages[messageSession.messages.length - 1]
-                  ?.message || ""} */}
-                fjdkshafjkdhsakjlfhjdksahlfjkdshajkflhdsjkalhfjkdslhfjkdsahfjkdslahfjkdsah
+                {messageSession?.messages[messageSession.messages.length - 1]
+                  ?.message || ""}
               </p>
               <p className="text-xs">
                 {new Date(
@@ -220,7 +213,7 @@ const ChatsMenu = () => {
               </p>
             </div>
             <button
-              className="p-3"
+              className="p-3 basis-1/6"
               onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
                 M_HandleContextMenu(e, {
                   // Pass in the "number" key and its value to satisfy type

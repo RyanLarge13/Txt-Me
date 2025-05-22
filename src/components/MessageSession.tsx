@@ -16,13 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import React, {
-  FormEvent,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { FormEvent, useContext, useEffect, useRef, useState } from "react";
 import { IoSend } from "react-icons/io5";
 import { MdFace } from "react-icons/md";
 import { TiMessages } from "react-icons/ti";
@@ -38,6 +32,7 @@ import { ContextMenuShowType } from "../types/interactiveCtxtTypes";
 import { Message, MessageSessionType } from "../types/userTypes";
 import { defaultMessage } from "../utils/constants";
 import { valPhoneNumber } from "../utils/validator";
+import MessageInfoTopBar from "./MessageInfoTopBar";
 
 const MessageSession = () => {
   const { messageSession, allMessages, setAllMessages } = useContext(UserCtxt);
@@ -236,12 +231,9 @@ const MessageSession = () => {
 
   return messageSession !== null ? (
     <div ref={messagesRef} className="h-full w-full overflow-y-auto pb-20">
-      <div className="p-5 text-sm fixed flex justify-between items-center top-0 z-[999] right-0 left-0 bg-black">
-        <p className="hover:text-primary duration-200 cursor-pointer">
-          {messageSession.contact?.name || messageSession.number}
-        </p>
-        <p className="text-tri">{messageSession.contact?.number || ""}</p>
-      </div>
+      {/* Name and number at top of message session view */}
+      <MessageInfoTopBar messageSession={messageSession} />
+      {/* Name and number at top of message session view */}
       {sessionMessages.length > 0 ? (
         <div className="flex flex-col justify-start px-10 py-20 gap-y-5 min-h-full">
           {sessionMessages.map((message, index) => (
