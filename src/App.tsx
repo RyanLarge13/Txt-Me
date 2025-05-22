@@ -22,13 +22,14 @@ import { TiMessages } from "react-icons/ti";
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import ChatsMenu from "./components/ChatsMenu.tsx";
-import Messages from "./components/Messages.tsx";
+import ContactsComponent from "./components/ContactsComponent.tsx";
 import Nav from "./components/Nav.tsx";
 import ProfileNav from "./components/ProfileNav.tsx";
 import SysNotif from "./components/SysNotif.tsx";
 import { InteractiveProvider } from "./context/interactiveCtxt.tsx";
 import { SocketProvider } from "./context/socketCtxt.tsx";
 import useUserData from "./hooks/useUserData.ts";
+import ContactPage from "./states/ContactPage.tsx";
 import Help from "./states/Help.tsx";
 import Home from "./states/Home.tsx";
 import Login from "./states/Login.tsx";
@@ -130,7 +131,11 @@ const App = () => {
             <Route path="newcontact" element={<NewContact />} />
             <Route path="account" element={<UserMenu />} />
             <Route path="messages" element={<ChatsMenu />} />
-            <Route path="contacts" element={<Messages />} />
+            {/* Nested Contact routes --------------------------------------------- */}
+            <Route path="contacts" element={<ContactsComponent />}>
+              <Route path=":id" element={<ContactPage />} />
+            </Route>
+            {/* Nested Contact routes --------------------------------------------- */}
             {/* Nested routes for "/profile" */}
           </Route>
 

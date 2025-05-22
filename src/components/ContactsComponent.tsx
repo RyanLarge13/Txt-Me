@@ -19,12 +19,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 import { AnimatePresence, motion } from "framer-motion";
 import React, { ChangeEvent, useContext, useState } from "react";
 import { FaSearch } from "react-icons/fa";
+import { Outlet } from "react-router-dom";
 
 import SearchIcon from "../assets/search.svg";
 import InteractiveCtxt from "../context/interactiveCtxt.tsx";
 import Contacts from "./Contacts.tsx";
 
-const Messages = () => {
+const ContactsComponent = () => {
   const { openChatsMenu } = useContext(InteractiveCtxt);
 
   const [noFoundContacts, setNoFoundContact] = useState(false);
@@ -82,8 +83,9 @@ const Messages = () => {
           ) : null}
         </AnimatePresence>
       </div>
+      <Outlet />
     </motion.section>
   );
 };
 
-export default Messages;
+export default ContactsComponent;

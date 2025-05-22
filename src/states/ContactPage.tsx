@@ -24,7 +24,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { motion } from "framer-motion";
-import { FormEvent, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   FaAddressCard,
   FaCamera,
@@ -34,27 +34,15 @@ import {
 } from "react-icons/fa";
 import { FaMobileScreen, FaUserGroup } from "react-icons/fa6";
 import { MdEmail } from "react-icons/md";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
-import { useDatabase } from "../context/dbContext";
+import UserCtxt from "../context/userCtxt";
 import useLogger from "../hooks/useLogger";
-import { DraftType } from "../types/dbCtxtTypes";
+import { Contacts as ContactsType } from "../types/userTypes";
 
-/*
-  TODO:
-    IMPLEMENT:
-      1. Save the current contact in like a draft state inside indexedDB
-      when navigating away from the new contact state or by pressing cancel
-*/
-const NewContact = (): JSX.Element => {
-  const { IDB_UpdateContactInDraft } = useDatabase();
+const ContactPage = () => {
+  const { contacts } = useContext(UserCtxt);
 
-  /*
-    TODO:
-      IMPLEMENT:
-        1. Make a more complex avatar image state with image type checking 
-        and other data to make sure the user uploads a good image
-  */
   const [avatarImage, setAvatarImage] = useState(null);
   const [groupText, setGroupText] = useState("");
   const [autoComplete, setAutoComplete] = useState({
@@ -62,8 +50,11 @@ const NewContact = (): JSX.Element => {
     names: [],
   });
 
+  const params = useParams();
   const navigate = useNavigate();
   const log = useLogger();
+
+  const contactId = Number(params.id);
 
   useEffect((): void => {
     if (groupText === "") {
@@ -72,66 +63,38 @@ const NewContact = (): JSX.Element => {
       });
     } else {
       /*
-        TODO:
-          IMPLEMENT:
-            1. Query for the groups that already exist for the user
-      */
+                TODO:
+                  IMPLEMENT:
+                    1. Query for the groups that already exist for the user
+              */
       setAutoComplete((prev) => {
         return { ...prev, show: true };
       });
     }
   }, [groupText]);
 
-  // Save contact in drafts (IndexedDB) when navigating away
-  useEffect(() => {
-    window.addEventListener("popstate", M_SaveContactInDraft);
+  // Loading logic ---------
+  if (!contactId) {
+    navigate("/profile/contacts");
+    return;
+  }
 
-    return () => window.removeEventListener("popstate", M_SaveContactInDraft);
-  }, []);
+  const contact = contacts.find((c: ContactsType) => c.contactid === contactId);
 
-  const M_AddContact = (e: FormEvent<HTMLFormElement>): void => {
-    e.preventDefault();
+  if (!contact) {
+    navigate("/profile/contacts");
+    return;
+  }
+  // Loading logic ---------
 
-    const formData = new FormData(e.currentTarget);
+  const M_UpdateContact = () => {};
 
-    const data = Object.fromEntries(formData.entries());
+  const M_ConfirmQuit = () => {};
 
-    log.devLog("Data from contact form: ", data);
-  };
-
-  // Handling the uploading of an Avatar image form input field,
-  // setting the image to state and showing it in the contact avatar window
   const M_UploadAvatar = (e): void => {
     const newAvatarFile = e?.target.files[0];
     setAvatarImage(newAvatarFile);
     log.devLog(newAvatarFile);
-  };
-
-  const M_SaveContactInDraft = async (): Promise<void> => {
-    try {
-      /*
-        TODO:
-          IMPLEMENT:
-            1. Change the way I handle form state so this object
-            can be updated appropriately
-      */
-      const contactToSaveAsDraft: DraftType["contact"] = {
-        contactid: 0,
-        name: "",
-        email: "",
-        number: "",
-        createdat: "",
-        space: "",
-        nickname: "",
-        address: "",
-        website: "",
-        avatar: null,
-      };
-      await IDB_UpdateContactInDraft(contactToSaveAsDraft);
-    } catch (err) {
-      log.logAllError("Error saving contact in drafts. Error: ", err);
-    }
-    navigate("/profile/contacts");
   };
 
   return (
@@ -145,11 +108,12 @@ const NewContact = (): JSX.Element => {
       }}
       className="fixed inset-0 z-[999] bg-[#000] overflow-y-auto small-scrollbar"
     >
-      <form onSubmit={M_AddContact}>
+      <form onSubmit={M_UpdateContact}>
+        {/* Changed! ------------------------------------------------------------------ */}
         <div className="flex justify-center items-center h-40 pt-20">
           <label
             className="rounded-full w-40 h-40 flex justify-center
-     items-center bg-[#111] cursor-pointer"
+   items-center bg-[#111] cursor-pointer"
           >
             <input
               type="file"
@@ -245,7 +209,7 @@ const NewContact = (): JSX.Element => {
           <button
             type="button"
             className="bg-secondary px-10 py-3 flex-[0.25] text-[#000]"
-            onClick={() => M_SaveContactInDraft()}
+            onClick={() => M_ConfirmQuit()}
           >
             Cancel
           </button>
@@ -261,4 +225,4 @@ const NewContact = (): JSX.Element => {
   );
 };
 
-export default NewContact;
+export default ContactPage;

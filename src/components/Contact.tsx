@@ -12,6 +12,7 @@ import {
   FaTrash,
   FaVideo,
 } from "react-icons/fa6";
+import { useNavigate } from "react-router-dom";
 
 import useContextMenu from "../hooks/useContextMenu";
 import { Contacts } from "../types/userTypes";
@@ -28,6 +29,8 @@ const Contact = ({
 
   const [expand, setExpand] = useState(false);
 
+  const navigate = useNavigate();
+
   const M_HandleContextMenu = (
     e: React.MouseEvent<HTMLButtonElement>
   ): void => {
@@ -42,7 +45,13 @@ const Contact = ({
         y: e.clientY,
       },
       mainOptions: [
-        { txt: "Edit", icon: <FaEdit />, func: () => {} },
+        {
+          txt: "Edit",
+          icon: <FaEdit />,
+          func: () => {
+            navigate(`/profile/contacts/${contact.contactid}`);
+          },
+        },
         { txt: "New", icon: <FaPerson />, func: () => {} },
         { txt: "Delete", icon: <FaTrash />, func: () => {} },
         { txt: "Block", icon: <FaStop />, func: () => {} },
