@@ -188,12 +188,14 @@ const ChatsMenu = () => {
           >
             {/* Contact avatar and name */}
             <div className="flex flex-col justify-center items-center basis-1/6 p-3">
-              <p className="text-lg w-8 flex aspect-square justify-center items-center rounded-full bg-gray-400">
+              <p className="text-lg text-center">
                 {messageSession.contact
                   ? getInitials(messageSession.contact.name)
                   : fromNumber}
               </p>
-              <p>{messageSession?.contact?.nickname || ""}</p>
+              <p className="text-center whitespace-nowrap">
+                {messageSession?.contact?.nickname || ""}
+              </p>
             </div>
             {/* Last message and time */}
             <div className="flex flex-col justify-center py-2 items-end h-full basis-3/5 overflow-hidden pr-5">
