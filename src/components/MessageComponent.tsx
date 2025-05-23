@@ -74,7 +74,7 @@ const MessageComponent = ({ message }: { message: Message }): JSX.Element => {
   return (
     <div
       className={`flex justify-center ${
-        isFromMe ? "self-end items-end" : "self-start items-start"
+        isFromMe ? "self-end items-end max-w-[60%]" : "self-start items-start"
       }`}
     >
       <p

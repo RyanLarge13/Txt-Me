@@ -1,0 +1,90 @@
+import React, { useContext } from "react";
+import { FaMessage } from "react-icons/fa6";
+import { useNavigate } from "react-router-dom";
+
+import { useDatabase } from "../context/dbContext";
+import UserCtxt from "../context/userCtxt";
+import useLogger from "../hooks/useLogger";
+import { Contacts as ContactType, MessageSessionType } from "../types/userTypes";
+
+const ContactProfileInfo = ({ contact }: { contact: ContactType }) => {
+  const { allMessages, setMessageSession } = useContext(UserCtxt);
+  const { IDB_UpdateMessageSession } = useDatabase();
+
+  const log = useLogger();
+  const navigate = useNavigate();
+
+  const contactMessages = allMessages.get(contact.number)?.messages || [];
+
+  /*
+  CONSIDER:
+    1. Open message session function below could be reused
+    this same function is used inside of ChatsMenu component
+*/
+  const M_CreateMessageSession = () => {
+    log.devLog(
+      "Creating a new message session from ContactProfileInfo.tsx. Logging messages and contact that is involved for creating session from click",
+      "contact: ",
+      contact,
+      "Messages: ",
+      contactMessages
+    );
+
+    if (!contact) {
+      log.devLog("No contact for this message session");
+    }
+
+    const newSession = {
+      number: contact?.number || "unknown", // Default for no known number
+      contact: contact !== null ? contact : null,
+      messages: contactMessages,
+    };
+
+    setMessageSession(newSession);
+
+    M_StoreMessageSession(newSession);
+
+    navigate("/profile");
+  };
+
+  /*
+    CONSIDER:
+        You have the same member function in/for Contacts.tsx
+        and also found in ChatsMenu.
+        Consider adding it to a common utils file or helper
+  */
+  const M_StoreMessageSession = async (
+    newSession: MessageSessionType
+  ): Promise<void> => {
+    try {
+      await IDB_UpdateMessageSession(newSession);
+    } catch (err) {
+      log.logAllError(
+        "Error storing message session in indexDB when clicking in chats menu",
+        err
+      );
+    }
+  };
+
+  return (
+    <div className="my-20 rounded-md bg-gray-400 p-3">
+      {contactMessages.length < 1 ? (
+        <button
+          onClick={() => M_CreateMessageSession()}
+          className="flex flex-col items-center justify-center"
+        >
+          <FaMessage />
+          <p className="bg-black p-2 truncate max-w-full overflow-x-hidden text-white">
+            {contactMessages[contactMessages.length - 1]?.message || "..."}
+          </p>
+        </button>
+      ) : (
+        <p>
+          No Messages <FaMessage />
+        </p>
+      )}
+    </div>
+  );
+};
+
+export default ContactProfileInfo;

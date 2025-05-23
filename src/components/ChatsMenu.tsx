@@ -19,13 +19,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 import { motion } from "framer-motion";
 import React, { useContext } from "react";
 import { BsThreeDotsVertical } from "react-icons/bs";
-import {
-  FaMailchimp,
-  FaMessage,
-  FaPerson,
-  FaStar,
-  FaTrash,
-} from "react-icons/fa6";
+import { FaMailchimp, FaMessage, FaPerson, FaStar, FaTrash } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
 
 import { useConfig } from "../context/configContext.tsx";
@@ -46,8 +40,12 @@ const ChatsMenu = () => {
   const log = useLogger();
   const contextMenu = useContextMenu();
 
-  // You have the same member function in/for Contacts.tsx
-  // Consider adding it to a common utils file or helper
+  /*
+    CONSIDER:
+        You have the same member function in/for Contacts.tsx
+        and also found in ContactProfileInfo.
+        Consider adding it to a common utils file or helper
+  */
   const M_StoreMessageSession = async (
     newSession: MessageSessionType
   ): Promise<void> => {
@@ -61,6 +59,11 @@ const ChatsMenu = () => {
     }
   };
 
+  /*
+  CONSIDER:
+    1. Create message session function below could be reused
+    this same function is used inside of ContactProfileInfo component
+*/
   const M_CreateMessageSession = (
     fromNumber: string,
     session: {

@@ -17,7 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import React from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import { MessageSessionType } from "../types/userTypes";
 
@@ -27,14 +27,20 @@ const MessageInfoTopBar = ({
   messageSession: MessageSessionType;
 }) => {
   const location = useLocation();
+  const navigate = useNavigate();
 
   return location.pathname === "/profile" ? (
-    <div className="p-5 text-sm flex fixed top-0 right-0 left-0 z-[999] justify-between items-center bg-black">
+    <button
+      onClick={() =>
+        navigate(`/profile/contacts/${messageSession.contact?.contactid}`)
+      }
+      className="p-5 text-sm flex fixed top-0 right-0 left-0 z-[999] justify-between items-center bg-black"
+    >
       <p className="hover:text-primary duration-200 cursor-pointer">
         {messageSession.contact?.name || messageSession.number}
       </p>
       <p className="text-tri">{messageSession.contact?.number || ""}</p>
-    </div>
+    </button>
   ) : null;
 };
 

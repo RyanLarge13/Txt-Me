@@ -25,17 +25,12 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import { motion } from "framer-motion";
 import React, { useContext, useEffect, useState } from "react";
-import {
-  FaAddressCard,
-  FaCamera,
-  FaLink,
-  FaUser,
-  FaUserTag,
-} from "react-icons/fa";
+import { FaAddressCard, FaCamera, FaLink, FaUser, FaUserTag } from "react-icons/fa";
 import { FaMobileScreen, FaUserGroup } from "react-icons/fa6";
 import { MdEmail } from "react-icons/md";
 import { useNavigate, useParams } from "react-router-dom";
 
+import ContactProfileInfo from "../components/ContactProfileInfo";
 import UserCtxt from "../context/userCtxt";
 import useLogger from "../hooks/useLogger";
 import { Contacts as ContactsType } from "../types/userTypes";
@@ -133,6 +128,7 @@ const ContactPage = () => {
             )}
           </label>
         </div>
+        <ContactProfileInfo contact={contact} />
         <div className="mt-40 px-5">
           <div className="flex gap-x-5 justify-start items-center w-full p-2 my-10 rounded-sm">
             <FaUser />
