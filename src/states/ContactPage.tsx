@@ -25,7 +25,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import { motion } from "framer-motion";
 import React, { useContext, useEffect, useState } from "react";
-import { FaAddressCard, FaCamera, FaLink, FaUser, FaUserTag } from "react-icons/fa";
+import { FaAddressCard, FaLink, FaUser, FaUserTag } from "react-icons/fa";
 import { FaMobileScreen, FaUserGroup } from "react-icons/fa6";
 import { MdEmail } from "react-icons/md";
 import { useNavigate, useParams } from "react-router-dom";
@@ -34,6 +34,7 @@ import ContactProfileInfo from "../components/ContactProfileInfo";
 import UserCtxt from "../context/userCtxt";
 import useLogger from "../hooks/useLogger";
 import { Contacts as ContactsType } from "../types/userTypes";
+import { getInitials } from "../utils/helpers";
 
 const ContactPage = () => {
   const { contacts } = useContext(UserCtxt);
@@ -101,7 +102,7 @@ const ContactPage = () => {
         y: 0,
         transition: { duration: 0.5, type: "spring" },
       }}
-      className="fixed inset-0 z-[999] bg-[#000] overflow-y-auto small-scrollbar"
+      className="fixed py-20 inset-0 z-[999] bg-[#000] overflow-y-auto small-scrollbar"
     >
       <form onSubmit={M_UpdateContact}>
         {/* Changed! ------------------------------------------------------------------ */}
@@ -124,7 +125,7 @@ const ContactPage = () => {
                 className="w-full h-full rounded-full object-cover"
               />
             ) : (
-              <FaCamera className="text-2xl text-primary" />
+              <p className="text-4xl">{getInitials(contact.name)}</p>
             )}
           </label>
         </div>
@@ -136,7 +137,7 @@ const ContactPage = () => {
               type="text"
               name="name"
               className="bg-[#000] focus:outline-none"
-              placeholder="Name"
+              placeholder={contact.name || "Name"}
             />
           </div>
           <div className="flex gap-x-5 justify-start items-center w-full p-2 my-10 rounded-sm">
@@ -145,43 +146,66 @@ const ContactPage = () => {
               type="text"
               name="nickname"
               className="bg-[#000] focus:outline-none"
-              placeholder="Nickname"
+              placeholder={contact.nickname || "Nickname"}
             />
           </div>
           <div className="flex gap-x-5 justify-start items-center w-full p-2 my-10 rounded-sm">
-            <FaMobileScreen />
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+              }}
+              className="p-2 rounded-md bg-primary hover:bg-tri duration-200 text-black"
+            >
+              <FaMobileScreen />
+            </button>
             <input
               type="tel"
               name="phonenumber"
               className="bg-[#000] focus:outline-none"
-              placeholder="Mobile"
+              placeholder={contact.number || "Mobile"}
             />
           </div>
           <div className="flex gap-x-5 justify-start items-center w-full p-2 my-10 rounded-sm">
-            <MdEmail />
+            <a
+              href={`mailto:${contact.email}`}
+              className="p-2 rounded-md bg-primary hover:bg-tri duration-200 text-black"
+            >
+              <MdEmail />
+            </a>
             <input
               type="email"
               name="email"
               className="bg-[#000] focus:outline-none"
-              placeholder="Email"
+              placeholder={contact.email || "Email"}
             />
           </div>
           <div className="flex gap-x-5 justify-start items-center w-full p-2 my-10 rounded-sm">
-            <FaAddressCard />
+            <a
+              href={`https://www.google.com/maps/search/?api=1&query=${contact.address}`}
+              className="p-2 rounded-md bg-primary hover:bg-tri duration-200 text-black"
+            >
+              <FaAddressCard />
+            </a>
             <input
               type="text"
               name="address"
-              className="bg-[#000] focus:outline-none"
-              placeholder="Address"
+              className="bg-[#000] focus:outline-none truncate"
+              placeholder={contact.address || "Address"}
             />
           </div>
           <div className="flex gap-x-5 justify-start items-center w-full p-2 my-10 rounded-sm">
-            <FaLink />
+            <a
+              target="_blank"
+              href={`${contact.website}`}
+              className="p-2 block rounded-md bg-primary hover:bg-tri duration-200 text-black"
+            >
+              <FaLink />
+            </a>
             <input
               type="url"
               name="website"
               className="bg-[#000] focus:outline-none"
-              placeholder="Website"
+              placeholder={contact.website || "Website"}
             />
           </div>
           <div className="relative">

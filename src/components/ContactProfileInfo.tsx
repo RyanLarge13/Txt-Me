@@ -5,7 +5,10 @@ import { useNavigate } from "react-router-dom";
 import { useDatabase } from "../context/dbContext";
 import UserCtxt from "../context/userCtxt";
 import useLogger from "../hooks/useLogger";
-import { Contacts as ContactType, MessageSessionType } from "../types/userTypes";
+import {
+  Contacts as ContactType,
+  MessageSessionType,
+} from "../types/userTypes";
 
 const ContactProfileInfo = ({ contact }: { contact: ContactType }) => {
   const { allMessages, setMessageSession } = useContext(UserCtxt);
@@ -15,6 +18,11 @@ const ContactProfileInfo = ({ contact }: { contact: ContactType }) => {
   const navigate = useNavigate();
 
   const contactMessages = allMessages.get(contact.number)?.messages || [];
+
+  const lastMessage =
+    contactMessages.length > 0
+      ? contactMessages[contactMessages.length - 1]
+      : null;
 
   /*
   CONSIDER:
@@ -67,15 +75,21 @@ const ContactProfileInfo = ({ contact }: { contact: ContactType }) => {
   };
 
   return (
-    <div className="my-20 rounded-md bg-gray-400 p-3">
-      {contactMessages.length < 1 ? (
+    <div className="my-20 rounded-md bg-gray-400 p-3 m-3 text-black">
+      {lastMessage ? (
         <button
           onClick={() => M_CreateMessageSession()}
-          className="flex flex-col items-center justify-center"
+          className="flex flex-col items-start justify-start"
         >
           <FaMessage />
-          <p className="bg-black p-2 truncate max-w-full overflow-x-hidden text-white">
-            {contactMessages[contactMessages.length - 1]?.message || "..."}
+          <p className="bg-primary mt-2 rounded-md py-2 px-3 truncate max-w-full overflow-x-hidden">
+            {lastMessage.message || "..."}
+          </p>
+          <p className="text-xs">
+            {new Date(lastMessage.sentat).toLocaleTimeString("en-US", {
+              hour: "numeric",
+              minute: "numeric",
+            }) || ""}
           </p>
         </button>
       ) : (
