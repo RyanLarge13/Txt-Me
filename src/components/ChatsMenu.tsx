@@ -19,7 +19,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 import { motion } from "framer-motion";
 import React, { useContext } from "react";
 import { BsThreeDotsVertical } from "react-icons/bs";
-import { FaMailchimp, FaMessage, FaPerson, FaStar, FaTrash } from "react-icons/fa6";
+import {
+  FaMailchimp,
+  FaMessage,
+  FaPerson,
+  FaStar,
+  FaTrash,
+} from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
 
 import { useConfig } from "../context/configContext.tsx";
@@ -201,7 +207,7 @@ const ChatsMenu = () => {
               </p>
             </div>
             {/* Last message and time */}
-            <div className="flex flex-col justify-center py-2 items-end h-full basis-3/5 overflow-hidden pr-5">
+            <div className="flex flex-col justify-center py-2 items-start gap-y-2 h-full basis-3/5 overflow-hidden pr-5">
               <p
                 className={`self-start w-full truncate ${
                   messageSession?.messages[messageSession.messages.length - 1]
