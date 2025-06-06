@@ -31,13 +31,17 @@ import { MdEmail } from "react-icons/md";
 import { useNavigate, useParams } from "react-router-dom";
 
 import ContactProfileInfo from "../components/ContactProfileInfo";
+import { useDatabase } from "../context/dbContext";
 import UserCtxt from "../context/userCtxt";
 import useLogger from "../hooks/useLogger";
-import { Contacts as ContactsType } from "../types/userTypes";
+import useNotifActions from "../hooks/useNotifActions";
+import { Contacts } from "../types/userTypes";
 import { getInitials } from "../utils/helpers";
 
 const ContactPage = () => {
   const { contacts } = useContext(UserCtxt);
+  const { addSuccessNotif } = useNotifActions();
+  const { IDB_UpdateContact } = useDatabase();
 
   const [avatarImage, setAvatarImage] = useState(null);
   const [groupText, setGroupText] = useState("");
@@ -50,7 +54,7 @@ const ContactPage = () => {
   const navigate = useNavigate();
   const log = useLogger();
 
-  const contactId = Number(params.id);
+  const contactId = params.id;
 
   useEffect((): void => {
     if (groupText === "") {
@@ -75,7 +79,7 @@ const ContactPage = () => {
     return;
   }
 
-  const contact = contacts.find((c: ContactsType) => c.contactid === contactId);
+  const contact = contacts.find((c: Contacts) => c.contactid === contactId);
 
   if (!contact) {
     navigate("/profile/contacts");
@@ -83,9 +87,31 @@ const ContactPage = () => {
   }
   // Loading logic ---------
 
-  const M_UpdateContact = () => {};
+  const M_UpdateContact = async (): Promise<void> => {
+    const newContact: Contacts = {
+      ...contact,
+      /*
+        TODO:
+          IMPLEMENT:
+            1. Make sure the updated contact information is added here don't forget
+            first the input tags within the form need to be updated to use state
+      */
+    };
 
-  const M_ConfirmQuit = () => {};
+    await IDB_UpdateContact(newContact);
+  };
+
+  const M_ConfirmQuit = () => {
+    addSuccessNotif(
+      "Save Changes?",
+      "If you choose not to save your changes they will be lost forever",
+      true,
+      [
+        { text: "leave", func: () => navigate("/profile/contacts") },
+        { text: "save", func: () => M_UpdateContact() },
+      ]
+    );
+  };
 
   const M_UploadAvatar = (e): void => {
     const newAvatarFile = e?.target.files[0];

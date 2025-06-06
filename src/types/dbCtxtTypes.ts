@@ -95,4 +95,5 @@ export interface DBCtxtProps {
   ) => Promise<IDBValidKey>;
   IDB_GetLastMessageSession: () => Promise<MessageSessionType>;
   IDB_AddMessage: (newMessage: Message) => Promise<IDBValidKey>;
+  IDB_UpdateContact: (newContact: Contacts) => Promise<void>;
 }

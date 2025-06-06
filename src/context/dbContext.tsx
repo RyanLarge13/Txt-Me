@@ -292,6 +292,24 @@ export const DatabaseProvider = ({
 
     (await IDB_GetDB()).put("drafts", newDrafts, "drafts");
   };
+
+  const IDB_UpdateContact = async (newContact: Contacts): Promise<void> => {
+    const currentContacts: Contacts[] = (await IDB_GetContactsData()) || [];
+
+    if (currentContacts.length === 0) {
+      M_UpdateContactsInDB([newContact]);
+    } else {
+      const updatedContacts = currentContacts.map((c: Contacts) => {
+        if (c.contactid === newContact.contactid) {
+          return newContact;
+        } else {
+          return c;
+        }
+      });
+
+      M_UpdateContactsInDB(updatedContacts);
+    }
+  };
   // Put/Patch DB Data ----------------------------------------------------------------------------
 
   return (
@@ -319,6 +337,7 @@ export const DatabaseProvider = ({
         IDB_UpdateMessageSession,
         IDB_AddMessage,
         IDB_UpdateContactInDraft,
+        IDB_UpdateContact,
       }}
     >
       {children}
