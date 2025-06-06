@@ -50,7 +50,7 @@ export type ContactSettings = {
 
 export type DraftType = {
   contact: {
-    contactid: 0;
+    contactid: string;
     name: string;
     email: string;
     number: string;

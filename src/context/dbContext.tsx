@@ -311,6 +311,7 @@ export const DatabaseProvider = ({
         IDB_GetContactSettingsData,
         IDB_GetPhoneNumber,
         IDB_GetLastMessageSession,
+        // Getters ------------------------------
 
         // Setters ------------------------------
         IDB_UpdateUserInDB,

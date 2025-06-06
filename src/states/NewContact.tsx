@@ -24,19 +24,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { motion } from "framer-motion";
-import { FormEvent, useEffect, useState } from "react";
-import {
-  FaAddressCard,
-  FaCamera,
-  FaLink,
-  FaUser,
-  FaUserTag,
-} from "react-icons/fa";
+import { FormEvent, useContext, useEffect, useState } from "react";
+import { FaAddressCard, FaCamera, FaLink, FaUser, FaUserTag } from "react-icons/fa";
 import { FaMobileScreen, FaUserGroup } from "react-icons/fa6";
 import { MdEmail } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
+import { v4 as uuidv4 } from "uuid";
 
 import { useDatabase } from "../context/dbContext";
+import UserCtxt from "../context/userCtxt";
 import useLogger from "../hooks/useLogger";
 import { DraftType } from "../types/dbCtxtTypes";
 
@@ -47,7 +43,9 @@ import { DraftType } from "../types/dbCtxtTypes";
       when navigating away from the new contact state or by pressing cancel
 */
 const NewContact = (): JSX.Element => {
-  const { IDB_UpdateContactInDraft } = useDatabase();
+  const { IDB_UpdateContactInDraft, IDB_GetDrafts, IDB_AddContact } =
+    useDatabase();
+  const { setContacts } = useContext(UserCtxt);
 
   /*
     TODO:
@@ -56,6 +54,13 @@ const NewContact = (): JSX.Element => {
         and other data to make sure the user uploads a good image
   */
   const [avatarImage, setAvatarImage] = useState(null);
+  const [name, setName] = useState("");
+  const [nickname, setNickname] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [email, setEmail] = useState("");
+  const [address, setAddress] = useState("");
+  const [website, setWebsite] = useState("");
+
   const [groupText, setGroupText] = useState("");
   const [autoComplete, setAutoComplete] = useState({
     show: groupText ? true : false,
@@ -84,19 +89,49 @@ const NewContact = (): JSX.Element => {
 
   // Save contact in drafts (IndexedDB) when navigating away
   useEffect(() => {
+    // Add in draft fetch from indexedDB as well in this setup use effect
+    M_LoadContactDraft();
+
     window.addEventListener("popstate", M_SaveContactInDraft);
 
     return () => window.removeEventListener("popstate", M_SaveContactInDraft);
   }, []);
 
-  const M_AddContact = (e: FormEvent<HTMLFormElement>): void => {
+  const M_AddContact = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
 
-    const formData = new FormData(e.currentTarget);
+    const contactToAdd = {
+      contactid: uuidv4(),
+      name: "",
+      email: "",
+      number: "",
+      createdat: "",
+      space: "",
+      nickname: "",
+      address: "",
+      website: "",
+      avatar: null,
+    };
 
-    const data = Object.fromEntries(formData.entries());
+    setContacts((prev) => [...prev, contactToAdd]);
 
-    log.devLog("Data from contact form: ", data);
+    await IDB_AddContact(contactToAdd);
+  };
+
+  const M_LoadContactDraft = async (): Promise<void> => {
+    const drafts = await IDB_GetDrafts();
+
+    const IDB_Contact = drafts.contact || null;
+
+    // Only if the contact exists in draft, otherwise do nothing
+    if (IDB_Contact) {
+      setName(IDB_Contact.name);
+      setNickname(IDB_Contact.nickname);
+      setPhoneNumber(IDB_Contact.number);
+      setEmail(IDB_Contact.email);
+      setAddress(IDB_Contact.address);
+      setWebsite(IDB_Contact.website);
+    }
   };
 
   // Handling the uploading of an Avatar image form input field,
@@ -116,7 +151,7 @@ const NewContact = (): JSX.Element => {
             can be updated appropriately
       */
       const contactToSaveAsDraft: DraftType["contact"] = {
-        contactid: 0,
+        contactid: uuidv4(),
         name: "",
         email: "",
         number: "",
@@ -174,6 +209,8 @@ const NewContact = (): JSX.Element => {
             <FaUser />
             <input
               type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               name="name"
               className="bg-[#000] focus:outline-none"
               placeholder="Name"
@@ -184,6 +221,8 @@ const NewContact = (): JSX.Element => {
             <input
               type="text"
               name="nickname"
+              value={nickname}
+              onChange={(e) => setNickname(e.target.value)}
               className="bg-[#000] focus:outline-none"
               placeholder="Nickname"
             />
@@ -192,7 +231,9 @@ const NewContact = (): JSX.Element => {
             <FaMobileScreen />
             <input
               type="tel"
-              name="phonenumber"
+              name={phoneNumber}
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
               className="bg-[#000] focus:outline-none"
               placeholder="Mobile"
             />
@@ -202,6 +243,8 @@ const NewContact = (): JSX.Element => {
             <input
               type="email"
               name="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="bg-[#000] focus:outline-none"
               placeholder="Email"
             />
@@ -211,6 +254,8 @@ const NewContact = (): JSX.Element => {
             <input
               type="text"
               name="address"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
               className="bg-[#000] focus:outline-none"
               placeholder="Address"
             />
@@ -220,6 +265,8 @@ const NewContact = (): JSX.Element => {
             <input
               type="url"
               name="website"
+              value={website}
+              onChange={(e) => setWebsite(e.target.value)}
               className="bg-[#000] focus:outline-none"
               placeholder="Website"
             />

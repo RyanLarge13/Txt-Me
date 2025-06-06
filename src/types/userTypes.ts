@@ -24,7 +24,7 @@ export type AllMessages = Map<
 >;
 
 export type Contacts = {
-  contactid: number;
+  contactid: string;
   name: string;
   email: string;
   number: string;

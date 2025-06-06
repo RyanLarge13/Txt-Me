@@ -52,7 +52,7 @@ type User = {
 type Contacts = {
   address: string;
   avatar: null | string;
-  contactid: number;
+  contactid: string;
   createdat: string;
   email: string;
   name: string;
