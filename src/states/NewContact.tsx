@@ -40,7 +40,9 @@ import { v4 as uuidv4 } from "uuid";
 import { useDatabase } from "../context/dbContext";
 import UserCtxt from "../context/userCtxt";
 import useLogger from "../hooks/useLogger";
+import useNotifActions from "../hooks/useNotifActions";
 import { DraftType } from "../types/dbCtxtTypes";
+import { Contacts } from "../types/userTypes";
 
 /*
   DEFINITION:
@@ -49,9 +51,14 @@ import { DraftType } from "../types/dbCtxtTypes";
     load up the next time the user navigates to this page
 */
 const NewContact = (): JSX.Element => {
-  const { IDB_UpdateContactInDraft, IDB_GetDrafts, IDB_AddContact } =
-    useDatabase();
-  const { setContacts } = useContext(UserCtxt);
+  const {
+    IDB_UpdateContactInDraft,
+    IDB_ClearContactDraft,
+    IDB_GetDrafts,
+    IDB_AddContact,
+  } = useDatabase();
+  const { setContacts, contacts } = useContext(UserCtxt);
+  const { addErrorNotif } = useNotifActions();
 
   /*
     TODO:
@@ -106,6 +113,24 @@ const NewContact = (): JSX.Element => {
   const M_AddContact = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
 
+    /*
+      NOTE:
+        1. Cannot add two contacts with the same phone number
+    */
+    const phoneNumberExits = contacts.find(
+      (c: Contacts) => c.number === phoneNumber
+    );
+
+    if (phoneNumberExits) {
+      addErrorNotif(
+        "Oops",
+        "A contact with this number already exists",
+        true,
+        []
+      );
+      return;
+    }
+
     const contactToAdd = {
       contactid: uuidv4(),
       name: name,
@@ -119,9 +144,14 @@ const NewContact = (): JSX.Element => {
       avatar: null,
     };
 
+    await IDB_AddContact(contactToAdd);
+
+    // No longer want to keep a draft stored in memory
+    await IDB_ClearContactDraft();
+
     setContacts((prev) => [...prev, contactToAdd]);
 
-    await IDB_AddContact(contactToAdd);
+    navigate("/profile/contacts");
 
     /*
       TODO:

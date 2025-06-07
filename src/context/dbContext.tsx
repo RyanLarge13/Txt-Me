@@ -24,7 +24,12 @@ import { createContext, useContext } from "react";
 import useLogger from "../hooks/useLogger.ts";
 import { User } from "../types/configCtxtTypes.ts";
 import {
-    ContactSettings, DBCtxtProps, DBUser, DraftType, MessageSettings, Theme
+  ContactSettings,
+  DBCtxtProps,
+  DBUser,
+  DraftType,
+  MessageSettings,
+  Theme,
 } from "../types/dbCtxtTypes.ts";
 import { Contacts, Message, MessageSessionType } from "../types/userTypes.ts";
 import { defaultAppSettings } from "../utils/constants.ts";
@@ -310,6 +315,17 @@ export const DatabaseProvider = ({
       M_UpdateContactsInDB(updatedContacts);
     }
   };
+
+  const IDB_ClearContactDraft = async (): Promise<void> => {
+    const storedDrafts: DraftType = (await IDB_GetDrafts()) || {
+      contact: null,
+      messages: [],
+    };
+
+    const newDrafts = { ...storedDrafts, contact: null };
+
+    (await IDB_GetDB()).put("drafts", newDrafts, "drafts");
+  };
   // Put/Patch DB Data ----------------------------------------------------------------------------
 
   return (
@@ -338,6 +354,7 @@ export const DatabaseProvider = ({
         IDB_AddMessage,
         IDB_UpdateContactInDraft,
         IDB_UpdateContact,
+        IDB_ClearContactDraft,
       }}
     >
       {children}

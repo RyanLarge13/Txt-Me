@@ -96,4 +96,5 @@ export interface DBCtxtProps {
   IDB_GetLastMessageSession: () => Promise<MessageSessionType>;
   IDB_AddMessage: (newMessage: Message) => Promise<IDBValidKey>;
   IDB_UpdateContact: (newContact: Contacts) => Promise<void>;
+  IDB_ClearContactDraft: () => Promise<void>;
 }
