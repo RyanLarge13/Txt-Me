@@ -178,7 +178,13 @@ export const UserProvider = ({
       // Handle any deletion or additions to contacts
       // Possibly need to implement a tracking system to make
       // sure that users devices stay correctly synced
-      setContacts(serverContacts);
+      /*
+        NOTE:
+          1. Uncomment out below if you want to set contacts to that which is
+          stored in the DB and returned form the server. Will not contain
+          any local changes made with IndexedDB without network
+      */
+      // setContacts(serverContacts);
       // For now just add what contacts you get back from the server into the local DB
       try {
         serverContacts.forEach(async (c: Contacts) => {
