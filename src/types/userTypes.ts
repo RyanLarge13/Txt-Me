@@ -28,12 +28,13 @@ export type Contacts = {
   name: string;
   email: string;
   number: string;
-  createdat: string;
+  createdat: Date;
   space: string;
   nickname: string;
   address: string;
   website: string;
   avatar: null | string;
+  synced?: boolean;
 };
 
 export type Message = {

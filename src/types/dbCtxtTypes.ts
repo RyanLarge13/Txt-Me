@@ -54,7 +54,7 @@ export type DraftType = {
     name: string;
     email: string;
     number: string;
-    createdat: string;
+    createdat: Date;
     space: string;
     nickname: string;
     address: string;

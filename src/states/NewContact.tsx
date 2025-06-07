@@ -24,8 +24,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { motion } from "framer-motion";
-import { FormEvent, useContext, useEffect, useState } from "react";
-import { FaAddressCard, FaCamera, FaLink, FaUser, FaUserTag } from "react-icons/fa";
+import React, { FormEvent, useContext, useEffect, useState } from "react";
+import {
+  FaAddressCard,
+  FaCamera,
+  FaLink,
+  FaUser,
+  FaUserTag,
+} from "react-icons/fa";
 import { FaMobileScreen, FaUserGroup } from "react-icons/fa6";
 import { MdEmail } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
@@ -37,10 +43,10 @@ import useLogger from "../hooks/useLogger";
 import { DraftType } from "../types/dbCtxtTypes";
 
 /*
-  TODO:
-    IMPLEMENT:
-      1. Save the current contact in like a draft state inside indexedDB
-      when navigating away from the new contact state or by pressing cancel
+  DEFINITION:
+    1. Create a new contact with form validation and functionality
+    for saving a contact to drafts that will automatically 
+    load up the next time the user navigates to this page
 */
 const NewContact = (): JSX.Element => {
   const { IDB_UpdateContactInDraft, IDB_GetDrafts, IDB_AddContact } =
@@ -102,20 +108,26 @@ const NewContact = (): JSX.Element => {
 
     const contactToAdd = {
       contactid: uuidv4(),
-      name: "",
-      email: "",
-      number: "",
-      createdat: "",
+      name: name,
+      email: email,
+      number: phoneNumber,
+      createdat: new Date(),
       space: "",
-      nickname: "",
-      address: "",
-      website: "",
+      nickname: nickname,
+      address: address,
+      website: website,
       avatar: null,
     };
 
     setContacts((prev) => [...prev, contactToAdd]);
 
     await IDB_AddContact(contactToAdd);
+
+    /*
+      TODO:
+        CONSIDER:
+          1. Save contact to server? Or bulk save later?
+    */
   };
 
   const M_LoadContactDraft = async (): Promise<void> => {
@@ -144,23 +156,17 @@ const NewContact = (): JSX.Element => {
 
   const M_SaveContactInDraft = async (): Promise<void> => {
     try {
-      /*
-        TODO:
-          IMPLEMENT:
-            1. Change the way I handle form state so this object
-            can be updated appropriately
-      */
       const contactToSaveAsDraft: DraftType["contact"] = {
         contactid: uuidv4(),
-        name: "",
-        email: "",
-        number: "",
-        createdat: "",
+        name: name,
+        email: email,
+        number: phoneNumber,
+        createdat: new Date(),
         space: "",
-        nickname: "",
-        address: "",
-        website: "",
-        avatar: null,
+        nickname: nickname,
+        address: address,
+        website: website,
+        avatar: avatarImage,
       };
       await IDB_UpdateContactInDraft(contactToSaveAsDraft);
     } catch (err) {
