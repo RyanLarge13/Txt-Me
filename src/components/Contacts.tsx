@@ -24,7 +24,10 @@ import { useDatabase } from "../context/dbContext";
 import UserCtxt from "../context/userCtxt";
 import useLogger from "../hooks/useLogger";
 import useNotifActions from "../hooks/useNotifActions";
-import { Contacts as ContactsType, MessageSessionType } from "../types/userTypes";
+import {
+  Contacts as ContactType,
+  MessageSessionType,
+} from "../types/userTypes";
 import { defaultContact } from "../utils/constants";
 import Contact from "./Contact";
 import ValueInput from "./ValueInput";
@@ -55,7 +58,7 @@ const Contacts = () => {
     }
   };
 
-  const M_StartMessage = (contact: ContactsType) => {
+  const M_StartMessage = (contact: ContactType) => {
     const newSessionDefault: MessageSessionType = {
       number: "",
       contact: null,
@@ -63,7 +66,7 @@ const Contacts = () => {
     };
 
     // Default contact id from constants provides a default contactid of 0
-    if (contact.contactid === 0 && typedPhoneNumberRef.current === "") {
+    if (!contact.contactid && typedPhoneNumberRef.current === "") {
       addErrorNotif(
         "Missing Number",
         "Please at least provide a phone number",
@@ -73,7 +76,7 @@ const Contacts = () => {
       return;
     }
 
-    if (contact.contactid === 0) {
+    if (!contact.contactid) {
       newSessionDefault.number = typedPhoneNumberRef.current;
       newSessionDefault.contact = null;
     } else {
@@ -134,7 +137,7 @@ const Contacts = () => {
         New Contact
       </button>
       {contacts.length > 0 ? (
-        contacts.map((contact: ContactsType) => (
+        contacts.map((contact: ContactType) => (
           <Contact
             key={contact.contactid}
             contact={contact}

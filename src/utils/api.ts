@@ -128,6 +128,16 @@ export const API_AddContact = (
   );
   return res;
 };
+
+export const API_DeleteContact = (
+  token: string,
+  contactId: string
+): Promise<AxiosResponse> => {
+  const res = Axios.delete(`${devUrl}/user/contacts/delete/${contactId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res;
+};
 // Contact related requests --------------------------------------
 
 // Message related requests --------------------------------------

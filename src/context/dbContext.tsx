@@ -328,6 +328,22 @@ export const DatabaseProvider = ({
   };
   // Put/Patch DB Data ----------------------------------------------------------------------------
 
+  // Delete DB Methods ------------------------------------------------------------------------------
+  const IDB_DeleteContact = async (contactId: string): Promise<void> => {
+    const currentContacts: Contacts[] = (await IDB_GetContactsData()) || [];
+
+    if (currentContacts.length < 1) {
+      return;
+    }
+
+    const newContacts = currentContacts.filter(
+      (c: Contacts) => c.contactid !== contactId
+    );
+
+    M_UpdateContactsInDB(newContacts);
+  };
+  // Delete DB Methods ------------------------------------------------------------------------------
+
   return (
     <DatabaseContext.Provider
       value={{
@@ -355,6 +371,7 @@ export const DatabaseProvider = ({
         IDB_UpdateContactInDraft,
         IDB_UpdateContact,
         IDB_ClearContactDraft,
+        IDB_DeleteContact,
       }}
     >
       {children}

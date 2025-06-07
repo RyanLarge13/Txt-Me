@@ -98,4 +98,5 @@ export interface DBCtxtProps {
   IDB_AddMessage: (newMessage: Message) => Promise<IDBValidKey>;
   IDB_UpdateContact: (newContact: Contacts) => Promise<void>;
   IDB_ClearContactDraft: () => Promise<void>;
+  IDB_DeleteContact: (contactId: string) => Promise<void>;
 }

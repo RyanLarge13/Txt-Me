@@ -14,22 +14,52 @@ import {
 } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
 
+import { useConfig } from "../context/configContext";
+import { useDatabase } from "../context/dbContext";
 import useContextMenu from "../hooks/useContextMenu";
-import { Contacts } from "../types/userTypes";
+import useNotifActions from "../hooks/useNotifActions";
+import { Contacts as ContactType } from "../types/userTypes";
+import { API_DeleteContact } from "../utils/api";
 import { getInitials } from "../utils/helpers";
 
 const Contact = ({
   contact,
   startMessage,
 }: {
-  contact: Contacts;
-  startMessage: (contact: Contacts) => void;
+  contact: ContactType;
+  startMessage: (contact: ContactType) => void;
 }) => {
+  const { addSuccessNotif } = useNotifActions();
+  const { IDB_DeleteContact } = useDatabase();
+  const { getUserData } = useConfig();
   const contextMenu = useContextMenu();
 
   const [expand, setExpand] = useState(false);
 
   const navigate = useNavigate();
+
+  const token = getUserData("authToken");
+
+  // CONTEXT_MENU_METHODS ----------------------------------------------------------------
+  const M_DeleteContact = () => {
+    const continueRequest = async () => {
+      /*
+        TODO:
+          IMPLEMENT:
+            1. Add a try catch block for these two operations for client logging
+      */
+      await IDB_DeleteContact(contact.contactid);
+      await API_DeleteContact(token, contact.contactid);
+    };
+
+    addSuccessNotif(
+      "Delete Contact",
+      "Are you sure you want to delete this contact?",
+      true,
+      [{ text: "confirm", func: continueRequest }]
+    );
+  };
+  // CONTEXT_MENU_METHODS ----------------------------------------------------------------
 
   const M_HandleContextMenu = (
     e: React.MouseEvent<HTMLButtonElement>
@@ -52,7 +82,7 @@ const Contact = ({
             navigate(`/profile/contacts/${contact.contactid}`);
           },
         },
-        { txt: "New", icon: <FaPerson />, func: () => {} },
+        { txt: "New", icon: <FaPerson />, func: M_DeleteContact },
         { txt: "Delete", icon: <FaTrash />, func: () => {} },
         { txt: "Block", icon: <FaStop />, func: () => {} },
       ],
@@ -70,7 +100,7 @@ const Contact = ({
 
   const M_HandleStartMessage = (
     e: React.MouseEvent<HTMLButtonElement>,
-    contactArg: Contacts
+    contactArg: ContactType
   ) => {
     e.stopPropagation();
     startMessage(contactArg);
@@ -104,7 +134,7 @@ const Contact = ({
       <div
         className={`duration-200 w-full ${
           expand
-            ? "h-10 opacity-100 pointer-events-auto"
+            ? "h-[250px] opacity-100 pointer-events-auto"
             : "h-0 pointer-events-none opacity-0"
         }`}
       >
@@ -114,7 +144,12 @@ const Contact = ({
         </div>
         <div className="flex justify-start mb-1 items-center gap-x-2">
           <p className="text-gray-400">Email</p>
-          <p>{contact.email}</p>
+          <a
+            href={`mailto:${contact.email}`}
+            className="hover:text-tri duration-200"
+          >
+            {contact.email}
+          </a>
         </div>
         <div className="flex justify-start mb-5 items-center gap-x-2">
           <p className="text-gray-400">Space</p>
@@ -123,21 +158,21 @@ const Contact = ({
         <div className="flex justify-between items-center">
           <button
             onClick={() => {}}
-            className="basis-1/3 aspect-square hover:bg-tri duration-200 hover:text-white text-black rounded-full bg-primary m-6 text-xs gap-y-1 flex flex-col justify-center items-center"
+            className="basis-1/3 max-w-[100px] aspect-square hover:bg-tri duration-200 hover:text-white text-black rounded-full bg-primary m-6 text-xs gap-y-1 flex flex-col justify-center items-center"
           >
             <p>Call</p>
             <FaPhone />
           </button>
           <button
             onClick={(e) => M_HandleStartMessage(e, contact)}
-            className="basis-1/3 aspect-square hover:bg-tri duration-200 hover:text-white text-black rounded-full bg-primary m-6 text-xs gap-y-1 flex flex-col justify-center items-center"
+            className="basis-1/3 max-w-[100px] aspect-square hover:bg-tri duration-200 hover:text-white text-black rounded-full bg-primary m-6 text-xs gap-y-1 flex flex-col justify-center items-center"
           >
             <p>Message</p>
             <FaMessage />
           </button>
           <button
             onClick={() => {}}
-            className="basis-1/3 aspect-square hover:bg-tri duration-200 hover:text-white text-black rounded-full bg-primary m-6 text-xs gap-y-1 flex flex-col justify-center items-center"
+            className="basis-1/3 max-w-[100px] aspect-square hover:bg-tri duration-200 hover:text-white text-black rounded-full bg-primary m-6 text-xs gap-y-1 flex flex-col justify-center items-center"
           >
             <p>Video</p>
             <FaVideo />

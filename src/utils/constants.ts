@@ -46,14 +46,15 @@ export const defaultAppSettings = {
 };
 
 export const defaultContact = {
-  contactid: 0,
+  contactid: "",
   name: "",
   email: "",
   number: "",
-  createdat: "",
+  createdat: new Date(),
   space: "",
   nickname: "",
   address: "",
   website: "",
   avatar: null,
+  synced: false,
 };
