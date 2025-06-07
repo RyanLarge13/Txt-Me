@@ -60,6 +60,7 @@ export type DraftType = {
     address: string;
     website: string;
     avatar: null | string;
+    synced: boolean;
   } | null;
   messages: {
     messageid: number;

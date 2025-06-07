@@ -34,7 +34,7 @@ export type Contacts = {
   address: string;
   website: string;
   avatar: null | string;
-  synced?: boolean;
+  synced: boolean;
 };
 
 export type Message = {

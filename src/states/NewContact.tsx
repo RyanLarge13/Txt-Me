@@ -37,12 +37,14 @@ import { MdEmail } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 
+import { useConfig } from "../context/configContext";
 import { useDatabase } from "../context/dbContext";
 import UserCtxt from "../context/userCtxt";
 import useLogger from "../hooks/useLogger";
 import useNotifActions from "../hooks/useNotifActions";
 import { DraftType } from "../types/dbCtxtTypes";
 import { Contacts } from "../types/userTypes";
+import { API_AddContact } from "../utils/api";
 
 /*
   DEFINITION:
@@ -59,6 +61,7 @@ const NewContact = (): JSX.Element => {
   } = useDatabase();
   const { setContacts, contacts } = useContext(UserCtxt);
   const { addErrorNotif } = useNotifActions();
+  const { getUserData } = useConfig();
 
   /*
     TODO:
@@ -82,6 +85,8 @@ const NewContact = (): JSX.Element => {
 
   const navigate = useNavigate();
   const log = useLogger();
+
+  const token = getUserData("authToken");
 
   useEffect((): void => {
     if (groupText === "") {
@@ -110,6 +115,12 @@ const NewContact = (): JSX.Element => {
     return () => window.removeEventListener("popstate", M_SaveContactInDraft);
   }, []);
 
+  /*
+    DESC:
+      This function handles adding a new contact to state an indexedDB
+      for instant reaction times and immediately after sending 
+      the new contact to the server to be saved remotely
+  */
   const M_AddContact = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
 
@@ -142,6 +153,7 @@ const NewContact = (): JSX.Element => {
       address: address,
       website: website,
       avatar: null,
+      synced: false,
     };
 
     await IDB_AddContact(contactToAdd);
@@ -153,11 +165,14 @@ const NewContact = (): JSX.Element => {
 
     navigate("/profile/contacts");
 
-    /*
-      TODO:
-        CONSIDER:
-          1. Save contact to server? Or bulk save later?
-    */
+    try {
+      await API_AddContact(token, contactToAdd);
+
+      contactToAdd.synced = true;
+      await IDB_UpdateContactInDraft(contactToAdd);
+    } catch (err) {
+      log.logAllError("Error saving contact to server", err);
+    }
   };
 
   const M_LoadContactDraft = async (): Promise<void> => {
@@ -197,6 +212,7 @@ const NewContact = (): JSX.Element => {
         address: address,
         website: website,
         avatar: avatarImage,
+        synced: false,
       };
       await IDB_UpdateContactInDraft(contactToSaveAsDraft);
     } catch (err) {
