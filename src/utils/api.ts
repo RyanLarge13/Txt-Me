@@ -122,7 +122,7 @@ export const API_AddContact = (
   contact: Contacts
 ): Promise<AxiosResponse> => {
   const res = Axios.post(
-    `${devUrl}/contacts/add`,
+    `${devUrl}/user/contacts/new`,
     { contact: contact },
     { headers: { Authorization: `Bearer ${token}` } }
   );
