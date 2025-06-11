@@ -110,7 +110,11 @@ const ChatsMenu = () => {
     messages: Message[];
   }) => {
     const lastMessage =
-      messageSession.messages[messageSession.messages.length - 1];
+      messageSession.messages[messageSession.messages.length - 1] || null;
+
+    if (!lastMessage) {
+      return "";
+    }
 
     if (
       lastMessage.fromnumber !== getUserData("phoneNumber") &&
@@ -210,18 +214,18 @@ const ChatsMenu = () => {
             <div className="flex flex-col justify-center py-2 items-start gap-y-2 h-full basis-3/5 overflow-hidden pr-5">
               <p
                 className={`self-start w-full truncate ${
-                  messageSession?.messages[messageSession.messages.length - 1]
+                  messageSession?.messages[messageSession?.messages.length - 1]
                     .fromnumber === getUserData("phoneNumber")
                     ? "text-primary"
                     : "text-secondary"
                 }`}
               >
-                {messageSession?.messages[messageSession.messages.length - 1]
+                {messageSession?.messages[messageSession?.messages.length - 1]
                   ?.message || ""}
               </p>
               <p className="text-xs">
                 {new Date(
-                  messageSession.messages[messageSession.messages.length - 1]
+                  messageSession.messages[messageSession?.messages.length - 1]
                     ?.sentat || new Date()
                 ).toLocaleTimeString("en-US", {
                   hour: "numeric",

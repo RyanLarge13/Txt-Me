@@ -29,6 +29,7 @@ import {
   MessageSessionType,
 } from "../types/userTypes";
 import { defaultContact } from "../utils/constants";
+import { normalizePhoneNumber } from "../utils/helpers";
 import Contact from "./Contact";
 import ValueInput from "./ValueInput";
 
@@ -65,7 +66,7 @@ const Contacts = () => {
       messages: [],
     };
 
-    // Default contact id from constants provides a default contactid of 0
+    // Default contact id from constants provides a default contactid of ""
     if (!contact.contactid && typedPhoneNumberRef.current === "") {
       addErrorNotif(
         "Missing Number",
@@ -77,7 +78,17 @@ const Contacts = () => {
     }
 
     if (!contact.contactid) {
+      const foundContact =
+        contacts.find(
+          (c: ContactType) =>
+            normalizePhoneNumber(c.number) ===
+            normalizePhoneNumber(typedPhoneNumberRef.current)
+        ) || null;
+
       newSessionDefault.number = typedPhoneNumberRef.current;
+      if (foundContact !== null) {
+        newSessionDefault.contact = foundContact;
+      }
       newSessionDefault.contact = null;
     } else {
       newSessionDefault.number = contact.number;

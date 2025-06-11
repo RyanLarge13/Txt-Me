@@ -27,3 +27,7 @@ export const getInitials = (name: string) => {
     parts[0].charAt(0).toUpperCase() + parts[1].charAt(0).toUpperCase() || "Me"
   );
 };
+
+export const normalizePhoneNumber = (phoneNumber: string): string => {
+  return phoneNumber.replace(/\D/g, "");
+};
