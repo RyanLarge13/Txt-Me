@@ -21,6 +21,7 @@ import React from "react";
 import { MdAccountCircle } from "react-icons/md";
 
 import { useConfig } from "../context/configContext";
+import { useDatabase } from "../context/dbContext";
 import useLogger from "../hooks/useLogger";
 import useNotifActions from "../hooks/useNotifActions";
 import { defaultUser } from "../utils/constants";
@@ -28,15 +29,17 @@ import { defaultUser } from "../utils/constants";
 const Logout = ({ setSettingsState, setTitle }) => {
   const { setUser } = useConfig();
   const { addSuccessNotif } = useNotifActions();
+  const { IDB_LogoutAndReset } = useDatabase();
 
   const log = useLogger();
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     try {
       localStorage.removeItem("authToken");
+      await IDB_LogoutAndReset();
     } catch (err) {
       log.logAllError(
-        "Error when removing authToken from localStorage when logging out.",
+        "Error when removing authToken from localStorage when logging out or resetting IndexedDB values",
         err
       );
       console.log("Could not remove stored auth token");

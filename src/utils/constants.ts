@@ -24,6 +24,16 @@ export const defaultUser = {
   phoneNumber: "",
 };
 
+export const defaultTheme = {
+  darkMode: true,
+  accent: "#fff",
+  background: "none",
+  animations: {
+    speed: 0.25,
+    spring: true,
+  },
+};
+
 export const defaultMessage = {
   messageid: 0,
   message: "",

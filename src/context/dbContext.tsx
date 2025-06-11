@@ -24,15 +24,10 @@ import { createContext, useContext } from "react";
 import useLogger from "../hooks/useLogger.ts";
 import { User } from "../types/configCtxtTypes.ts";
 import {
-  ContactSettings,
-  DBCtxtProps,
-  DBUser,
-  DraftType,
-  MessageSettings,
-  Theme,
+    ContactSettings, DBCtxtProps, DBUser, DraftType, MessageSettings, Theme
 } from "../types/dbCtxtTypes.ts";
 import { Contacts, Message, MessageSessionType } from "../types/userTypes.ts";
-import { defaultAppSettings } from "../utils/constants.ts";
+import { defaultAppSettings, defaultUser } from "../utils/constants.ts";
 
 const DatabaseContext = createContext({} as DBCtxtProps);
 
@@ -344,6 +339,18 @@ export const DatabaseProvider = ({
   };
   // Delete DB Methods ------------------------------------------------------------------------------
 
+  // Reset to default values ------------------------------------------------------------------------
+  const IDB_LogoutAndReset = async (): Promise<void> => {
+    const db = await IDB_GetDB();
+
+    await db.put("app", defaultAppSettings, "settings");
+    await db.put("app", defaultUser, "user");
+
+    await db.put("messages", [], "messages");
+    await db.put("contacts", [], "contacts");
+  };
+  // Reset to default values ------------------------------------------------------------------------
+
   return (
     <DatabaseContext.Provider
       value={{
@@ -372,6 +379,7 @@ export const DatabaseProvider = ({
         IDB_UpdateContact,
         IDB_ClearContactDraft,
         IDB_DeleteContact,
+        IDB_LogoutAndReset,
       }}
     >
       {children}
