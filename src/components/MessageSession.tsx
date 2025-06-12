@@ -104,7 +104,7 @@ const MessageSession = () => {
       const height = rect.height;
       elem.scrollTo(0, height);
     }
-  }, [messagesRef, sessionMessages]);
+  }, [messagesRef, sessionMessages, allMessages]);
 
   /*
     DESC:
@@ -188,6 +188,7 @@ const MessageSession = () => {
       fromnumber: phoneNumber,
       tonumber: messageSession.number,
       sentat: new Date(),
+      synced: false,
     };
     socket ? socket.emit("text-message", newMessage) : null;
 

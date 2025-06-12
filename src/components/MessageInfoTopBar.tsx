@@ -17,8 +17,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import React from "react";
+import { BsThreeDotsVertical } from "react-icons/bs";
+import { FcContacts } from "react-icons/fc";
 import { useLocation, useNavigate } from "react-router-dom";
 
+import useContextMenu from "../hooks/useContextMenu";
+import {
+  ContextMenuOptions,
+  ContextMenuShowType,
+} from "../types/interactiveCtxtTypes";
 import { MessageSessionType } from "../types/userTypes";
 
 const MessageInfoTopBar = ({
@@ -26,8 +33,36 @@ const MessageInfoTopBar = ({
 }: {
   messageSession: MessageSessionType;
 }) => {
+  const contextMenu = useContextMenu();
   const location = useLocation();
   const navigate = useNavigate();
+
+  const handleContextMenu = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+
+    const mainOptions: ContextMenuOptions[] = [
+      { txt: "Add Contact", icon: <FcContacts />, func: () => {} },
+      { txt: "Star Conversation", icon: <FcContacts />, func: () => {} },
+      { txt: "Start Conversation", icon: <FcContacts />, func: () => {} },
+      { txt: "Delete Messages", icon: <FcContacts />, func: () => {} },
+    ];
+
+    const options: ContextMenuOptions[] = [
+      { txt: "Add Contact", icon: <FcContacts />, func: () => {} },
+      { txt: "Add Contact", icon: <FcContacts />, func: () => {} },
+      { txt: "Add Contact", icon: <FcContacts />, func: () => {} },
+    ];
+
+    const newMenu: ContextMenuShowType = {
+      show: true,
+      color: "bg-tri",
+      coords: { x: e.clientX, y: e.clientY },
+      mainOptions: mainOptions,
+      options: options,
+    };
+
+    contextMenu.buildContextMenu(newMenu);
+  };
 
   return location.pathname === "/profile" ? (
     <button
@@ -40,6 +75,9 @@ const MessageInfoTopBar = ({
         {messageSession.contact?.name || messageSession.number}
       </p>
       <p className="text-tri">{messageSession.contact?.number || ""}</p>
+      <button onClick={handleContextMenu}>
+        <BsThreeDotsVertical />
+      </button>
     </button>
   ) : null;
 };
