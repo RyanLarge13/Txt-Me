@@ -201,7 +201,15 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         const newMap = new Map(currentAllMessages);
 
         setAllMessages(newMap);
-        await M_AddMessageToIndexedDB(socketMessage);
+
+        try {
+          await IDB_AddMessage(socketMessage);
+        } catch (err) {
+          log.logAllError(
+            "Error adding message to indexedDB sending from client",
+            err
+          );
+        }
       } else {
         log.devLogDebug(
           "Socket message came through with unknown data type",
@@ -214,7 +222,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
   /*
     IMPLEMENT:
-      1. Combine handle message update and handle message error below
+      1. Combine M_HandleMessageUpdate and M_HandleDeliveryError below
        into a single function
   */
   const M_HandleMessageUpdate = useCallback(
@@ -300,17 +308,6 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     [allMessagesRef.current]
   );
   // Socket Methods ---------------------------------------------------
-
-  const M_AddMessageToIndexedDB = async (newMessage: Message) => {
-    try {
-      await IDB_AddMessage(newMessage);
-    } catch (err) {
-      log.logAllError(
-        "Error adding message to indexedDB sending from client",
-        err
-      );
-    }
-  };
 
   return (
     <SocketContext.Provider value={{ socket: socketRef.current }}>

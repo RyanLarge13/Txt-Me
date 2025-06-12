@@ -24,12 +24,7 @@ import { createContext, useContext } from "react";
 import useLogger from "../hooks/useLogger.ts";
 import { User } from "../types/configCtxtTypes.ts";
 import {
-  ContactSettings,
-  DBCtxtProps,
-  DBUser,
-  DraftType,
-  MessageSettings,
-  Theme,
+    ContactSettings, DBCtxtProps, DBUser, DraftType, MessageSettings, Theme
 } from "../types/dbCtxtTypes.ts";
 import { Contacts, Message, MessageSessionType } from "../types/userTypes.ts";
 import { defaultAppSettings, defaultUser } from "../utils/constants.ts";
@@ -37,6 +32,13 @@ import { defaultAppSettings, defaultUser } from "../utils/constants.ts";
 const DatabaseContext = createContext({} as DBCtxtProps);
 
 // IDB Documentation https://www.npmjs.com/package/idb
+
+/*
+  TODO:
+    IMPLEMENT:
+      1. Remove all try catch blocks from this file that make 
+      more sense to be handled from inside the caller of the method
+*/
 
 export const DatabaseProvider = ({
   children,
