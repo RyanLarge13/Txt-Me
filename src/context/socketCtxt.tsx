@@ -18,7 +18,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 /// <reference types="vite/client" />
 
-import React, { createContext, useCallback, useContext, useEffect, useRef } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+} from "react";
 import io, { Socket } from "socket.io-client";
 
 import UserCtxt from "../context/userCtxt";
@@ -117,6 +123,19 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         "Message from the server!!! Socket message from other client with socketMessage attached"
       );
       M_HandleTextMessage(socketMessage);
+    });
+
+    /*
+      TODO:
+        IMPLEMENT:
+          1. Change on server the name of this listener to non-dynamic
+    */
+    socketRef.on("update", (update) => {
+      log.devLog("Update to message", update);
+    });
+
+    socketRef.on("delivery-error", (error) => {
+      log.devLog("Error delivering message", error);
     });
   };
 
