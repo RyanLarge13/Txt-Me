@@ -42,7 +42,7 @@ const Logout = ({ setSettingsState, setTitle }) => {
         "Error when removing authToken from localStorage when logging out or resetting IndexedDB values",
         err
       );
-      console.log("Could not remove stored auth token");
+      log.logAllError("Could not remove stored auth token");
     }
     setUser(defaultUser);
 

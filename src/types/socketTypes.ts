@@ -23,6 +23,19 @@ export type SocketMessage = {
   message: string;
   time: string;
 } | null;
+
+export type MessageUpdateType = {
+  id: string;
+  sessionNumber: string;
+  delivered: boolean;
+  time: Date;
+};
+
+export type MessageDeliveryErrorType = {
+  messageid: string;
+  reason: string;
+  sessionNumber: string;
+};
 export interface SocketProps {
   socket: Socket | null;
 }

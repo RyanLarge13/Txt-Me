@@ -34,7 +34,7 @@ export type Theme = {
   };
 };
 export type User = {
-  userId: number;
+  userId: string;
   authToken: string;
   username: string;
   email: string;

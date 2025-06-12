@@ -12,7 +12,7 @@ export type AppSettings = {
 };
 
 export type DBUser = {
-  userId: number;
+  userId: string;
   username: string;
   email: string;
   phoneNumber: string;
@@ -63,7 +63,7 @@ export type DraftType = {
     synced: boolean;
   } | null;
   messages: {
-    messageid: number;
+    messageid: string;
     message: string;
     sent: boolean;
     sentat: Date;
@@ -100,4 +100,5 @@ export interface DBCtxtProps {
   IDB_ClearContactDraft: () => Promise<void>;
   IDB_DeleteContact: (contactId: string) => Promise<void>;
   IDB_LogoutAndReset: () => Promise<void>;
+  IDB_UpdateMessage: (message: Message) => Promise<void>;
 }

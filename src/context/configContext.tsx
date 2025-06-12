@@ -16,10 +16,22 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from "react";
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 import useLogger from "../hooks/useLogger";
-import { AppData, ConfigContextType, Theme, User } from "../types/configCtxtTypes";
+import {
+  AppData,
+  ConfigContextType,
+  Theme,
+  User,
+} from "../types/configCtxtTypes";
 import { useDatabase } from "./dbContext";
 
 export const ConfigContext = createContext({} as ConfigContextType);
@@ -51,7 +63,7 @@ export const ConfigProvider = ({
   });
 
   const [user, setUser] = useState({
-    userId: 0,
+    userId: "",
     authToken: "",
     username: "",
     email: "",

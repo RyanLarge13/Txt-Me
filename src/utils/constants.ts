@@ -16,15 +16,18 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-export const defaultUser = {
-  userId: 0,
+import { AppSettings, DBUser, Theme } from "../types/dbCtxtTypes";
+import { Message } from "../types/userTypes";
+
+export const defaultUser: DBUser = {
+  userId: "",
   authToken: "",
   username: "",
   email: "",
   phoneNumber: "",
 };
 
-export const defaultTheme = {
+export const defaultTheme: Theme = {
   darkMode: true,
   accent: "#fff",
   background: "none",
@@ -34,20 +37,21 @@ export const defaultTheme = {
   },
 };
 
-export const defaultMessage = {
-  messageid: 0,
+export const defaultMessage: Message = {
+  messageid: "",
   message: "",
   sent: true,
-  sentat: null,
+  sentat: new Date(), // Must change and update when using this default object,
   delivered: false,
   deliveredat: null,
   read: false,
   readat: null,
   fromnumber: "",
   tonumber: "",
+  error: false,
 };
 
-export const defaultAppSettings = {
+export const defaultAppSettings: AppSettings = {
   initialized: false,
   authToken: "",
   locked: false,
@@ -60,7 +64,7 @@ export const defaultContact = {
   name: "",
   email: "",
   number: "",
-  createdat: new Date(),
+  createdat: new Date(), // Must change and update when using this default object,
   space: "",
   nickname: "",
   address: "",

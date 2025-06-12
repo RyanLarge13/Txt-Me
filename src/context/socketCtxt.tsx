@@ -26,17 +26,23 @@ import React, {
   useRef,
 } from "react";
 import io, { Socket } from "socket.io-client";
+import { defaultMessage } from "utils/constants";
 
 import UserCtxt from "../context/userCtxt";
 import useLogger from "../hooks/useLogger";
-import { SocketProps } from "../types/socketTypes";
+import {
+  MessageDeliveryErrorType,
+  MessageUpdateType,
+  SocketProps,
+} from "../types/socketTypes";
 import { Contacts, Message } from "../types/userTypes";
 import { useDatabase } from "./dbContext";
 
 export const SocketContext = createContext({} as SocketProps);
 
 export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
-  const { IDB_GetPhoneNumber, IDB_AddMessage } = useDatabase();
+  const { IDB_GetPhoneNumber, IDB_AddMessage, IDB_UpdateMessage } =
+    useDatabase();
   const { allMessages, contacts, setAllMessages } = useContext(UserCtxt);
   const log = useLogger();
 
@@ -119,23 +125,18 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       M_HandleError(error);
     });
     socketRef.on("text-message", (socketMessage) => {
-      console.log(
+      log.devLog(
         "Message from the server!!! Socket message from other client with socketMessage attached"
       );
       M_HandleTextMessage(socketMessage);
     });
-
-    /*
-      TODO:
-        IMPLEMENT:
-          1. Change on server the name of this listener to non-dynamic
-    */
-    socketRef.on("update", (update) => {
+    socketRef.on("message-update", (update) => {
       log.devLog("Update to message", update);
+      M_HandleMessageUpdate(update);
     });
-
     socketRef.on("delivery-error", (error) => {
       log.devLog("Error delivering message", error);
+      M_HandleDeliveryError(error);
     });
   };
 
@@ -220,6 +221,36 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     },
     [contacts, setAllMessages, IDB_AddMessage]
   );
+
+  const M_HandleMessageUpdate = useCallback(
+    (update: MessageUpdateType) => {
+      const currentMessages = allMessagesRef.current;
+
+      let idbUpdate: Message = defaultMessage;
+
+      currentMessages.get(update.sessionNumber)?.messages.map((m: Message) => {
+        if (m.messageid === update.id) {
+          const updatedMessage = {
+            ...m,
+            delivered: true,
+            deliveredat: new Date(),
+          };
+
+          idbUpdate = updatedMessage;
+          return updatedMessage;
+        } else {
+          return m;
+        }
+      });
+
+      setAllMessages(new Map(currentMessages));
+      IDB_UpdateMessage(idbUpdate);
+    },
+    [allMessagesRef]
+  );
+
+  const M_HandleDeliveryError = (error: MessageDeliveryErrorType) => {};
+  // Socket Methods ---------------------------------------------------
 
   const M_AddMessageToIndexedDB = async (newMessage: Message) => {
     try {

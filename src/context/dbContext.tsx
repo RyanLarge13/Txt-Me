@@ -24,7 +24,12 @@ import { createContext, useContext } from "react";
 import useLogger from "../hooks/useLogger.ts";
 import { User } from "../types/configCtxtTypes.ts";
 import {
-    ContactSettings, DBCtxtProps, DBUser, DraftType, MessageSettings, Theme
+  ContactSettings,
+  DBCtxtProps,
+  DBUser,
+  DraftType,
+  MessageSettings,
+  Theme,
 } from "../types/dbCtxtTypes.ts";
 import { Contacts, Message, MessageSessionType } from "../types/userTypes.ts";
 import { defaultAppSettings, defaultUser } from "../utils/constants.ts";
@@ -237,6 +242,8 @@ export const DatabaseProvider = ({
     contacts: Contacts[]
   ): Promise<IDBValidKey> =>
     (await IDB_GetDB()).put("contacts", contacts, "contacts");
+  const M_UpdateMessagesInDB = async (messages: Message[]) =>
+    (await IDB_GetDB()).put("messages", messages, "messages");
 
   const IDB_AddContact = async (newContact: Contacts): Promise<void> => {
     const currentContacts = await IDB_GetContactsData();
@@ -321,6 +328,24 @@ export const DatabaseProvider = ({
 
     (await IDB_GetDB()).put("drafts", newDrafts, "drafts");
   };
+
+  const IDB_UpdateMessage = async (message: Message): Promise<void> => {
+    const messages = await IDB_GetMessagesData();
+
+    const newMessages = messages.map((m: Message) => {
+      if (m.messageid === message.messageid) {
+        return message;
+      } else {
+        return m;
+      }
+    });
+
+    try {
+      await M_UpdateMessagesInDB(newMessages);
+    } catch (err) {
+      log.logAllError("Error updating message in IndexedDB", err);
+    }
+  };
   // Put/Patch DB Data ----------------------------------------------------------------------------
 
   // Delete DB Methods ------------------------------------------------------------------------------
@@ -380,6 +405,7 @@ export const DatabaseProvider = ({
         IDB_ClearContactDraft,
         IDB_DeleteContact,
         IDB_LogoutAndReset,
+        IDB_UpdateMessage,
       }}
     >
       {children}

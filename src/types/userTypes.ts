@@ -38,7 +38,7 @@ export type Contacts = {
 };
 
 export type Message = {
-  messageid: number;
+  messageid: string;
   message: string;
   sent: boolean;
   sentat: Date;
@@ -48,6 +48,7 @@ export type Message = {
   readat: Date | null;
   fromnumber: string;
   tonumber: string;
+  error: boolean;
 };
 
 export type MessageSessionType = {
