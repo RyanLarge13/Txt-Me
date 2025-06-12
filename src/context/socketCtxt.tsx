@@ -18,24 +18,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 /// <reference types="vite/client" />
 
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-} from "react";
+import React, { createContext, useCallback, useContext, useEffect, useRef } from "react";
 import io, { Socket } from "socket.io-client";
-import { defaultMessage } from "utils/constants";
 
 import UserCtxt from "../context/userCtxt";
 import useLogger from "../hooks/useLogger";
-import {
-  MessageDeliveryErrorType,
-  MessageUpdateType,
-  SocketProps,
-} from "../types/socketTypes";
+import { MessageDeliveryErrorType, MessageUpdateType, SocketProps } from "../types/socketTypes";
 import { Contacts, Message } from "../types/userTypes";
+import { defaultMessage } from "../utils/constants";
 import { useDatabase } from "./dbContext";
 
 export const SocketContext = createContext({} as SocketProps);
@@ -228,20 +218,33 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
       let idbUpdate: Message = defaultMessage;
 
-      currentMessages.get(update.sessionNumber)?.messages.map((m: Message) => {
-        if (m.messageid === update.id) {
-          const updatedMessage = {
-            ...m,
-            delivered: true,
-            deliveredat: new Date(),
-          };
+      const updatedMessages: Message[] =
+        currentMessages.get(update.sessionNumber)?.messages ||
+        [].map((m: Message) => {
+          if (m.messageid === update.id) {
+            const updatedMessage = {
+              ...m,
+              delivered: true,
+              deliveredat: new Date(),
+            };
 
-          idbUpdate = updatedMessage;
-          return updatedMessage;
-        } else {
-          return m;
+            idbUpdate = updatedMessage;
+            return updatedMessage;
+          } else {
+            return m;
+          }
+        });
+
+      if (updatedMessages) {
+        const session = currentMessages.get(update.sessionNumber);
+
+        if (session) {
+          currentMessages.set(update.sessionNumber, {
+            ...session,
+            messages: updatedMessages,
+          });
         }
-      });
+      }
 
       setAllMessages(new Map(currentMessages));
       IDB_UpdateMessage(idbUpdate);
@@ -249,7 +252,9 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     [allMessagesRef]
   );
 
-  const M_HandleDeliveryError = (error: MessageDeliveryErrorType) => {};
+  const M_HandleDeliveryError = (error: MessageDeliveryErrorType) => {
+    log.devLog("Error delivering message from server", error);
+  };
   // Socket Methods ---------------------------------------------------
 
   const M_AddMessageToIndexedDB = async (newMessage: Message) => {
