@@ -153,7 +153,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const M_HandleTextMessage = useCallback(
-    (socketMessage: Message): void => {
+    async (socketMessage: Message): Promise<void> => {
       /*
     TODO:
       DEBUG:
@@ -201,7 +201,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         const newMap = new Map(currentAllMessages);
 
         setAllMessages(newMap);
-        M_AddMessageToIndexedDB(socketMessage);
+        await M_AddMessageToIndexedDB(socketMessage);
       } else {
         log.devLogDebug(
           "Socket message came through with unknown data type",
@@ -212,8 +212,13 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     [contacts, setAllMessages, IDB_AddMessage]
   );
 
+  /*
+    IMPLEMENT:
+      1. Combine handle message update and handle message error below
+       into a single function
+  */
   const M_HandleMessageUpdate = useCallback(
-    (update: MessageUpdateType) => {
+    async (update: MessageUpdateType): Promise<void> => {
       const currentMessages = allMessagesRef.current;
 
       let idbUpdate: Message = defaultMessage;
@@ -247,14 +252,53 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       setAllMessages(new Map(currentMessages));
-      IDB_UpdateMessage(idbUpdate);
+      await IDB_UpdateMessage(idbUpdate);
     },
-    [allMessagesRef]
+    [allMessagesRef.current]
   );
 
-  const M_HandleDeliveryError = (error: MessageDeliveryErrorType) => {
-    log.devLog("Error delivering message from server", error);
-  };
+  const M_HandleDeliveryError = useCallback(
+    async (error: MessageDeliveryErrorType) => {
+      log.devLog("Error delivering message from server", error);
+
+      const currentMessages = allMessagesRef.current;
+
+      let idbUpdate: Message = defaultMessage;
+
+      const updatedMessages: Message[] =
+        currentMessages.get(error.sessionNumber)?.messages ||
+        [].map((m: Message) => {
+          if (m.messageid === error.messageid) {
+            const updatedMessage = {
+              ...m,
+              delivered: false,
+              deliveredat: null,
+              error: true,
+            };
+
+            idbUpdate = updatedMessage;
+            return updatedMessage;
+          } else {
+            return m;
+          }
+        });
+
+      if (updatedMessages) {
+        const session = currentMessages.get(error.sessionNumber);
+
+        if (session) {
+          currentMessages.set(error.sessionNumber, {
+            ...session,
+            messages: updatedMessages,
+          });
+        }
+      }
+
+      setAllMessages(new Map(currentMessages));
+      await IDB_UpdateMessage(idbUpdate);
+    },
+    [allMessagesRef.current]
+  );
   // Socket Methods ---------------------------------------------------
 
   const M_AddMessageToIndexedDB = async (newMessage: Message) => {

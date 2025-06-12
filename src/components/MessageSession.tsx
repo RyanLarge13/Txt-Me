@@ -16,16 +16,11 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import React, {
-  FormEvent,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { FormEvent, useContext, useEffect, useRef, useState } from "react";
 import { IoSend } from "react-icons/io5";
 import { TiMessages } from "react-icons/ti";
 import { useLocation } from "react-router-dom";
+import { v4 as uuidv4 } from "uuid";
 
 import { useDatabase } from "../context/dbContext";
 import UserCtxt from "../context/userCtxt";
@@ -184,6 +179,7 @@ const MessageSession = () => {
 
     const newMessage = {
       ...defaultMessage,
+      messageid: uuidv4(),
       message: value,
       fromnumber: phoneNumber,
       tonumber: messageSession.number,
