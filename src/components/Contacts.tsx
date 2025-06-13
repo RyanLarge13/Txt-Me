@@ -17,32 +17,47 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { motion } from "framer-motion";
-import React, { useCallback, useContext, useRef } from "react";
+import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useDatabase } from "../context/dbContext";
 import UserCtxt from "../context/userCtxt";
 import useLogger from "../hooks/useLogger";
 import useNotifActions from "../hooks/useNotifActions";
-import {
-  Contacts as ContactType,
-  MessageSessionType,
-} from "../types/userTypes";
+import { Contacts as ContactType, MessageSessionType } from "../types/userTypes";
 import { defaultContact } from "../utils/constants";
-import { normalizePhoneNumber } from "../utils/helpers";
+import { normalizePhoneNumber as npn } from "../utils/helpers";
 import Contact from "./Contact";
 import ValueInput from "./ValueInput";
 
-const Contacts = () => {
-  const { contacts, allMessages, setMessageSession, setAllMessages } =
+const Contacts = ({ contacts }: { contacts: ContactType[] }) => {
+  const { allMessages, setMessageSession, setAllMessages } =
     useContext(UserCtxt);
   const { addErrorNotif } = useNotifActions();
   const { IDB_UpdateMessageSession } = useDatabase();
+
+  const [searchedContacts, setSearchedContacts] = useState(contacts);
 
   const typedPhoneNumberRef = useRef("");
 
   const navigate = useNavigate();
   const log = useLogger();
+
+  useEffect(() => {
+    if (typedPhoneNumberRef.current) {
+      const searchNumber = typedPhoneNumberRef.current;
+
+      if (searchNumber !== "") {
+        setSearchedContacts((prev) => {
+          return prev.filter((c: ContactType) =>
+            npn(c.number).includes(npn(searchNumber))
+          );
+        });
+      } else {
+        setSearchedContacts(contacts);
+      }
+    }
+  }, [typedPhoneNumberRef.current]);
 
   // You have the same member function in/for ChatsMenu.tsx
   // Consider adding it to a common utils file or helper
@@ -80,9 +95,7 @@ const Contacts = () => {
     if (!contact.contactid) {
       const foundContact =
         contacts.find(
-          (c: ContactType) =>
-            normalizePhoneNumber(c.number) ===
-            normalizePhoneNumber(typedPhoneNumberRef.current)
+          (c: ContactType) => npn(c.number) === npn(typedPhoneNumberRef.current)
         ) || null;
 
       newSessionDefault.number = typedPhoneNumberRef.current;
@@ -147,8 +160,8 @@ const Contacts = () => {
       >
         New Contact
       </button>
-      {contacts.length > 0 ? (
-        contacts.map((contact: ContactType) => (
+      {searchedContacts.length > 0 ? (
+        searchedContacts.map((contact: ContactType) => (
           <Contact
             key={contact.contactid}
             contact={contact}

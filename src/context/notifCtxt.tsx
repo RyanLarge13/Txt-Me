@@ -21,12 +21,7 @@ import { createContext, ReactNode, useCallback, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 import useLogger from "../hooks/useLogger.ts";
-import {
-  Actions,
-  NotifActionProps,
-  NotifStateProps,
-  SysNotifType,
-} from "../types/notifTypes.ts";
+import { Actions, NotifActionProps, NotifStateProps, SysNotifType } from "../types/notifTypes.ts";
 
 export const NotifStateCtxt = createContext({} as NotifStateProps);
 export const NotifActionsCtxt = createContext({} as NotifActionProps);
@@ -41,6 +36,23 @@ export const NotifProvider = ({
 
   const log = useLogger();
 
+  /*
+    DESC:
+      This method allows each action passed to have the built
+      in functionality of clearing the notification
+      when a action button is pressed
+  */
+  const M_WrapActions = (id: string, actions: Actions[]): Actions[] => {
+    const newActions: Actions[] = actions.map((a: Actions) => ({
+      ...a,
+      func: () => {
+        a.func();
+        removeNotif(id);
+      },
+    }));
+    return newActions;
+  };
+
   const addSuccessNotif = useCallback(
     (
       title: string,
@@ -49,6 +61,8 @@ export const NotifProvider = ({
       actions: Actions[]
     ): void => {
       const id = uuidv4();
+      actions = M_WrapActions(id, actions);
+
       const newNotif = {
         id: id,
         confirmation: false,
@@ -74,6 +88,8 @@ export const NotifProvider = ({
       actions: Actions[]
     ): void => {
       const id = uuidv4();
+      actions = M_WrapActions(id, actions);
+
       const newNotif = {
         id: id,
         confirmation: false,
@@ -93,6 +109,8 @@ export const NotifProvider = ({
 
   const showNetworkErrorNotif = useCallback((actions: Actions[]): void => {
     const id = uuidv4();
+
+    actions = M_WrapActions(id, actions);
     const newNotif = {
       id: id,
       confirmation: false,

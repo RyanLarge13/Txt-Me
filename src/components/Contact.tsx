@@ -1,22 +1,16 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { FaEdit } from "react-icons/fa";
 import {
-  Fa42Group,
-  FaMessage,
-  FaPerson,
-  FaPhone,
-  FaShare,
-  FaStar,
-  FaStop,
-  FaTrash,
-  FaVideo,
+    Fa42Group, FaMessage, FaPerson, FaPhone, FaShare, FaStar, FaStop, FaTrash, FaVideo
 } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
 
 import { useConfig } from "../context/configContext";
 import { useDatabase } from "../context/dbContext";
+import UserCtxt from "../context/userCtxt";
 import useContextMenu from "../hooks/useContextMenu";
+import useLogger from "../hooks/useLogger";
 import useNotifActions from "../hooks/useNotifActions";
 import { Contacts as ContactType } from "../types/userTypes";
 import { API_DeleteContact } from "../utils/api";
@@ -32,24 +26,38 @@ const Contact = ({
   const { addSuccessNotif } = useNotifActions();
   const { IDB_DeleteContact } = useDatabase();
   const { getUserData } = useConfig();
+  const { setContacts } = useContext(UserCtxt);
   const contextMenu = useContextMenu();
 
   const [expand, setExpand] = useState(false);
 
   const navigate = useNavigate();
+  const log = useLogger();
 
   const token = getUserData("authToken");
 
   // CONTEXT_MENU_METHODS ----------------------------------------------------------------
   const M_DeleteContact = () => {
     const continueRequest = async () => {
-      /*
-        TODO:
-          IMPLEMENT:
-            1. Add a try catch block for these two operations for client logging
-      */
-      await IDB_DeleteContact(contact.contactid);
-      await API_DeleteContact(token, contact.contactid);
+      try {
+        await IDB_DeleteContact(contact.contactid);
+
+        // Remove contact immediately after a successful deletion from IndexedDB
+        setContacts((prev: ContactType[]) => {
+          const newCs = prev.filter(
+            (c: ContactType) => c.contactid !== contact.contactid
+          );
+
+          return newCs;
+        });
+
+        await API_DeleteContact(token, contact.contactid);
+      } catch (err) {
+        log.logAllError(
+          "Error when removing contact from IndexedDB or from server",
+          err
+        );
+      }
     };
 
     addSuccessNotif(
@@ -82,8 +90,8 @@ const Contact = ({
             navigate(`/profile/contacts/${contact.contactid}`);
           },
         },
-        { txt: "New", icon: <FaPerson />, func: M_DeleteContact },
-        { txt: "Delete", icon: <FaTrash />, func: () => {} },
+        { txt: "New", icon: <FaPerson />, func: () => {} },
+        { txt: "Delete", icon: <FaTrash />, func: M_DeleteContact },
         { txt: "Block", icon: <FaStop />, func: () => {} },
       ],
       options: [
