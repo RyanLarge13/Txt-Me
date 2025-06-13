@@ -33,7 +33,7 @@ export type Contacts = {
   nickname: string;
   address: string;
   website: string;
-  avatar: null | string;
+  avatar: null | File;
   synced: boolean;
 };
 

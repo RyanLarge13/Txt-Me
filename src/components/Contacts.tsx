@@ -135,7 +135,7 @@ const Contacts = ({ contacts }: { contacts: ContactType[] }) => {
       initial={{ y: "100%", opacity: 0 }}
       exit={{ y: "100%", opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      className="mt-20 w-full"
+      className="mt-20 w-full pb-20"
     >
       <form
         onSubmit={(e) => {

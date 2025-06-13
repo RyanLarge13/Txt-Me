@@ -122,7 +122,7 @@ const Contact = ({
       >
         {contact.avatar ? (
           <img
-            src={contact?.avatar}
+            src={URL.createObjectURL(contact?.avatar)}
             alt="avatar"
             width={30}
             height={30}

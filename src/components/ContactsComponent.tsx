@@ -47,7 +47,7 @@ const ContactsComponent = () => {
   useEffect(() => {
     if (searchText === "") {
       setSearchedContacts(contacts);
-      setNoFoundContact(true);
+      setNoFoundContact(false);
     } else {
       const foundContacts = contacts.filter((c: ContactType) =>
         c.name.toLowerCase().includes(searchText.toLowerCase())
