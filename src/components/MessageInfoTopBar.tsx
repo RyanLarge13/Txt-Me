@@ -16,6 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { motion } from "framer-motion";
 import React from "react";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { FcContacts } from "react-icons/fc";
@@ -65,7 +66,9 @@ const MessageInfoTopBar = ({
   };
 
   return location.pathname === "/profile" ? (
-    <div
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
       onClick={() =>
         navigate(`/profile/contacts/${messageSession.contact?.contactid}`)
       }
@@ -78,7 +81,7 @@ const MessageInfoTopBar = ({
       <button onClick={handleContextMenu}>
         <BsThreeDotsVertical />
       </button>
-    </div>
+    </motion.div>
   ) : null;
 };
 

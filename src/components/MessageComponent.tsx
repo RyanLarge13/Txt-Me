@@ -17,8 +17,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import React from "react";
-import { FaCheckCircle, FaClock } from "react-icons/fa";
-import { MdFace } from "react-icons/md";
+import { BsFillSendExclamationFill, BsSendCheckFill } from "react-icons/bs";
+import { FaClock } from "react-icons/fa";
+import { MdFace, MdOutlineScheduleSend } from "react-icons/md";
 
 import useContextMenu from "../hooks/useContextMenu";
 import useUserData from "../hooks/useUserData";
@@ -82,16 +83,36 @@ const MessageComponent = ({ message }: { message: Message }): JSX.Element => {
           isFromMe ? "self-end" : "self-start"
         } text-xs`}
       >
-        {isFromMe ? sentDate : deliveredDate}
         {isFromMe ? (
-          <span
-            className={`${
-              message.delivered ? "text-primary" : "text-secondary"
-            }`}
-          >
-            {message.delivered ? <FaCheckCircle /> : <FaClock />}
-          </span>
-        ) : null}
+          <>
+            {/*
+              CONSIDER:
+                Adding these checks up top to reuse and also 
+                change the color of the message container
+            */}
+            {message.sent && !message.delivered
+              ? sentDate
+              : message.sent && message.delivered
+              ? deliveredDate
+              : "FAILED"}
+            <span>
+              {message.sent && !message.delivered ? (
+                <MdOutlineScheduleSend className="text-primary" />
+              ) : message.sent && message.delivered ? (
+                <BsSendCheckFill className="text-tri" />
+              ) : (
+                <BsFillSendExclamationFill className="text-secondary" />
+              )}
+            </span>
+          </>
+        ) : (
+          <>
+            {deliveredDate}
+            <span>
+              <FaClock className="text-tri" />
+            </span>
+          </>
+        )}
       </p>
       <div
         onContextMenu={M_HandleContextMenu}

@@ -18,12 +18,22 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 /// <reference types="vite/client" />
 
-import React, { createContext, useCallback, useContext, useEffect, useRef } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+} from "react";
 import io, { Socket } from "socket.io-client";
 
 import UserCtxt from "../context/userCtxt";
 import useLogger from "../hooks/useLogger";
-import { MessageDeliveryErrorType, MessageUpdateType, SocketProps } from "../types/socketTypes";
+import {
+  MessageDeliveryErrorType,
+  MessageUpdateType,
+  SocketProps,
+} from "../types/socketTypes";
 import { Contacts, Message } from "../types/userTypes";
 import { defaultMessage } from "../utils/constants";
 import { useDatabase } from "./dbContext";
@@ -164,6 +174,13 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       if (socketMessage) {
         log.devLog("Message from socket", socketMessage);
 
+        /*
+          NOTE:
+            Update local delivered at state immediately on messages from others
+        */
+        socketMessage.delivered = true;
+        socketMessage.deliveredat = new Date();
+
         // Call getter to ensure fresh allMessages map out of state
 
         if (!currentAllMessages.has(socketMessage.fromnumber)) {
@@ -281,6 +298,8 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
               ...m,
               delivered: false,
               deliveredat: null,
+              sent: false,
+              sentat: new Date(),
               error: true,
             };
 
