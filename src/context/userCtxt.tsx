@@ -184,13 +184,17 @@ export const UserProvider = ({
           stored in the DB and returned form the server. Will not contain
           any local changes made with IndexedDB without network
       */
-      setContacts(serverContacts);
+      // setContacts(serverContacts);
       // For now just add what contacts you get back from the server into the local DB
       try {
         serverContacts.forEach(async (c: Contacts) => {
           log.devLog("Adding contact from server to the local IDB database");
           await IDB_AddContact(c);
         });
+
+        const localContacts = await IDB_GetContactsData();
+
+        setContacts(localContacts);
       } catch (err) {
         log.logError(
           "Error adding contacts from server to the local database.",
@@ -289,6 +293,16 @@ export const UserProvider = ({
       */
       await M_FetchLatestContacts();
       await M_FetchLatestMessages();
+
+      /*
+        TODO:
+          IMPLEMENT:
+            1. Fetch unsynced contacts here to make sure the remote db
+            gets the latest data. Verify contacts are of correct datatype
+            first and that the only good reason for it not to be synced is
+            because of network errors and such when the contact was created
+      */
+      // const unsyncedContacts = await IDB_FetchUnsyncedContacts();
     } catch (err) {
       log.logAllError("Error when fetching user data", err);
     }

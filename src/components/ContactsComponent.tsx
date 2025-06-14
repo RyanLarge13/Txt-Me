@@ -61,7 +61,7 @@ const ContactsComponent = () => {
         setNoFoundContact(false);
       }
     }
-  }, [searchText]);
+  }, [searchText, noFoundContacts]);
 
   return (
     <motion.section

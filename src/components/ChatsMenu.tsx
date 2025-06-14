@@ -162,6 +162,14 @@ const ChatsMenu = () => {
     log.devLog("Message session in handle context menu", messageSession);
   };
 
+  /*
+    CONSIDER:
+      Maybe instead of using ? every time we query the 
+      last message in the message session or any message 
+      in the message session. We first check to see if 
+      messages has any length
+  */
+
   return (
     <motion.nav
       initial={{ opacity: 0, x: -100 }}
@@ -215,7 +223,7 @@ const ChatsMenu = () => {
               <p
                 className={`self-start w-full truncate ${
                   messageSession?.messages[messageSession?.messages.length - 1]
-                    .fromnumber === getUserData("phoneNumber")
+                    ?.fromnumber === getUserData("phoneNumber")
                     ? "text-primary"
                     : "text-secondary"
                 }`}

@@ -59,7 +59,7 @@ export type DraftType = {
     nickname: string;
     address: string;
     website: string;
-    avatar: null | string;
+    avatar: null | File;
     synced: boolean;
   } | null;
   messages: {

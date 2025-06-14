@@ -2,7 +2,15 @@ import React, { useContext, useState } from "react";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { FaEdit } from "react-icons/fa";
 import {
-    Fa42Group, FaMessage, FaPerson, FaPhone, FaShare, FaStar, FaStop, FaTrash, FaVideo
+  Fa42Group,
+  FaMessage,
+  FaPerson,
+  FaPhone,
+  FaShare,
+  FaStar,
+  FaStop,
+  FaTrash,
+  FaVideo,
 } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
 
@@ -50,11 +58,15 @@ const Contact = ({
 
           return newCs;
         });
+      } catch (err) {
+        log.logAllError("Error when removing contact from IndexedDB", err);
+      }
 
+      try {
         await API_DeleteContact(token, contact.contactid);
       } catch (err) {
         log.logAllError(
-          "Error when removing contact from IndexedDB or from server",
+          "Error deleting contact from server. Most likely does not exist on server. Error: ",
           err
         );
       }

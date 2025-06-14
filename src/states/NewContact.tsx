@@ -69,7 +69,7 @@ const NewContact = (): JSX.Element => {
         1. Make a more complex avatar image state with image type checking 
         and other data to make sure the user uploads a good image
   */
-  const [avatarImage, setAvatarImage] = useState(null);
+  const [avatarImage, setAvatarImage] = useState<File | null>(null);
   const [name, setName] = useState("");
   const [nickname, setNickname] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -148,7 +148,7 @@ const NewContact = (): JSX.Element => {
       email: email,
       number: phoneNumber,
       createdat: new Date(),
-      space: "",
+      space: groupText || "primary",
       nickname: nickname,
       address: address,
       website: website,
@@ -182,6 +182,7 @@ const NewContact = (): JSX.Element => {
 
     // Only if the contact exists in draft, otherwise do nothing
     if (IDB_Contact) {
+      setAvatarImage(IDB_Contact.avatar);
       setName(IDB_Contact.name);
       setNickname(IDB_Contact.nickname);
       setPhoneNumber(IDB_Contact.number);
@@ -207,7 +208,7 @@ const NewContact = (): JSX.Element => {
         email: email,
         number: phoneNumber,
         createdat: new Date(),
-        space: "",
+        space: groupText || "primary",
         nickname: nickname,
         address: address,
         website: website,
@@ -219,6 +220,20 @@ const NewContact = (): JSX.Element => {
       log.logAllError("Error saving contact in drafts. Error: ", err);
     }
     navigate("/profile/contacts");
+  };
+
+  const M_HandleClearDrafts = async (e): Promise<void> => {
+    e.preventDefault();
+
+    setAvatarImage(null);
+    setName("");
+    setNickname("");
+    setPhoneNumber("");
+    setEmail("");
+    setAddress("");
+    setWebsite("");
+
+    await IDB_ClearContactDraft();
   };
 
   return (
@@ -355,6 +370,13 @@ const NewContact = (): JSX.Element => {
             Save
           </button>
         </div>
+        <button
+          type="button"
+          onClick={M_HandleClearDrafts}
+          className="bg-tri flex-[0.25] px-10 py-3 text-[#000] w-full"
+        >
+          Clear Values
+        </button>
       </form>
     </motion.section>
   );

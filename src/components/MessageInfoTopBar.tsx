@@ -65,7 +65,7 @@ const MessageInfoTopBar = ({
   };
 
   return location.pathname === "/profile" ? (
-    <button
+    <div
       onClick={() =>
         navigate(`/profile/contacts/${messageSession.contact?.contactid}`)
       }
@@ -78,7 +78,7 @@ const MessageInfoTopBar = ({
       <button onClick={handleContextMenu}>
         <BsThreeDotsVertical />
       </button>
-    </button>
+    </div>
   ) : null;
 };
 

@@ -17,18 +17,20 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { motion } from "framer-motion";
-import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useDatabase } from "../context/dbContext";
 import UserCtxt from "../context/userCtxt";
 import useLogger from "../hooks/useLogger";
 import useNotifActions from "../hooks/useNotifActions";
-import { Contacts as ContactType, MessageSessionType } from "../types/userTypes";
+import {
+  Contacts as ContactType,
+  MessageSessionType,
+} from "../types/userTypes";
 import { defaultContact } from "../utils/constants";
 import { normalizePhoneNumber as npn } from "../utils/helpers";
 import Contact from "./Contact";
-import ValueInput from "./ValueInput";
 
 const Contacts = ({ contacts }: { contacts: ContactType[] }) => {
   const { allMessages, setMessageSession, setAllMessages } =
@@ -37,27 +39,24 @@ const Contacts = ({ contacts }: { contacts: ContactType[] }) => {
   const { IDB_UpdateMessageSession } = useDatabase();
 
   const [searchedContacts, setSearchedContacts] = useState(contacts);
-
-  const typedPhoneNumberRef = useRef("");
+  const [phoneNumberSearchText, setPhoneNumberSearchText] = useState("");
 
   const navigate = useNavigate();
   const log = useLogger();
 
   useEffect(() => {
-    if (typedPhoneNumberRef.current) {
-      const searchNumber = typedPhoneNumberRef.current;
+    const searchNumber = phoneNumberSearchText;
 
-      if (searchNumber !== "") {
-        setSearchedContacts((prev) => {
-          return prev.filter((c: ContactType) =>
-            npn(c.number).includes(npn(searchNumber))
-          );
-        });
-      } else {
-        setSearchedContacts(contacts);
-      }
+    if (searchNumber !== "") {
+      setSearchedContacts((prev) => {
+        return prev.filter((c: ContactType) =>
+          npn(c.number).includes(npn(searchNumber))
+        );
+      });
+    } else {
+      setSearchedContacts(contacts);
     }
-  }, [typedPhoneNumberRef.current]);
+  }, [phoneNumberSearchText, contacts]);
 
   // You have the same member function in/for ChatsMenu.tsx
   // Consider adding it to a common utils file or helper
@@ -82,7 +81,7 @@ const Contacts = ({ contacts }: { contacts: ContactType[] }) => {
     };
 
     // Default contact id from constants provides a default contactid of ""
-    if (!contact.contactid && typedPhoneNumberRef.current === "") {
+    if (!contact.contactid && phoneNumberSearchText === "") {
       addErrorNotif(
         "Missing Number",
         "Please at least provide a phone number",
@@ -95,14 +94,16 @@ const Contacts = ({ contacts }: { contacts: ContactType[] }) => {
     if (!contact.contactid) {
       const foundContact =
         contacts.find(
-          (c: ContactType) => npn(c.number) === npn(typedPhoneNumberRef.current)
+          (c: ContactType) => npn(c.number) === npn(phoneNumberSearchText)
         ) || null;
 
-      newSessionDefault.number = typedPhoneNumberRef.current;
       if (foundContact !== null) {
+        newSessionDefault.number = foundContact.number;
         newSessionDefault.contact = foundContact;
+      } else {
+        newSessionDefault.number = phoneNumberSearchText;
+        newSessionDefault.contact = null;
       }
-      newSessionDefault.contact = null;
     } else {
       newSessionDefault.number = contact.number;
       newSessionDefault.contact = contact;
@@ -117,7 +118,7 @@ const Contacts = ({ contacts }: { contacts: ContactType[] }) => {
     } else {
       // First update our map and then create the message session
       allMessages.set(contact.number, {
-        contact: contact,
+        contact: contact.contactid ? contact : null,
         messages: [],
       });
 
@@ -142,14 +143,13 @@ const Contacts = ({ contacts }: { contacts: ContactType[] }) => {
           e.preventDefault();
           M_StartMessage({
             ...defaultContact,
-            number: typedPhoneNumberRef.current,
+            number: phoneNumberSearchText,
           });
         }}
       >
-        <ValueInput
-          retrieveValue={useCallback((value) => {
-            typedPhoneNumberRef.current = value;
-          }, [])}
+        <input
+          onChange={(e) => setPhoneNumberSearchText(e.target.value)}
+          className="focus:outline-none py-2 my-1 bg-[transparent] w-full"
           placeholder="Type a phone number ..."
           type="text"
         />
