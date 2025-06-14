@@ -74,9 +74,17 @@ const MessageInfoTopBar = ({
       }
       className="p-5 text-sm flex fixed top-0 right-0 left-0 z-[999] justify-between items-center bg-black"
     >
-      <p className="hover:text-primary duration-200 cursor-pointer">
-        {messageSession.contact?.name || messageSession.number}
-      </p>
+      {messageSession.contact && messageSession.contact?.avatar ? (
+        <img
+          src={URL.createObjectURL(messageSession.contact.avatar)}
+          alt={messageSession.contact?.name || messageSession.number}
+          className="w-[25px] rounded-full object-cover shadow-md"
+        />
+      ) : (
+        <p className="hover:text-primary duration-200 cursor-pointer">
+          {messageSession.contact?.name || messageSession.number}
+        </p>
+      )}
       <p className="text-tri">{messageSession.contact?.number || ""}</p>
       <button onClick={handleContextMenu}>
         <BsThreeDotsVertical />

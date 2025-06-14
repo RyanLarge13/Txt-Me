@@ -209,11 +209,19 @@ const ChatsMenu = () => {
           >
             {/* Contact avatar and name */}
             <div className="flex flex-col justify-center items-center basis-1/6 p-3">
-              <p className="text-lg text-center">
-                {messageSession.contact
-                  ? getInitials(messageSession.contact.name)
-                  : fromNumber}
-              </p>
+              {messageSession.contact?.avatar ? (
+                <img
+                  src={URL.createObjectURL(messageSession.contact.avatar)}
+                  className="w-[25px] rounded-ull object-cover shadow-md"
+                  alt={getInitials(messageSession.contact.name) || fromNumber}
+                />
+              ) : (
+                <p className="text-lg text-center">
+                  {messageSession.contact
+                    ? getInitials(messageSession.contact.name)
+                    : fromNumber}
+                </p>
+              )}
               <p className="text-center whitespace-nowrap">
                 {messageSession?.contact?.nickname || ""}
               </p>
