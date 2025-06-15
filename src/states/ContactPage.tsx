@@ -80,6 +80,12 @@ const ContactPage = () => {
     if (contact) {
       setFormState(contact);
     } else {
+      /*
+        TODO:
+          IMPLEMENT:
+            1. Instead of navigating back here and adding this broken state
+            to history, instead popstate and remove this route from history
+      */
       navigate("/profile/contacts");
     }
   }, []);
