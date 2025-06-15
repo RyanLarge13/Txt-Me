@@ -133,9 +133,13 @@ export const API_UpdateContact = (
   token: string,
   contact: Contacts
 ): Promise<AxiosResponse> => {
-  const res = Axios.put(`${devUrl}/user/contacts/update`, contact, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const res = Axios.put(
+    `${devUrl}/user/contacts/update`,
+    { contact: contact },
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
   return res;
 };
 

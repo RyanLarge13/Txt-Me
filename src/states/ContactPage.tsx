@@ -38,7 +38,7 @@ import useLogger from "../hooks/useLogger";
 import useNotifActions from "../hooks/useNotifActions";
 import { Contacts } from "../types/userTypes";
 import { API_UpdateContact } from "../utils/api";
-import { getInitials } from "../utils/helpers";
+import { contactFromFormState, getInitials } from "../utils/helpers";
 
 const ContactPage = () => {
   const { contacts } = useContext(UserCtxt);
@@ -46,10 +46,22 @@ const ContactPage = () => {
   const { IDB_UpdateContact } = useDatabase();
   const { getUserData } = useConfig();
 
-  const [avatarImage, setAvatarImage] = useState(null);
-  const [groupText, setGroupText] = useState("");
+  const [formState, setFormState] = useState<Contacts>({
+    contactid: "",
+    createdat: new Date(),
+    name: "",
+    nickname: "",
+    avatar: null,
+    number: "",
+    address: "",
+    website: "",
+    email: "",
+    space: "",
+    synced: false,
+  });
+
   const [autoComplete, setAutoComplete] = useState({
-    show: groupText ? true : false,
+    show: formState.space ? true : false,
     names: [],
   });
 
@@ -61,7 +73,7 @@ const ContactPage = () => {
   const contactId = params.id;
 
   useEffect((): void => {
-    if (groupText === "") {
+    if (formState.space === "") {
       setAutoComplete((prev) => {
         return { ...prev, show: false };
       });
@@ -75,7 +87,7 @@ const ContactPage = () => {
         return { ...prev, show: true };
       });
     }
-  }, [groupText]);
+  }, [formState.space]);
 
   // Loading logic ---------
   if (!contactId) {
@@ -89,18 +101,17 @@ const ContactPage = () => {
     navigate("/profile/contacts");
     return;
   }
+
+  setFormState(contact);
   // Loading logic ---------
 
   const M_UpdateContact = async (): Promise<void> => {
-    const newContact: Contacts = {
-      ...contact,
-      /*
-        TODO:
-          IMPLEMENT:
-            1. Make sure the updated contact information is added here don't forget
-            first the input tags within the form need to be updated to use state
-      */
-    };
+    /*
+      TODO:
+        IMPLEMENT:
+          1. Validate this new contact below
+    */
+    const newContact: Contacts = contactFromFormState(formState, contact);
 
     try {
       await IDB_UpdateContact(newContact);
@@ -129,7 +140,7 @@ const ContactPage = () => {
 
   const M_UploadAvatar = (e): void => {
     const newAvatarFile = e?.target.files[0];
-    setAvatarImage(newAvatarFile);
+    setFormState((prev) => ({ ...prev, avatar: newAvatarFile }));
     log.devLog(newAvatarFile);
   };
 
@@ -158,9 +169,9 @@ const ContactPage = () => {
               name="avatar"
               className="hidden"
             />
-            {avatarImage !== null ? (
+            {formState.avatar !== null ? (
               <img
-                src={URL.createObjectURL(avatarImage)}
+                src={URL.createObjectURL(formState.avatar)}
                 alt="Avatar"
                 className="w-full h-full rounded-full object-cover"
               />
@@ -182,6 +193,10 @@ const ContactPage = () => {
             <input
               type="text"
               name="name"
+              value={formState.name}
+              onChange={(e) =>
+                setFormState((prev) => ({ ...prev, name: e.target.value }))
+              }
               className="bg-[#000] focus:outline-none"
               placeholder={contact.name || "Name"}
             />
@@ -191,6 +206,10 @@ const ContactPage = () => {
             <input
               type="text"
               name="nickname"
+              value={formState.nickname}
+              onChange={(e) =>
+                setFormState((prev) => ({ ...prev, nickname: e.target.value }))
+              }
               className="bg-[#000] focus:outline-none"
               placeholder={contact.nickname || "Nickname"}
             />
@@ -207,6 +226,10 @@ const ContactPage = () => {
             <input
               type="tel"
               name="phonenumber"
+              value={formState.number}
+              onChange={(e) =>
+                setFormState((prev) => ({ ...prev, number: e.target.value }))
+              }
               className="bg-[#000] focus:outline-none"
               placeholder={contact.number || "Mobile"}
             />
@@ -221,6 +244,10 @@ const ContactPage = () => {
             <input
               type="email"
               name="email"
+              value={formState.email}
+              onChange={(e) =>
+                setFormState((prev) => ({ ...prev, email: e.target.value }))
+              }
               className="bg-[#000] focus:outline-none"
               placeholder={contact.email || "Email"}
             />
@@ -235,6 +262,10 @@ const ContactPage = () => {
             <input
               type="text"
               name="address"
+              value={formState.address}
+              onChange={(e) =>
+                setFormState((prev) => ({ ...prev, address: e.target.value }))
+              }
               className="bg-[#000] focus:outline-none truncate"
               placeholder={contact.address || "Address"}
             />
@@ -250,6 +281,10 @@ const ContactPage = () => {
             <input
               type="url"
               name="website"
+              value={formState.website}
+              onChange={(e) =>
+                setFormState((prev) => ({ ...prev, website: e.target.value }))
+              }
               className="bg-[#000] focus:outline-none"
               placeholder={contact.website || "Website"}
             />
@@ -259,8 +294,10 @@ const ContactPage = () => {
               <FaUserGroup />
               <input
                 type="text"
-                onChange={(e) => setGroupText(e.target.value)}
-                value={groupText}
+                onChange={(e) =>
+                  setFormState((prev) => ({ ...prev, group: e.target.value }))
+                }
+                value={formState.space}
                 name="group"
                 className="bg-[#000] focus:outline-none"
                 placeholder="Group"
