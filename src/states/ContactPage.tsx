@@ -72,6 +72,18 @@ const ContactPage = () => {
 
   const contactId = params.id;
 
+  const contact: Contacts | undefined = contacts.find(
+    (c: Contacts) => c.contactid === contactId
+  );
+
+  useEffect(() => {
+    if (contact) {
+      setFormState(contact);
+    } else {
+      navigate("/profile/contacts");
+    }
+  }, []);
+
   useEffect((): void => {
     if (formState.space === "") {
       setAutoComplete((prev) => {
@@ -79,10 +91,10 @@ const ContactPage = () => {
       });
     } else {
       /*
-                TODO:
-                  IMPLEMENT:
-                    1. Query for the groups that already exist for the user
-              */
+        TODO:
+          IMPLEMENT:
+            1. Query for the groups that already exist for the user
+      */
       setAutoComplete((prev) => {
         return { ...prev, show: true };
       });
@@ -90,22 +102,9 @@ const ContactPage = () => {
   }, [formState.space]);
 
   // Loading logic ---------
-  if (!contactId) {
-    navigate("/profile/contacts");
-    return;
-  }
 
-  const contact = contacts.find((c: Contacts) => c.contactid === contactId);
-
-  if (!contact) {
-    navigate("/profile/contacts");
-    return;
-  }
-
-  setFormState(contact);
-  // Loading logic ---------
-
-  const M_UpdateContact = async (): Promise<void> => {
+  const M_UpdateContact = async (e: React.FormEvent | null): Promise<void> => {
+    e?.preventDefault();
     /*
       TODO:
         IMPLEMENT:
@@ -133,7 +132,7 @@ const ContactPage = () => {
       true,
       [
         { text: "leave", func: () => navigate("/profile/contacts") },
-        { text: "save", func: () => M_UpdateContact() },
+        { text: "save", func: () => M_UpdateContact(null) },
       ]
     );
   };
@@ -155,175 +154,180 @@ const ContactPage = () => {
       }}
       className="fixed py-20 inset-0 z-[999] bg-[#000] overflow-y-auto small-scrollbar"
     >
-      <form onSubmit={M_UpdateContact}>
-        {/* Changed! ------------------------------------------------------------------ */}
-        <div className="flex justify-center items-center h-40 pt-20">
-          <label
-            className="rounded-full w-40 h-40 flex justify-center
+      {contact !== undefined ? (
+        <form onSubmit={M_UpdateContact}>
+          {/* Changed! ------------------------------------------------------------------ */}
+          <div className="flex justify-center items-center h-40 pt-20">
+            <label
+              className="rounded-full w-40 h-40 flex justify-center
    items-center bg-[#111] cursor-pointer"
-          >
-            <input
-              type="file"
-              accept=".jpeg .png .svg .webp .jpg"
-              onChange={M_UploadAvatar}
-              name="avatar"
-              className="hidden"
-            />
-            {formState.avatar !== null ? (
-              <img
-                src={URL.createObjectURL(formState.avatar)}
-                alt="Avatar"
-                className="w-full h-full rounded-full object-cover"
+            >
+              <input
+                type="file"
+                accept=".jpeg .png .svg .webp .jpg"
+                onChange={M_UploadAvatar}
+                name="avatar"
+                className="hidden"
               />
-            ) : contact?.avatar ? (
-              <img
-                src={URL.createObjectURL(contact.avatar)}
-                alt="Avatar"
-                className="w-full h-full rounded-full object-cover"
-              />
-            ) : (
-              <p className="text-4xl">{getInitials(contact.name)}</p>
-            )}
-          </label>
-        </div>
-        <ContactProfileInfo contact={contact} />
-        <div className="mt-40 px-5">
-          <div className="flex gap-x-5 justify-start items-center w-full p-2 my-10 rounded-sm">
-            <FaUser />
-            <input
-              type="text"
-              name="name"
-              value={formState.name}
-              onChange={(e) =>
-                setFormState((prev) => ({ ...prev, name: e.target.value }))
-              }
-              className="bg-[#000] focus:outline-none"
-              placeholder={contact.name || "Name"}
-            />
+              {formState.avatar !== null ? (
+                <img
+                  src={URL.createObjectURL(formState.avatar)}
+                  alt="Avatar"
+                  className="w-full h-full rounded-full object-cover"
+                />
+              ) : contact?.avatar ? (
+                <img
+                  src={URL.createObjectURL(contact.avatar)}
+                  alt="Avatar"
+                  className="w-full h-full rounded-full object-cover"
+                />
+              ) : (
+                <p className="text-4xl">{getInitials(contact.name)}</p>
+              )}
+            </label>
           </div>
-          <div className="flex gap-x-5 justify-start items-center w-full p-2 my-10 rounded-sm">
-            <FaUserTag />
-            <input
-              type="text"
-              name="nickname"
-              value={formState.nickname}
-              onChange={(e) =>
-                setFormState((prev) => ({ ...prev, nickname: e.target.value }))
-              }
-              className="bg-[#000] focus:outline-none"
-              placeholder={contact.nickname || "Nickname"}
-            />
-          </div>
-          <div className="flex gap-x-5 justify-start items-center w-full p-2 my-10 rounded-sm">
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-              }}
-              className="p-2 rounded-md bg-primary hover:bg-tri duration-200 text-black"
-            >
-              <FaMobileScreen />
-            </button>
-            <input
-              type="tel"
-              name="phonenumber"
-              value={formState.number}
-              onChange={(e) =>
-                setFormState((prev) => ({ ...prev, number: e.target.value }))
-              }
-              className="bg-[#000] focus:outline-none"
-              placeholder={contact.number || "Mobile"}
-            />
-          </div>
-          <div className="flex gap-x-5 justify-start items-center w-full p-2 my-10 rounded-sm">
-            <a
-              href={`mailto:${contact.email}`}
-              className="p-2 rounded-md bg-primary hover:bg-tri duration-200 text-black"
-            >
-              <MdEmail />
-            </a>
-            <input
-              type="email"
-              name="email"
-              value={formState.email}
-              onChange={(e) =>
-                setFormState((prev) => ({ ...prev, email: e.target.value }))
-              }
-              className="bg-[#000] focus:outline-none"
-              placeholder={contact.email || "Email"}
-            />
-          </div>
-          <div className="flex gap-x-5 justify-start items-center w-full p-2 my-10 rounded-sm">
-            <a
-              href={`https://www.google.com/maps/search/?api=1&query=${contact.address}`}
-              className="p-2 rounded-md bg-primary hover:bg-tri duration-200 text-black"
-            >
-              <FaAddressCard />
-            </a>
-            <input
-              type="text"
-              name="address"
-              value={formState.address}
-              onChange={(e) =>
-                setFormState((prev) => ({ ...prev, address: e.target.value }))
-              }
-              className="bg-[#000] focus:outline-none truncate"
-              placeholder={contact.address || "Address"}
-            />
-          </div>
-          <div className="flex gap-x-5 justify-start items-center w-full p-2 my-10 rounded-sm">
-            <a
-              target="_blank"
-              href={`${contact.website}`}
-              className="p-2 block rounded-md bg-primary hover:bg-tri duration-200 text-black"
-            >
-              <FaLink />
-            </a>
-            <input
-              type="url"
-              name="website"
-              value={formState.website}
-              onChange={(e) =>
-                setFormState((prev) => ({ ...prev, website: e.target.value }))
-              }
-              className="bg-[#000] focus:outline-none"
-              placeholder={contact.website || "Website"}
-            />
-          </div>
-          <div className="relative">
+          <ContactProfileInfo contact={contact} />
+          <div className="mt-40 px-5">
             <div className="flex gap-x-5 justify-start items-center w-full p-2 my-10 rounded-sm">
-              <FaUserGroup />
+              <FaUser />
               <input
                 type="text"
+                name="name"
+                value={formState.name}
                 onChange={(e) =>
-                  setFormState((prev) => ({ ...prev, group: e.target.value }))
+                  setFormState((prev) => ({ ...prev, name: e.target.value }))
                 }
-                value={formState.space}
-                name="group"
                 className="bg-[#000] focus:outline-none"
-                placeholder="Group"
+                placeholder={contact.name || "Name"}
               />
             </div>
-            {autoComplete.show ? (
-              <select className="w-full absolute bottom-[-25px] bg-tri"></select>
-            ) : null}
+            <div className="flex gap-x-5 justify-start items-center w-full p-2 my-10 rounded-sm">
+              <FaUserTag />
+              <input
+                type="text"
+                name="nickname"
+                value={formState.nickname}
+                onChange={(e) =>
+                  setFormState((prev) => ({
+                    ...prev,
+                    nickname: e.target.value,
+                  }))
+                }
+                className="bg-[#000] focus:outline-none"
+                placeholder={contact.nickname || "Nickname"}
+              />
+            </div>
+            <div className="flex gap-x-5 justify-start items-center w-full p-2 my-10 rounded-sm">
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                }}
+                className="p-2 rounded-md bg-primary hover:bg-tri duration-200 text-black"
+              >
+                <FaMobileScreen />
+              </button>
+              <input
+                type="tel"
+                name="phonenumber"
+                value={formState.number}
+                onChange={(e) =>
+                  setFormState((prev) => ({ ...prev, number: e.target.value }))
+                }
+                className="bg-[#000] focus:outline-none"
+                placeholder={contact.number || "Mobile"}
+              />
+            </div>
+            <div className="flex gap-x-5 justify-start items-center w-full p-2 my-10 rounded-sm">
+              <a
+                href={`mailto:${contact.email}`}
+                className="p-2 rounded-md bg-primary hover:bg-tri duration-200 text-black"
+              >
+                <MdEmail />
+              </a>
+              <input
+                type="email"
+                name="email"
+                value={formState.email}
+                onChange={(e) =>
+                  setFormState((prev) => ({ ...prev, email: e.target.value }))
+                }
+                className="bg-[#000] focus:outline-none"
+                placeholder={contact.email || "Email"}
+              />
+            </div>
+            <div className="flex gap-x-5 justify-start items-center w-full p-2 my-10 rounded-sm">
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${contact.address}`}
+                className="p-2 rounded-md bg-primary hover:bg-tri duration-200 text-black"
+              >
+                <FaAddressCard />
+              </a>
+              <input
+                type="text"
+                name="address"
+                value={formState.address}
+                onChange={(e) =>
+                  setFormState((prev) => ({ ...prev, address: e.target.value }))
+                }
+                className="bg-[#000] focus:outline-none truncate"
+                placeholder={contact.address || "Address"}
+              />
+            </div>
+            <div className="flex gap-x-5 justify-start items-center w-full p-2 my-10 rounded-sm">
+              <a
+                target="_blank"
+                href={`${contact.website}`}
+                className="p-2 block rounded-md bg-primary hover:bg-tri duration-200 text-black"
+              >
+                <FaLink />
+              </a>
+              <input
+                type="url"
+                name="website"
+                value={formState.website}
+                onChange={(e) =>
+                  setFormState((prev) => ({ ...prev, website: e.target.value }))
+                }
+                className="bg-[#000] focus:outline-none"
+                placeholder={contact.website || "Website"}
+              />
+            </div>
+            <div className="relative">
+              <div className="flex gap-x-5 justify-start items-center w-full p-2 my-10 rounded-sm">
+                <FaUserGroup />
+                <input
+                  type="text"
+                  onChange={(e) =>
+                    setFormState((prev) => ({ ...prev, group: e.target.value }))
+                  }
+                  value={formState.space}
+                  name="group"
+                  className="bg-[#000] focus:outline-none"
+                  placeholder="Group"
+                />
+              </div>
+              {autoComplete.show ? (
+                <select className="w-full absolute bottom-[-25px] bg-tri"></select>
+              ) : null}
+            </div>
           </div>
-        </div>
-        <div className="flex justify-evenly items-center mb-10 mt-20">
-          <button
-            type="button"
-            className="bg-secondary px-10 py-3 flex-[0.25] text-[#000]"
-            onClick={() => M_ConfirmQuit()}
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="bg-primary flex-[0.25] px-10 py-3 text-[#000]"
-          >
-            Save
-          </button>
-        </div>
-      </form>
+          <div className="flex justify-evenly items-center mb-10 mt-20">
+            <button
+              type="button"
+              className="bg-secondary px-10 py-3 flex-[0.25] text-[#000]"
+              onClick={() => M_ConfirmQuit()}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="bg-primary flex-[0.25] px-10 py-3 text-[#000]"
+            >
+              Save
+            </button>
+          </div>
+        </form>
+      ) : null}
     </motion.section>
   );
 };

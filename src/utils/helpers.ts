@@ -40,7 +40,14 @@ export const normalizePhoneNumber = (phoneNumber: string): string => {
     nc: New contact
     oc: Original contact
 */
-export const contactFromFormState = (nc: Contacts, oc: Contacts): Contacts => {
+export const contactFromFormState = (
+  nc: Contacts,
+  oc: Contacts | undefined
+): Contacts => {
+  if (oc === undefined) {
+    return nc;
+  }
+
   const uc: Contacts = {
     ...oc,
   };
