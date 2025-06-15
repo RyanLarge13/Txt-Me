@@ -31,17 +31,20 @@ import { MdEmail } from "react-icons/md";
 import { useNavigate, useParams } from "react-router-dom";
 
 import ContactProfileInfo from "../components/ContactProfileInfo";
+import { useConfig } from "../context/configContext";
 import { useDatabase } from "../context/dbContext";
 import UserCtxt from "../context/userCtxt";
 import useLogger from "../hooks/useLogger";
 import useNotifActions from "../hooks/useNotifActions";
 import { Contacts } from "../types/userTypes";
+import { API_UpdateContact } from "../utils/api";
 import { getInitials } from "../utils/helpers";
 
 const ContactPage = () => {
   const { contacts } = useContext(UserCtxt);
   const { addSuccessNotif } = useNotifActions();
   const { IDB_UpdateContact } = useDatabase();
+  const { getUserData } = useConfig();
 
   const [avatarImage, setAvatarImage] = useState(null);
   const [groupText, setGroupText] = useState("");
@@ -53,6 +56,7 @@ const ContactPage = () => {
   const params = useParams();
   const navigate = useNavigate();
   const log = useLogger();
+  const token = getUserData("authToken");
 
   const contactId = params.id;
 
@@ -98,7 +102,17 @@ const ContactPage = () => {
       */
     };
 
-    await IDB_UpdateContact(newContact);
+    try {
+      await IDB_UpdateContact(newContact);
+    } catch (err) {
+      log.logAllError("Error updating the contact to indexedDB. Error: ", err);
+    }
+
+    try {
+      await API_UpdateContact(token, newContact);
+    } catch (err) {
+      log.logAllError("Error updating contact to server. Error: ", err);
+    }
   };
 
   const M_ConfirmQuit = () => {
@@ -147,6 +161,12 @@ const ContactPage = () => {
             {avatarImage !== null ? (
               <img
                 src={URL.createObjectURL(avatarImage)}
+                alt="Avatar"
+                className="w-full h-full rounded-full object-cover"
+              />
+            ) : contact?.avatar ? (
+              <img
+                src={URL.createObjectURL(contact.avatar)}
                 alt="Avatar"
                 className="w-full h-full rounded-full object-cover"
               />

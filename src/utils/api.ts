@@ -129,6 +129,16 @@ export const API_AddContact = (
   return res;
 };
 
+export const API_UpdateContact = (
+  token: string,
+  contact: Contacts
+): Promise<AxiosResponse> => {
+  const res = Axios.put(`${devUrl}/user/contacts/update`, contact, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res;
+};
+
 export const API_DeleteContact = (
   token: string,
   contactId: string
