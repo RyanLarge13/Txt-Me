@@ -138,7 +138,7 @@ const Contact = ({
             alt={getInitials(contact.name)}
             width={30}
             height={30}
-            className="w-[30px] h-[30px] rounded-full object-cover"
+            className="w-[35px] h-[35px] rounded-full object-cover"
           />
         ) : (
           <p className="flex justify-center items-center w-[40px] h-[40px] text-black rounded-full bg-slate-400">

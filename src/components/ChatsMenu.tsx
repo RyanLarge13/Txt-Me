@@ -215,7 +215,7 @@ const ChatsMenu = () => {
                   alt={getInitials(messageSession.contact.name) || fromNumber}
                   width={30}
                   height={30}
-                  className="w-[30px] h-[30px] rounded-full object-cover"
+                  className="w-[35px] h-[35px] rounded-full object-cover"
                 />
               ) : (
                 <p className="text-lg text-center">

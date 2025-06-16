@@ -37,22 +37,56 @@ if (mode === "null") {
   });
 }
 
+const updateAppPrompt = (e) => {
+  if (e.data?.type === "NEW_VERSION_AVAILABLE") {
+    // Notify user in-app (custom logic/UI here)
+    const shouldRefresh = confirm(
+      "A new version of this app is available. Reload now?"
+    );
+    if (shouldRefresh) {
+      window.location.reload();
+    }
+  }
+};
+
+const loadServiceWorker = async () => {
+  const registration = await navigator.serviceWorker.register("/sw.js");
+  console.log("Service Worker registered with scope:", registration.scope);
+
+  navigator.serviceWorker.addEventListener("message", updateAppPrompt);
+
+  if ("periodicSync" in registration) {
+    try {
+      await registration.periodicSync?.register("periodic-sync-example", {
+        minInterval: 24 * 60 * 60 * 1000, // once per day
+      });
+    } catch (err) {
+      console.error("Periodic Sync not supported or permission denied: ", err);
+    }
+  }
+
+  if ("sync" in registration) {
+    try {
+      registration.sync?.register("sync-tag-example");
+    } catch (err) {
+      console.log("Background Sync not supported or permission denied: ", err);
+    }
+  }
+
+  if ("Notification" in window && Notification.permission !== "granted") {
+    try {
+      const notificationPermission = await Notification.requestPermission();
+      console.log(notificationPermission);
+    } catch (err) {
+      console.log("Permissions unaccessible. Error: ", err);
+    }
+  }
+};
+
 // Checking for null because no service worker should run in prod or dev for now
 if ("serviceWorker" in navigator && mode === "null") {
   // Register service worker for "/"
-  window.addEventListener("load", () => {
-    navigator.serviceWorker
-      .register("/sw.js")
-      .then((registration) => {
-        console.log(
-          "Service Worker registered with scope:",
-          registration.scope
-        );
-      })
-      .catch((error) => {
-        console.error("Service Worker registration failed:", error);
-      });
-  });
+  window.addEventListener("load", loadServiceWorker);
 }
 
 ReactDOM.createRoot(document.getElementById("root")!).render(

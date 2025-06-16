@@ -28,7 +28,6 @@ import {
   ContextMenuShowType,
 } from "../types/interactiveCtxtTypes";
 import { MessageSessionType } from "../types/userTypes";
-import { getInitials } from "../utils/helpers";
 
 const MessageInfoTopBar = ({
   messageSession,
@@ -76,21 +75,16 @@ const MessageInfoTopBar = ({
       className="p-5 text-sm flex fixed top-0 right-0 left-0 z-[999] justify-between items-center bg-black"
     >
       {messageSession.contact && messageSession.contact?.avatar ? (
-        <>
-          <img
-            src={URL.createObjectURL(messageSession.contact.avatar)}
-            alt={
-              getInitials(messageSession.contact?.name) || messageSession.number
-            }
-            width={30}
-            height={30}
-            className="w-[30px] h-[30px] rounded-full object-cover"
-          />
-          <p>{messageSession.number}</p>
-        </>
+        <img
+          src={URL.createObjectURL(messageSession.contact.avatar)}
+          alt="user"
+          width={30}
+          height={30}
+          className="w-[35px] h-[35px] rounded-full object-cover"
+        />
       ) : (
         <p className="hover:text-primary duration-200 cursor-pointer">
-          {messageSession.contact?.name || messageSession.number}
+          {messageSession.contact?.name || messageSession.contact?.nickname}
         </p>
       )}
       <p className="text-tri">{messageSession.contact?.number || ""}</p>

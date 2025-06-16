@@ -1,10 +1,19 @@
 {
-  "name": "Txt Me",
-  "short_name": "Txt Me",
-  "start_url": "/",
+  "name": "Your App Name",
+  "short_name": "AppShort",
+  "description": "A professional Progressive Web App that delivers a native-like experience across platforms.",
+  "start_url": "/?source=pwa",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#000000",
   "theme_color": "#000000",
+  "scope": "/",
+  "lang": "en-US",
+  "dir": "ltr",
+  "id": "/",
+  "categories": ["productivity", "utilities", "tools"],
+  "iarc_rating_id": "e10+",
+
   "icons": [
     {
       "src": "/assets/Txt-Me_Logo.jpg",
@@ -15,6 +24,109 @@
       "src": "/assets/Txt-Me_Logo.jpg",
       "sizes": "512x512",
       "type": "image/jpg"
+    },
+    {
+      "src": "/icons/icon-72.png",
+      "sizes": "72x72",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-96.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-128.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-144.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-152.png",
+      "sizes": "152x152",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-384.png",
+      "sizes": "384x384",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
-  ]
+  ],
+
+  "screenshots": [
+    {
+      "src": "/screenshots/screen1.png",
+      "type": "image/png",
+      "sizes": "540x960",
+      "label": "Home screen"
+    },
+    {
+      "src": "/screenshots/screen2.png",
+      "type": "image/png",
+      "sizes": "540x960",
+      "label": "Feature view"
+    }
+  ],
+
+  "shortcuts": [
+    {
+      "name": "New Task",
+      "short_name": "Task",
+      "description": "Quickly create a new task",
+      "url": "/tasks/new",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "My Profile",
+      "short_name": "Profile",
+      "description": "View your user profile",
+      "url": "/profile",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+
+  "file_handlers": [
+    {
+      "action": "/import",
+      "accept": {
+        "application/json": [".json"],
+        "text/plain": [".txt"]
+      }
+    }
+  ],
+
+  "protocol_handlers": [
+    {
+      "protocol": "web+yourapp",
+      "url": "/?url=%s"
+    }
+  ],
+
+  "permissions": ["periodic-background-sync", "notifications"],
+
+  "related_applications": [
+    {
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=com.yourcompany.yourapp",
+      "id": "com.yourcompany.yourapp"
+    }
+  ],
+
+  "prefer_related_applications": false
 }
