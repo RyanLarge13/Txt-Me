@@ -211,9 +211,11 @@ const ChatsMenu = () => {
             <div className="flex flex-col justify-center items-center basis-1/6 p-3">
               {messageSession.contact?.avatar ? (
                 <img
-                  src={URL.createObjectURL(messageSession.contact.avatar)}
-                  className="w-[25px] rounded-ull object-cover shadow-md"
+                  src={URL.createObjectURL(messageSession?.contact?.avatar)}
                   alt={getInitials(messageSession.contact.name) || fromNumber}
+                  width={30}
+                  height={30}
+                  className="w-[30px] h-[30px] rounded-full object-cover"
                 />
               ) : (
                 <p className="text-lg text-center">
