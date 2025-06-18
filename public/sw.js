@@ -34,9 +34,10 @@ self.addEventListener("activate", (event) => {
 // === FETCH ===
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
+  const apiUrl = "https://txt-me-server-production.up.railway.app/";
 
   // Don't cache API calls
-  if (url.pathname.startsWith("/api/")) return;
+  if (url.pathname.startsWith(apiUrl)) return;
 
   // Cache-first strategy
   event.respondWith(
@@ -59,20 +60,57 @@ self.addEventListener("fetch", (event) => {
   );
 });
 
+const M_AddMessageToIndexedDB = async (data) => {
+  try {
+    const db = await openExistingDB("app", "messages");
+    const tx = db.transaction("messages", "readwrite");
+    const store = tx.objectStore("messages");
+
+    const key = "messages"; // or whatever fixed key you use
+    const getRequest = store.get(key);
+
+    getRequest.onsuccess = () => {
+      const existingMessages = getRequest.result || [];
+      existingMessages.push(data.message);
+
+      store.put(existingMessages, key); // update the array at that key
+    };
+
+    getRequest.onerror = () => {
+      console.warn("Failed to get messages array");
+    };
+
+    return new Promise((resolve) => {
+      tx.oncomplete = resolve;
+    });
+  } catch (err) {
+    console.log(
+      "Will not add message to IndexedDB. DB does not exist or could not be opened"
+    );
+  }
+};
+
 // === PUSH NOTIFICATIONS ===
-self.addEventListener("push", (event) => {
+self.addEventListener("push", async (event) => {
   console.log("SW Push received");
   const data = event.data?.json() || {};
 
-  const title = data.title || "Notification";
+  const title = data.title || "New Message";
   const options = {
-    body: data.body || "New content available!",
-    icon: data.icon || "/icons/icon-192.png",
-    badge: data.badge || "/icons/icon-192.png",
+    body: data.body || "New message waiting",
+    icon: data.icon || "/assets/icons/Txt-Me-Logo_192x192.png",
+    badge: data.badge || "/assets/badges/txt-me-mail-badge_1024x1024.png",
     data: data.data || {},
   };
 
-  event.waitUntil(self.registration.showNotification(title, options));
+  try {
+    event.waitUntil(M_AddMessageToIndexedDB(data));
+    event.waitUntil(self.registration.showNotification(title, options));
+  } catch (err) {
+    console.log(
+      "Error adding message to indexedDB from service worker or showing notification"
+    );
+  }
 });
 
 // === NOTIFICATION CLICK ===
@@ -122,46 +160,35 @@ async function notifyClientsAboutUpdate() {
   }
 }
 
+// IndexedDB Methods-------------------------------------------------------------------
 /*
-CLIENT SIDE SERVICE WORKER LOGIC 
+  NOTE:
+    If the database does not exist then forget storing messages
+*/
+function openExistingDB(dbName, storeName) {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(dbName);
 
+    request.onupgradeneeded = () => {
+      // If this fires, the DB doesn't exist yet — abort
+      request.transaction.abort();
+      reject(new Error("Database does not exist yet"));
+    };
 
+    request.onsuccess = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains(storeName)) {
+        db.close();
+        reject(new Error("Object store not found"));
+        return;
+      }
+      resolve(db);
+    };
 
-// === REQUEST NOTIFICATION PERMISSION ===
-if ('Notification' in window && Notification.permission !== 'granted') {
-  Notification.requestPermission().then((permission) => {
-    console.log('Notification permission:', permission);
+    request.onerror = () => {
+      reject(request.error);
+    };
   });
 }
 
-// === LISTEN FOR SW MESSAGES ===
-navigator.serviceWorker.addEventListener('message', (event) => {
-  if (event.data?.type === 'NEW_VERSION_AVAILABLE') {
-    // Notify user in-app (custom logic/UI here)
-    const shouldRefresh = confirm('A new version of this app is available. Reload now?');
-    if (shouldRefresh) {
-      window.location.reload();
-    }
-  }
-});
-
-** PERIODIC SYNC ** 
-navigator.serviceWorker.ready.then(async (reg) => {
-  try {
-    await reg.periodicSync.register('periodic-sync-example', {
-      minInterval: 24 * 60 * 60 * 1000, // once per day
-    });
-  } catch (e) {
-    console.error('Periodic Sync not supported or permission denied:', e);
-  }
-});
-
-** BACKGROUND SYNC **
-navigator.serviceWorker.ready.then((reg) => {
-  reg.sync.register('sync-tag-example');
-});
-
-** IN MANIFEST **
-"permissions": ["periodic-background-sync"]
-
-*/
+// IndexedDB Methods-------------------------------------------------------------------
