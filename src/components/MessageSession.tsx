@@ -186,6 +186,7 @@ const MessageSession = () => {
     const newMessage = {
       ...defaultMessage,
       messageid: uuidv4(),
+      toname: messageSession.contact?.name || messageSession.number,
       message: value,
       fromnumber: phoneNumber,
       tonumber: messageSession.number,

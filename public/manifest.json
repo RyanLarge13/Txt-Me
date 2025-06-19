@@ -1,7 +1,7 @@
 {
-  "name": "Your App Name",
-  "short_name": "AppShort",
-  "description": "A professional Progressive Web App that delivers a native-like experience across platforms.",
+  "name": "Txt Me",
+  "short_name": "TxtMe",
+  "description": "A professional Progressive Web App that delivers a native-like experience across platforms",
   "start_url": "/?source=pwa",
   "display": "standalone",
   "orientation": "portrait",

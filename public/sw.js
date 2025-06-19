@@ -71,9 +71,13 @@ const M_AddMessageToIndexedDB = async (data) => {
 
     getRequest.onsuccess = () => {
       const existingMessages = getRequest.result || [];
-      existingMessages.push(data.message);
 
-      store.put(existingMessages, key); // update the array at that key
+      const existingMessageSet = existingMessages.filter(
+        (m) => m.mesageid !== data.message.id
+      );
+      existingMessageSet.push(data.message);
+
+      store.put(existingMessageSet, key); // update the array at that key
     };
 
     getRequest.onerror = () => {

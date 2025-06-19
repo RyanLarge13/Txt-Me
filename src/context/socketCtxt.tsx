@@ -152,6 +152,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       query: {
         number: number,
         subscribeInfo: {
+          number: number,
           newClient: webPushSubscription.subscribed,
           subscription: webPushSubscription.subscription,
         },
