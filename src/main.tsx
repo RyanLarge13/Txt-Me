@@ -37,7 +37,7 @@ if (mode === "null") {
   });
 }
 
-const updateAppPrompt = (e) => {
+const M_UpdateAppPrompt = (e) => {
   if (e.data?.type === "NEW_VERSION_AVAILABLE") {
     // Notify user in-app (custom logic/UI here)
     const shouldRefresh = confirm(
@@ -49,11 +49,11 @@ const updateAppPrompt = (e) => {
   }
 };
 
-const loadServiceWorker = async () => {
+const M_LoadServiceWorker = async () => {
   const registration = await navigator.serviceWorker.register("/sw.js");
   console.log("Service Worker registered with scope:", registration.scope);
 
-  navigator.serviceWorker.addEventListener("message", updateAppPrompt);
+  navigator.serviceWorker.addEventListener("message", M_UpdateAppPrompt);
 
   if ("periodicSync" in registration) {
     try {
@@ -84,9 +84,9 @@ const loadServiceWorker = async () => {
 };
 
 // Checking for null because no service worker should run in prod or dev for now
-if ("serviceWorker" in navigator && mode === "null") {
+if ("serviceWorker" in navigator && mode === "prod") {
   // Register service worker for "/"
-  window.addEventListener("load", loadServiceWorker);
+  window.addEventListener("load", M_LoadServiceWorker);
 }
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
