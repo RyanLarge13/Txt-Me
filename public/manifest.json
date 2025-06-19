@@ -39,10 +39,10 @@
       "type": "image/png",
       "sizes": "501x951",
       "label": "Home screen",
-      "form_factor": "portrait"
+      "form_factor": "narrow"
     },
     {
-      "src": "/assets/screenshots/public/screenshot-landscape.PNG",
+      "src": "/assets/screenshots/screenshot-landscape.PNG",
       "type": "image/png",
       "sizes": "1353x648",
       "label": "Feature view",
@@ -56,18 +56,14 @@
       "short_name": "Message +",
       "description": "Create a new message",
       "url": "/profile/messages",
-      "icons": [
-        { "src": "/assets/icons/Txt-Me-Logo_192x192.png", "sizes": "192x192" }
-      ]
+      "icons": [{ "src": "/assets/icons/new-message.png", "sizes": "192x192" }]
     },
     {
       "name": "New Contact",
       "short_name": "Contact +",
       "description": "Create a new contact",
       "url": "/profile/newcontact",
-      "icons": [
-        { "src": "/assets/icons/Txt-Me-Logo_192x192.png", "sizes": "192x192" }
-      ]
+      "icons": [{ "src": "/assets/icons/new-contact.png", "sizes": "192x192" }]
     }
   ],
 
