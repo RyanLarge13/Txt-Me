@@ -57,6 +57,10 @@ export const defaultAppSettings: AppSettings = {
   locked: false,
   passwordType: "pin",
   showOnline: false,
+  webPushSubscription: {
+    subscription: null,
+    subscribed: false,
+  },
 };
 
 export const defaultContact = {

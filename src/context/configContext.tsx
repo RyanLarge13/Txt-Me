@@ -50,6 +50,10 @@ export const ConfigProvider = ({
     passwordType: "pin",
     authToken: "",
     showOnline: false,
+    webPushSubscription: {
+      subscription: null,
+      subscribed: false,
+    },
   });
 
   const [theme, setTheme] = useState<Theme>({

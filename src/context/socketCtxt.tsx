@@ -29,6 +29,7 @@ import io, { Socket } from "socket.io-client";
 
 import UserCtxt from "../context/userCtxt";
 import useLogger from "../hooks/useLogger";
+import { AppData } from "../types/configCtxtTypes";
 import {
   MessageDeliveryErrorType,
   MessageUpdateType,
@@ -36,14 +37,22 @@ import {
 } from "../types/socketTypes";
 import { Contacts, Message } from "../types/userTypes";
 import { defaultMessage } from "../utils/constants";
+import { urlBase64ToUint8Array } from "../utils/helpers";
+import { useConfig } from "./configContext";
 import { useDatabase } from "./dbContext";
 
 export const SocketContext = createContext({} as SocketProps);
 
 export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
-  const { IDB_GetPhoneNumber, IDB_AddMessage, IDB_UpdateMessage } =
-    useDatabase();
+  const {
+    IDB_GetPhoneNumber,
+    IDB_AddMessage,
+    IDB_UpdateMessage,
+    IDB_UpdateAppDataWebPush,
+  } = useDatabase();
   const { allMessages, contacts, setAllMessages } = useContext(UserCtxt);
+  const { getAppData, setAppData } = useConfig();
+
   const log = useLogger();
 
   // UseRef for socket to avoid unwanted rerenders
@@ -73,9 +82,14 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   // Local Scop Context Methods ---------------------------------------
   const M_QueryPhoneNumber = async () => {
     const phoneNumber = await IDB_GetPhoneNumber();
+    const webPushSubscription = getAppData("webPushSubscription") || {
+      subscribed: false,
+      subscription: null,
+    };
+
     try {
       if (phoneNumber && socketRef) {
-        M_SetUpSocket(phoneNumber);
+        M_SetUpSocket(phoneNumber, webPushSubscription);
         return;
       }
       log.devLog(
@@ -88,7 +102,35 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const M_SetUpSocket = (number: string): void => {
+  const M_SubscribeClientToNotifications =
+    async (): Promise<null | PushSubscription> => {
+      const PUBLIC_VAPID_KEY =
+        import.meta.env.VITE_WEB_PUSH_VAPID_PUBLIC_KEY || "";
+
+      if (!PUBLIC_VAPID_KEY) {
+        throw new Error(
+          "Application not receiving web push vapid key from env. Check env immediately!"
+        );
+      }
+
+      if ("serviceWorker" in navigator) {
+        const registration = await navigator.serviceWorker.ready;
+
+        const subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(PUBLIC_VAPID_KEY),
+        });
+
+        return subscription;
+      } else {
+        return null;
+      }
+    };
+
+  const M_SetUpSocket = async (
+    number: string,
+    webPushSubscription: AppData["webPushSubscription"]
+  ): Promise<void> => {
     const socketURL = import.meta.env.VITE_API_SOCKET_URL || "";
     if (!socketURL) {
       log.logAllError(
@@ -98,11 +140,21 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       throw new Error("Check ENV file for socket url");
     }
 
+    if (webPushSubscription.subscribed === false) {
+      webPushSubscription.subscription =
+        await M_SubscribeClientToNotifications();
+      webPushSubscription.subscribed = false;
+    }
+
     socketRef.current = io(socketURL, {
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
       query: {
         number: number,
+        subscribeInfo: {
+          newClient: webPushSubscription.subscribed,
+          subscription: webPushSubscription.subscription,
+        },
       },
     });
 
@@ -137,6 +189,9 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     socketRef.on("delivery-error", (error) => {
       log.devLog("Error delivering message", error);
       M_HandleDeliveryError(error);
+    });
+    socketRef.on("web-push-sub-success", (subscriptionMessage) => {
+      M_HandleWebPushSubscriptionUpdate(subscriptionMessage);
     });
   };
 
@@ -326,6 +381,35 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     },
     [allMessagesRef.current]
   );
+
+  const M_HandleWebPushSubscriptionUpdate = async (subscriptionMessage: {
+    message: string;
+    subscribed: boolean;
+    subscription: PushSubscription | null;
+  }) => {
+    log.devLog(
+      "Server message about subscribing to notifications",
+      subscriptionMessage?.message
+    );
+
+    try {
+      const currentWebPushInfo = getAppData("webPushSubscription");
+      currentWebPushInfo.subscribed = subscriptionMessage.subscribed;
+      currentWebPushInfo.subscription = subscriptionMessage.subscription;
+
+      await IDB_UpdateAppDataWebPush(currentWebPushInfo);
+
+      setAppData((prev) => ({
+        ...prev,
+        webPushSubscription: currentWebPushInfo,
+      }));
+    } catch (err) {
+      log.logAllError(
+        "Error updating app data in indexedDB after creating a subscription",
+        err
+      );
+    }
+  };
   // Socket Methods ---------------------------------------------------
 
   return (

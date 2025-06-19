@@ -22,6 +22,10 @@ export type AppData = {
   passwordType: string;
   authToken: string;
   showOnline: boolean;
+  webPushSubscription: {
+    subscription: null | PushSubscription;
+    subscribed: boolean;
+  };
 };
 
 export type Theme = {

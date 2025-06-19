@@ -152,20 +152,34 @@ self.addEventListener("periodicsync", (event) => {
   }
 });
 
+self.addEventListener("message", (event) => {
+  console.log("SW: event from frontend to service worker", event);
+  const eventType = event.data?.type || null;
+
+  if (eventType === null) {
+    console.log(
+      "Event type is null. Check where in your frontend code you are sending a null type"
+    );
+    return;
+  }
+
+  // Handle any other messages from  the frontend
+});
+
 // === VERSION UPDATE NOTIFICATION ===
-async function notifyClientsAboutUpdate() {
+const notifyClientsAboutUpdate = async () => {
   const allClients = await self.clients.matchAll({ includeUncontrolled: true });
   for (const client of allClients) {
     client.postMessage({ type: "NEW_VERSION_AVAILABLE" });
   }
-}
+};
 
 // IndexedDB Methods-------------------------------------------------------------------
 /*
   NOTE:
     If the database does not exist then forget storing messages
 */
-function openExistingDB(dbName, storeName) {
+const openExistingDB = (dbName, storeName) => {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(dbName);
 
@@ -189,6 +203,6 @@ function openExistingDB(dbName, storeName) {
       reject(request.error);
     };
   });
-}
+};
 
 // IndexedDB Methods-------------------------------------------------------------------

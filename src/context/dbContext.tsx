@@ -22,9 +22,14 @@ import { IDBPDatabase, openDB } from "idb";
 import { createContext, useContext } from "react";
 
 import useLogger from "../hooks/useLogger.ts";
-import { User } from "../types/configCtxtTypes.ts";
+import { AppData, User } from "../types/configCtxtTypes.ts";
 import {
-    ContactSettings, DBCtxtProps, DBUser, DraftType, MessageSettings, Theme
+  ContactSettings,
+  DBCtxtProps,
+  DBUser,
+  DraftType,
+  MessageSettings,
+  Theme,
 } from "../types/dbCtxtTypes.ts";
 import { Contacts, Message, MessageSessionType } from "../types/userTypes.ts";
 import { defaultAppSettings, defaultUser } from "../utils/constants.ts";
@@ -54,6 +59,10 @@ export const DatabaseProvider = ({
       locked: false,
       passwordType: "pin",
       showOnline: false,
+      webPushSubscription: {
+        subscription: null,
+        subscribed: false,
+      },
     };
 
     const appUser = {
@@ -348,6 +357,16 @@ export const DatabaseProvider = ({
       log.logAllError("Error updating message in IndexedDB", err);
     }
   };
+
+  const IDB_UpdateAppDataWebPush = async (
+    newData: AppData["webPushSubscription"]
+  ): Promise<void> => {
+    const currentSettings: AppData = await IDB_GetAppData();
+
+    currentSettings.webPushSubscription = newData;
+
+    (await IDB_GetDB()).put("app", currentSettings, "settings");
+  };
   // Put/Patch DB Data ----------------------------------------------------------------------------
 
   // Delete DB Methods ------------------------------------------------------------------------------
@@ -408,6 +427,7 @@ export const DatabaseProvider = ({
         IDB_DeleteContact,
         IDB_LogoutAndReset,
         IDB_UpdateMessage,
+        IDB_UpdateAppDataWebPush,
       }}
     >
       {children}

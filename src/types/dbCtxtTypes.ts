@@ -1,6 +1,6 @@
 import { IDBPDatabase } from "idb";
 
-import { User } from "./configCtxtTypes";
+import { AppData, User } from "./configCtxtTypes";
 import { Contacts, Message, MessageSessionType } from "./userTypes";
 
 export type AppSettings = {
@@ -9,6 +9,10 @@ export type AppSettings = {
   locked: boolean;
   passwordType: string;
   showOnline: boolean;
+  webPushSubscription: {
+    subscription: null | PushSubscription;
+    subscribed: boolean;
+  };
 };
 
 export type DBUser = {
@@ -101,4 +105,7 @@ export interface DBCtxtProps {
   IDB_DeleteContact: (contactId: string) => Promise<void>;
   IDB_LogoutAndReset: () => Promise<void>;
   IDB_UpdateMessage: (message: Message) => Promise<void>;
+  IDB_UpdateAppDataWebPush: (
+    data: AppData["webPushSubscription"]
+  ) => Promise<void>;
 }
