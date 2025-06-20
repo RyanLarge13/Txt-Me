@@ -18,14 +18,24 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 /// <reference types="vite/client" />
 
-import React, { createContext, useCallback, useContext, useEffect, useRef } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+} from "react";
 import io, { Socket } from "socket.io-client";
 
 import UserCtxt from "../context/userCtxt";
 import useLogger from "../hooks/useLogger";
 import useNotifActions from "../hooks/useNotifActions";
 import { AppData } from "../types/configCtxtTypes";
-import { MessageDeliveryErrorType, MessageUpdateType, SocketProps } from "../types/socketTypes";
+import {
+  MessageDeliveryErrorType,
+  MessageUpdateType,
+  SocketProps,
+} from "../types/socketTypes";
 import { Contacts, Message } from "../types/userTypes";
 import { defaultMessage } from "../utils/constants";
 import { urlBase64ToUint8Array } from "../utils/helpers";
@@ -45,6 +55,12 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const { allMessages, contacts, setAllMessages } = useContext(UserCtxt);
   const { getAppData, setAppData } = useConfig();
   const { addSuccessNotif } = useNotifActions();
+
+  /*
+    TODO:
+      IMPLEMENT:
+        1. Add a reusable method for sending a new subscription to the server
+  */
 
   const log = useLogger();
 
@@ -316,22 +332,23 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
     let idbUpdate: Message = defaultMessage;
 
-    const updatedMessages: Message[] =
-      currentMessages.get(update.sessionNumber)?.messages ||
-      [].map((m: Message) => {
-        if (m.messageid === update.id) {
-          const updatedMessage = {
-            ...m,
-            delivered: true,
-            deliveredat: new Date(),
-          };
+    const messages: Message[] =
+      currentMessages.get(update.sessionNumber)?.messages || [];
 
-          idbUpdate = updatedMessage;
-          return updatedMessage;
-        } else {
-          return m;
-        }
-      });
+    const updatedMessages: Message[] = messages.map((m: Message) => {
+      if (m.messageid === update.id) {
+        const updatedMessage = {
+          ...m,
+          delivered: true,
+          deliveredat: update.time,
+        };
+
+        idbUpdate = updatedMessage;
+        return updatedMessage;
+      } else {
+        return m;
+      }
+    });
 
     if (updatedMessages) {
       const session = currentMessages.get(update.sessionNumber);
@@ -371,25 +388,26 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
     let idbUpdate: Message = defaultMessage;
 
-    const updatedMessages: Message[] =
-      currentMessages.get(error.sessionNumber)?.messages ||
-      [].map((m: Message) => {
-        if (m.messageid === error.messageid) {
-          const updatedMessage = {
-            ...m,
-            delivered: false,
-            deliveredat: null,
-            sent: false,
-            sentat: new Date(),
-            error: true,
-          };
+    const messages: Message[] =
+      currentMessages.get(error.sessionNumber)?.messages || [];
 
-          idbUpdate = updatedMessage;
-          return updatedMessage;
-        } else {
-          return m;
-        }
-      });
+    const updatedMessages: Message[] = messages.map((m: Message) => {
+      if (m.messageid === error.messageid) {
+        const updatedMessage = {
+          ...m,
+          delivered: false,
+          deliveredat: null,
+          sent: false,
+          sentat: new Date(),
+          error: true,
+        };
+
+        idbUpdate = updatedMessage;
+        return updatedMessage;
+      } else {
+        return m;
+      }
+    });
 
     if (updatedMessages) {
       const session = currentMessages.get(error.sessionNumber);

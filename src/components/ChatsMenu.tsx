@@ -19,7 +19,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 import { motion } from "framer-motion";
 import React, { useContext } from "react";
 import { BsThreeDotsVertical } from "react-icons/bs";
-import { FaMailchimp, FaMessage, FaPerson, FaStar, FaTrash } from "react-icons/fa6";
+import {
+  FaMailchimp,
+  FaMessage,
+  FaPerson,
+  FaStar,
+  FaTrash,
+} from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
 
 import { useConfig } from "../context/configContext.tsx";
@@ -122,7 +128,7 @@ const ChatsMenu = () => {
       }
     });
 
-    log.devLog(
+    log.logAll(
       "Creating a new message session from chats menu. Logging messages and contact that is involved in chats menu session click",
       "contact: ",
       contact,
