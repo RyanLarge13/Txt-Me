@@ -114,11 +114,13 @@ const ChatsMenu = () => {
         2. Send socket message to make sure sender knows message has been read
     */
 
-    const newMessages: Message[] = messages.map((m: Message) => ({
-      ...m,
-      read: true,
-      readat: new Date(),
-    }));
+    const newMessages: Message[] = messages.map((m: Message) => {
+      if (m.fromnumber === fromNumber) {
+        return { ...m, read: true, readat: new Date() };
+      } else {
+        return m;
+      }
+    });
 
     log.devLog(
       "Creating a new message session from chats menu. Logging messages and contact that is involved in chats menu session click",
@@ -160,7 +162,7 @@ const ChatsMenu = () => {
 
     if (
       lastMessage.fromnumber !== getUserData("phoneNumber") &&
-      !lastMessage.read
+      lastMessage.read === false
     ) {
       return "border-t-2 border-t-primary";
     } else {

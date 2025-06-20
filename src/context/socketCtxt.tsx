@@ -40,7 +40,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     IDB_AddMessage,
     IDB_UpdateMessage,
     IDB_UpdateAppDataWebPush,
-    // IDB_UpdateMessages,
+    IDB_UpdateMessages,
   } = useDatabase();
   const { allMessages, contacts, setAllMessages } = useContext(UserCtxt);
   const { getAppData, setAppData } = useConfig();
@@ -114,6 +114,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
           applicationServerKey: urlBase64ToUint8Array(PUBLIC_VAPID_KEY),
         });
 
+        log.logAll("Successfully generated subscription to send to the server");
         return subscription;
       } else {
         return null;
@@ -139,16 +140,19 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       webPushSubscription.subscribed = false;
     }
 
+    const subscribeInfo = {
+      number: number,
+      newClient: webPushSubscription.subscribed,
+      subscription: webPushSubscription.subscription,
+    };
+    log.logAll("Subscribe info to be sent to the server", subscribeInfo);
+
     socketRef.current = io(socketURL, {
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
       query: {
         number: number,
-        subscribeInfo: {
-          number: number,
-          newClient: webPushSubscription.subscribed,
-          subscription: webPushSubscription.subscription,
-        },
+        subscribeInfo: subscribeInfo,
       },
     });
 
@@ -293,7 +297,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         );
       }
     },
-    [contacts, setAllMessages]
+    [contacts]
   );
 
   /*
@@ -301,136 +305,179 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       1. Combine M_HandleMessageUpdate and M_HandleDeliveryError below
        into a single function
   */
-  const M_HandleMessageUpdate = useCallback(
-    async (update: MessageUpdateType): Promise<void> => {
-      const currentMessages = allMessagesRef.current;
+  const M_HandleMessageUpdate = async (
+    update: MessageUpdateType
+  ): Promise<void> => {
+    log.logAll(
+      "Ping update from server about message being delivered to other client",
+      update
+    );
+    const currentMessages = allMessagesRef.current;
 
-      let idbUpdate: Message = defaultMessage;
+    let idbUpdate: Message = defaultMessage;
 
-      const updatedMessages: Message[] =
-        currentMessages.get(update.sessionNumber)?.messages ||
-        [].map((m: Message) => {
-          if (m.messageid === update.id) {
-            const updatedMessage = {
-              ...m,
-              delivered: true,
-              deliveredat: new Date(),
-            };
+    const updatedMessages: Message[] =
+      currentMessages.get(update.sessionNumber)?.messages ||
+      [].map((m: Message) => {
+        if (m.messageid === update.id) {
+          const updatedMessage = {
+            ...m,
+            delivered: true,
+            deliveredat: new Date(),
+          };
 
-            idbUpdate = updatedMessage;
-            return updatedMessage;
-          } else {
-            return m;
-          }
-        });
-
-      if (updatedMessages) {
-        const session = currentMessages.get(update.sessionNumber);
-
-        if (session) {
-          currentMessages.set(update.sessionNumber, {
-            ...session,
-            messages: updatedMessages,
-          });
+          idbUpdate = updatedMessage;
+          return updatedMessage;
+        } else {
+          return m;
         }
-      }
+      });
 
-      setAllMessages(new Map(currentMessages));
-      await IDB_UpdateMessage(idbUpdate);
-    },
-    [allMessagesRef, setAllMessages]
-  );
+    if (updatedMessages) {
+      const session = currentMessages.get(update.sessionNumber);
 
-  const M_HandleDeliveryError = useCallback(
-    async (error: MessageDeliveryErrorType) => {
-      log.devLog("Error delivering message from server", error);
-
-      const currentMessages = allMessagesRef.current;
-
-      let idbUpdate: Message = defaultMessage;
-
-      const updatedMessages: Message[] =
-        currentMessages.get(error.sessionNumber)?.messages ||
-        [].map((m: Message) => {
-          if (m.messageid === error.messageid) {
-            const updatedMessage = {
-              ...m,
-              delivered: false,
-              deliveredat: null,
-              sent: false,
-              sentat: new Date(),
-              error: true,
-            };
-
-            idbUpdate = updatedMessage;
-            return updatedMessage;
-          } else {
-            return m;
-          }
+      if (session) {
+        currentMessages.set(update.sessionNumber, {
+          ...session,
+          messages: updatedMessages,
         });
-
-      if (updatedMessages) {
-        const session = currentMessages.get(error.sessionNumber);
-
-        if (session) {
-          currentMessages.set(error.sessionNumber, {
-            ...session,
-            messages: updatedMessages,
-          });
-        }
       }
+    }
 
-      setAllMessages(new Map(currentMessages));
+    const newAllMessages = new Map(currentMessages);
+
+    setAllMessages(newAllMessages);
+
+    try {
       await IDB_UpdateMessage(idbUpdate);
-    },
-    [allMessagesRef, setAllMessages]
-  );
-
-  const M_HandleWebPushSubscriptionUpdate = useCallback(
-    async (subscriptionMessage: {
-      message: string;
-      subscribed: boolean;
-      subscription: PushSubscription | null;
-    }) => {
-      log.devLog(
-        "Server message about subscribing to notifications",
-        subscriptionMessage?.message
+      log.logAll(
+        "Successfully updated message in indexedDB about message being delivered to other client"
       );
+    } catch (err) {
+      log.logAllError(
+        "Error when updating message in indexedDB about message being delivered to other client",
+        err
+      );
+    }
+  };
+
+  const M_HandleDeliveryError = async (error: MessageDeliveryErrorType) => {
+    log.logAll(
+      "Error delivering message from server it seems as though the server failed and now the socket is warning us",
+      error
+    );
+
+    const currentMessages = allMessagesRef.current;
+
+    let idbUpdate: Message = defaultMessage;
+
+    const updatedMessages: Message[] =
+      currentMessages.get(error.sessionNumber)?.messages ||
+      [].map((m: Message) => {
+        if (m.messageid === error.messageid) {
+          const updatedMessage = {
+            ...m,
+            delivered: false,
+            deliveredat: null,
+            sent: false,
+            sentat: new Date(),
+            error: true,
+          };
+
+          idbUpdate = updatedMessage;
+          return updatedMessage;
+        } else {
+          return m;
+        }
+      });
+
+    if (updatedMessages) {
+      const session = currentMessages.get(error.sessionNumber);
+
+      if (session) {
+        currentMessages.set(error.sessionNumber, {
+          ...session,
+          messages: updatedMessages,
+        });
+      }
+    }
+
+    const newAllMessages = new Map(currentMessages);
+
+    setAllMessages(newAllMessages);
+
+    try {
+      await IDB_UpdateMessage(idbUpdate);
+    } catch (err) {
+      log.logAllError(
+        "Error when trying to update the message that failed to send to IndexedDB",
+        err
+      );
+    }
+  };
+
+  const M_HandleWebPushSubscriptionUpdate = async (subscriptionMessage: {
+    message: string;
+    subscribed: boolean;
+    subscription: PushSubscription | null;
+  }) => {
+    log.logAll(
+      "Server message about subscribing to notifications",
+      subscriptionMessage
+    );
+
+    try {
+      const currentWebPushInfo = getAppData("webPushSubscription");
+      currentWebPushInfo.subscribed = subscriptionMessage.subscribed;
+      currentWebPushInfo.subscription = subscriptionMessage.subscription;
+
+      await IDB_UpdateAppDataWebPush(currentWebPushInfo);
+      log.logAll(
+        "IndexedDB Updated to reflect the successful webpush subscription on server and db"
+      );
+      setAppData((prev) => ({
+        ...prev,
+        webPushSubscription: currentWebPushInfo,
+      }));
+    } catch (err) {
+      log.logAllError(
+        "Error updating app data in indexedDB after creating a subscription",
+        err
+      );
+    }
+  };
+
+  const M_HandleMessagesRead = async (fromNumber: string): Promise<void> => {
+    log.logAll(
+      "Ping from server to update messages to read from the client you sent messages to"
+    );
+    const usersPhone = await IDB_GetPhoneNumber();
+
+    if (allMessagesRef.current.has(fromNumber)) {
+      log.logAll("all messages has the number you are sending messages too");
+      const messages = allMessagesRef.current.get(fromNumber)?.messages || [];
+
+      const newMessages = messages.map((m: Message) => {
+        if (m.fromnumber === usersPhone) {
+          return { ...m, read: true, readat: new Date() };
+        } else {
+          return m;
+        }
+      });
 
       try {
-        const currentWebPushInfo = getAppData("webPushSubscription");
-        currentWebPushInfo.subscribed = subscriptionMessage.subscribed;
-        currentWebPushInfo.subscription = subscriptionMessage.subscription;
-
-        await IDB_UpdateAppDataWebPush(currentWebPushInfo);
-
-        setAppData((prev) => ({
-          ...prev,
-          webPushSubscription: currentWebPushInfo,
-        }));
+        await IDB_UpdateMessages(newMessages);
+        log.logAll(
+          "Successfully updated the db with new messages that are read"
+        );
       } catch (err) {
         log.logAllError(
-          "Error updating app data in indexedDB after creating a subscription",
+          "Error updating messages to read after socket event. Error: ",
           err
         );
       }
-    },
-    [setAppData]
-  );
-
-  const M_HandleMessagesRead = useCallback(
-    async (fromNumber: string): Promise<void> => {
-      if (allMessages.has(fromNumber)) {
-        // const messages = allMessages.get(fromNumber);
-        // const newMessages = messages.map((m: Message) => ({
-        //   ...m,
-        //   read: true,
-        //   readat: new Date(),
-        // }));
-      }
-    },
-    [allMessages, allMessagesRef, setAllMessages]
-  );
+    }
+  };
   // Socket Methods ---------------------------------------------------
 
   return (

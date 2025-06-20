@@ -78,14 +78,10 @@ const MessageComponent = ({ message }: { message: Message }): JSX.Element => {
   return (
     <div
       className={`flex justify-center ${
-        isFromMe ? "self-end items-end" : "self-start items-end"
+        isFromMe ? "self-end items-end" : "self-start items-start"
       }`}
     >
-      <p
-        className={`mr-3 whitespace-nowrap flex gap-x-2 ${
-          isFromMe ? "self-end" : "self-start"
-        } text-xs`}
-      >
+      <p className="mr-3 whitespace-nowrap flex gap-x-2 text-xs">
         {isFromMe ? (
           <>
             {/*
