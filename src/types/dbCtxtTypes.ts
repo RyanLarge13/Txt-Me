@@ -108,4 +108,5 @@ export interface DBCtxtProps {
   IDB_UpdateAppDataWebPush: (
     data: AppData["webPushSubscription"]
   ) => Promise<void>;
+  IDB_UpdateMessages: (newMessages: Message[]) => Promise<void>;
 }

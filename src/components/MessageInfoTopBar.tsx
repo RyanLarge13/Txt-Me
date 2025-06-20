@@ -23,10 +23,7 @@ import { FcContacts } from "react-icons/fc";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import useContextMenu from "../hooks/useContextMenu";
-import {
-  ContextMenuOptions,
-  ContextMenuShowType,
-} from "../types/interactiveCtxtTypes";
+import { ContextMenuOptions, ContextMenuShowType } from "../types/interactiveCtxtTypes";
 import { MessageSessionType } from "../types/userTypes";
 
 const MessageInfoTopBar = ({
@@ -87,7 +84,9 @@ const MessageInfoTopBar = ({
           {messageSession.contact?.name || messageSession.contact?.nickname}
         </p>
       )}
-      <p className="text-tri">{messageSession.contact?.number || ""}</p>
+      <p className="text-tri">
+        {messageSession.contact?.number || messageSession.number || ""}
+      </p>
       <button onClick={handleContextMenu}>
         <BsThreeDotsVertical />
       </button>

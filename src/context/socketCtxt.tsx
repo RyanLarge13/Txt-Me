@@ -18,23 +18,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 /// <reference types="vite/client" />
 
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-} from "react";
+import React, { createContext, useCallback, useContext, useEffect, useRef } from "react";
 import io, { Socket } from "socket.io-client";
 
 import UserCtxt from "../context/userCtxt";
 import useLogger from "../hooks/useLogger";
+import useNotifActions from "../hooks/useNotifActions";
 import { AppData } from "../types/configCtxtTypes";
-import {
-  MessageDeliveryErrorType,
-  MessageUpdateType,
-  SocketProps,
-} from "../types/socketTypes";
+import { MessageDeliveryErrorType, MessageUpdateType, SocketProps } from "../types/socketTypes";
 import { Contacts, Message } from "../types/userTypes";
 import { defaultMessage } from "../utils/constants";
 import { urlBase64ToUint8Array } from "../utils/helpers";
@@ -49,9 +40,11 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     IDB_AddMessage,
     IDB_UpdateMessage,
     IDB_UpdateAppDataWebPush,
+    // IDB_UpdateMessages,
   } = useDatabase();
   const { allMessages, contacts, setAllMessages } = useContext(UserCtxt);
   const { getAppData, setAppData } = useConfig();
+  const { addSuccessNotif } = useNotifActions();
 
   const log = useLogger();
 
@@ -194,6 +187,9 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     socketRef.on("web-push-sub-success", (subscriptionMessage) => {
       M_HandleWebPushSubscriptionUpdate(subscriptionMessage);
     });
+    socketRef.on("messages-read", (fromNumber: string) => {
+      M_HandleMessagesRead(fromNumber);
+    });
   };
 
   // Socket Methods ---------------------------------------------------
@@ -226,6 +222,9 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         1. When setting up a new message session from a socket message where the session does not currently exist, I seem to be incorrectly setting the contact information for the message session when pushing to allMessages. Inspect how you are retrieving contact information on new message session creations
     */
       const currentAllMessages = allMessagesRef.current;
+      const contactReference =
+        contacts.find((c: Contacts) => c.number === socketMessage.fromnumber) ||
+        null;
 
       if (socketMessage) {
         log.devLog("Message from socket", socketMessage);
@@ -247,10 +246,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
           );
 
           currentAllMessages.set(socketMessage.fromnumber, {
-            contact:
-              contacts.find(
-                (c: Contacts) => c.number === socketMessage.fromnumber
-              ) || null,
+            contact: contactReference,
             messages: [socketMessage],
           });
         } else {
@@ -275,6 +271,13 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
         setAllMessages(newMap);
 
+        addSuccessNotif(
+          contactReference?.name || socketMessage.fromnumber,
+          socketMessage.message,
+          true,
+          []
+        );
+
         try {
           await IDB_AddMessage(socketMessage);
         } catch (err) {
@@ -290,7 +293,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         );
       }
     },
-    [contacts, setAllMessages, IDB_AddMessage]
+    [contacts, setAllMessages]
   );
 
   /*
@@ -335,7 +338,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       setAllMessages(new Map(currentMessages));
       await IDB_UpdateMessage(idbUpdate);
     },
-    [allMessagesRef.current]
+    [allMessagesRef, setAllMessages]
   );
 
   const M_HandleDeliveryError = useCallback(
@@ -380,37 +383,54 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       setAllMessages(new Map(currentMessages));
       await IDB_UpdateMessage(idbUpdate);
     },
-    [allMessagesRef.current]
+    [allMessagesRef, setAllMessages]
   );
 
-  const M_HandleWebPushSubscriptionUpdate = async (subscriptionMessage: {
-    message: string;
-    subscribed: boolean;
-    subscription: PushSubscription | null;
-  }) => {
-    log.devLog(
-      "Server message about subscribing to notifications",
-      subscriptionMessage?.message
-    );
-
-    try {
-      const currentWebPushInfo = getAppData("webPushSubscription");
-      currentWebPushInfo.subscribed = subscriptionMessage.subscribed;
-      currentWebPushInfo.subscription = subscriptionMessage.subscription;
-
-      await IDB_UpdateAppDataWebPush(currentWebPushInfo);
-
-      setAppData((prev) => ({
-        ...prev,
-        webPushSubscription: currentWebPushInfo,
-      }));
-    } catch (err) {
-      log.logAllError(
-        "Error updating app data in indexedDB after creating a subscription",
-        err
+  const M_HandleWebPushSubscriptionUpdate = useCallback(
+    async (subscriptionMessage: {
+      message: string;
+      subscribed: boolean;
+      subscription: PushSubscription | null;
+    }) => {
+      log.devLog(
+        "Server message about subscribing to notifications",
+        subscriptionMessage?.message
       );
-    }
-  };
+
+      try {
+        const currentWebPushInfo = getAppData("webPushSubscription");
+        currentWebPushInfo.subscribed = subscriptionMessage.subscribed;
+        currentWebPushInfo.subscription = subscriptionMessage.subscription;
+
+        await IDB_UpdateAppDataWebPush(currentWebPushInfo);
+
+        setAppData((prev) => ({
+          ...prev,
+          webPushSubscription: currentWebPushInfo,
+        }));
+      } catch (err) {
+        log.logAllError(
+          "Error updating app data in indexedDB after creating a subscription",
+          err
+        );
+      }
+    },
+    [setAppData]
+  );
+
+  const M_HandleMessagesRead = useCallback(
+    async (fromNumber: string): Promise<void> => {
+      if (allMessages.has(fromNumber)) {
+        // const messages = allMessages.get(fromNumber);
+        // const newMessages = messages.map((m: Message) => ({
+        //   ...m,
+        //   read: true,
+        //   readat: new Date(),
+        // }));
+      }
+    },
+    [allMessages, allMessagesRef, setAllMessages]
+  );
   // Socket Methods ---------------------------------------------------
 
   return (

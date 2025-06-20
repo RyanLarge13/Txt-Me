@@ -50,7 +50,9 @@ const M_UpdateAppPrompt = (e) => {
 };
 
 const M_LoadServiceWorker = async () => {
-  const registration = await navigator.serviceWorker.register("/sw.js");
+  await navigator.serviceWorker.register("/sw.js");
+  const registration = await navigator.serviceWorker.ready;
+
   console.log("Service Worker registered with scope:", registration.scope);
 
   navigator.serviceWorker.addEventListener("message", M_UpdateAppPrompt);

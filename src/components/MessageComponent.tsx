@@ -17,8 +17,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import React from "react";
+import { BiSolidMessageCheck } from "react-icons/bi";
 import { BsFillSendExclamationFill, BsSendCheckFill } from "react-icons/bs";
-import { FaClock } from "react-icons/fa";
 import { MdFace, MdOutlineScheduleSend } from "react-icons/md";
 
 import useContextMenu from "../hooks/useContextMenu";
@@ -37,7 +37,10 @@ const MessageComponent = ({ message }: { message: Message }): JSX.Element => {
   const isFromMe = message.fromnumber === phoneNumber;
 
   const deliveredDate = message.deliveredat
-    ? new Date(message.deliveredat).toLocaleTimeString()
+    ? new Date(message.deliveredat).toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "numeric",
+      })
     : "";
   const sentDate = message.sentat
     ? new Date(message.sentat).toLocaleTimeString("en-US", {
@@ -75,7 +78,7 @@ const MessageComponent = ({ message }: { message: Message }): JSX.Element => {
   return (
     <div
       className={`flex justify-center ${
-        isFromMe ? "self-end items-end" : "self-start items-start"
+        isFromMe ? "self-end items-end" : "self-start items-end"
       }`}
     >
       <p
@@ -109,7 +112,7 @@ const MessageComponent = ({ message }: { message: Message }): JSX.Element => {
           <>
             {deliveredDate}
             <span>
-              <FaClock className="text-tri" />
+              <BiSolidMessageCheck className="text-tri" />
             </span>
           </>
         )}

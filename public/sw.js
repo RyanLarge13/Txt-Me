@@ -96,7 +96,7 @@ const M_AddMessageToIndexedDB = async (data) => {
 
 // === PUSH NOTIFICATIONS ===
 self.addEventListener("push", async (event) => {
-  console.log("SW Push received");
+  console.log("SW Push received", event);
   const data = event.data?.json() || {};
 
   const title = data.title || "New Message";
@@ -119,6 +119,7 @@ self.addEventListener("push", async (event) => {
 
 // === NOTIFICATION CLICK ===
 self.addEventListener("notificationclick", (event) => {
+  console.log("SW notification clicked", event);
   event.notification.close();
   event.waitUntil(
     self.clients.matchAll({ type: "window" }).then((clientsList) => {

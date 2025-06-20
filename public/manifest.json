@@ -55,14 +55,18 @@
       "name": "New Message",
       "short_name": "Message +",
       "description": "Create a new message",
-      "url": "/profile/messages",
+      "url": "/messages",
+      "type": "image/png",
+      "purpose": "maskable",
       "icons": [{ "src": "/assets/icons/new-message.png", "sizes": "192x192" }]
     },
     {
       "name": "New Contact",
       "short_name": "Contact +",
       "description": "Create a new contact",
-      "url": "/profile/newcontact",
+      "url": "/newcontact",
+      "type": "image/png",
+      "purpose": "maskable",
       "icons": [{ "src": "/assets/icons/new-contact.png", "sizes": "192x192" }]
     }
   ],

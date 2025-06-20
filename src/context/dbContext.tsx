@@ -24,15 +24,11 @@ import { createContext, useContext } from "react";
 import useLogger from "../hooks/useLogger.ts";
 import { AppData, User } from "../types/configCtxtTypes.ts";
 import {
-  ContactSettings,
-  DBCtxtProps,
-  DBUser,
-  DraftType,
-  MessageSettings,
-  Theme,
+    ContactSettings, DBCtxtProps, DBUser, DraftType, MessageSettings, Theme
 } from "../types/dbCtxtTypes.ts";
 import { Contacts, Message, MessageSessionType } from "../types/userTypes.ts";
 import { defaultAppSettings, defaultUser } from "../utils/constants.ts";
+import { messageFoundIn } from "../utils/helpers.ts";
 
 const DatabaseContext = createContext({} as DBCtxtProps);
 
@@ -66,7 +62,7 @@ export const DatabaseProvider = ({
     };
 
     const appUser = {
-      userId: 0,
+      userId: "",
       authToken: "",
       username: "",
       email: "",
@@ -367,6 +363,16 @@ export const DatabaseProvider = ({
 
     (await IDB_GetDB()).put("app", currentSettings, "settings");
   };
+
+  const IDB_UpdateMessages = async (newMessages: Message[]): Promise<void> => {
+    const existingMessages: Message[] = await IDB_GetMessagesData();
+
+    const updatedMessages = existingMessages.map((m: Message) => {
+      return messageFoundIn(m, newMessages);
+    });
+
+    (await IDB_GetDB()).put("messages", updatedMessages, "messages");
+  };
   // Put/Patch DB Data ----------------------------------------------------------------------------
 
   // Delete DB Methods ------------------------------------------------------------------------------
@@ -428,6 +434,7 @@ export const DatabaseProvider = ({
         IDB_LogoutAndReset,
         IDB_UpdateMessage,
         IDB_UpdateAppDataWebPush,
+        IDB_UpdateMessages,
       }}
     >
       {children}

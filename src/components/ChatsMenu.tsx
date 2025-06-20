@@ -19,13 +19,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 import { motion } from "framer-motion";
 import React, { useContext } from "react";
 import { BsThreeDotsVertical } from "react-icons/bs";
-import {
-  FaMailchimp,
-  FaMessage,
-  FaPerson,
-  FaStar,
-  FaTrash,
-} from "react-icons/fa6";
+import { FaMailchimp, FaMessage, FaPerson, FaStar, FaTrash } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
 
 import { useConfig } from "../context/configContext.tsx";
@@ -33,14 +27,16 @@ import { useDatabase } from "../context/dbContext";
 import UserCtxt from "../context/userCtxt";
 import useContextMenu from "../hooks/useContextMenu.ts";
 import useLogger from "../hooks/useLogger";
+import useSocket from "../hooks/useSocket.ts";
 import { ContextMenuShowType } from "../types/interactiveCtxtTypes.ts";
 import { Contacts, Message, MessageSessionType } from "../types/userTypes";
 import { getInitials } from "../utils/helpers.ts";
 
 const ChatsMenu = () => {
   const { setMessageSession, allMessages } = useContext(UserCtxt);
-  const { IDB_UpdateMessageSession } = useDatabase();
+  const { IDB_UpdateMessageSession, IDB_UpdateMessages } = useDatabase();
   const { getUserData } = useConfig();
+  const { socket } = useSocket();
 
   const navigate = useNavigate();
   const log = useLogger();
@@ -65,6 +61,38 @@ const ChatsMenu = () => {
     }
   };
 
+  const M_UpdateMessagesAsRead = async (newMessages: Message[]) => {
+    try {
+      await IDB_UpdateMessages(newMessages);
+    } catch (err) {
+      log.logAllError(
+        "Error updating entire session messages to read=true and readat=new Date()  in indexedDB after clicking chats menu message session div. Error: ",
+        err
+      );
+    }
+  };
+
+  const M_SendAsReadThroughSocket = (fromNumber: string) => {
+    if (!socket) {
+      /*
+        NOTE:
+          Not sure if I need this. Probably od. Consider doing more. Like force a refresh or something
+      */
+      log.logAllError(
+        "No socket to use to update messages as read from chats menu. Something is wrong!"
+      );
+      return;
+    }
+    try {
+      socket?.emit("messages-read", fromNumber);
+    } catch (err) {
+      log.logAllError(
+        "Error sending update through socket to update read and readat values on messages to fromNumber",
+        err
+      );
+    }
+  };
+
   /*
   CONSIDER:
     1. Create message session function below could be reused
@@ -79,6 +107,18 @@ const ChatsMenu = () => {
   ): void => {
     const contact = session.contact;
     const messages = session.messages;
+
+    /*
+      DEFINE:
+        1. Update the message so it is marked as read.
+        2. Send socket message to make sure sender knows message has been read
+    */
+
+    const newMessages: Message[] = messages.map((m: Message) => ({
+      ...m,
+      read: true,
+      readat: new Date(),
+    }));
 
     log.devLog(
       "Creating a new message session from chats menu. Logging messages and contact that is involved in chats menu session click",
@@ -95,12 +135,14 @@ const ChatsMenu = () => {
     const newSession = {
       number: contact?.number || fromNumber,
       contact: contact !== null ? contact : null,
-      messages: messages,
+      messages: newMessages,
     };
 
     setMessageSession(newSession);
 
+    M_UpdateMessagesAsRead(newMessages);
     M_StoreMessageSession(newSession);
+    M_SendAsReadThroughSocket(fromNumber);
 
     navigate("/profile");
   };

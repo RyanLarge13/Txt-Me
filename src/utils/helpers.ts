@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Contacts } from "../types/userTypes";
+import { Contacts, Message } from "../types/userTypes";
 
 // Retrieve and return the initials of a username
 export const getInitials = (name: string) => {
@@ -70,4 +70,13 @@ export const urlBase64ToUint8Array = (base64String: string) => {
   const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
   const rawData = atob(base64);
   return Uint8Array.from([...rawData].map((c) => c.charCodeAt(0)));
+};
+
+export const messageFoundIn = (m: Message, newMessages: Message[]): Message => {
+  newMessages.forEach((_m: Message) => {
+    if (_m.messageid === m.messageid) {
+      return _m;
+    }
+  });
+  return m;
 };
