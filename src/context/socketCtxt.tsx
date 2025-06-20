@@ -142,7 +142,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
     const subscribeInfo = {
       number: number,
-      newClient: webPushSubscription.subscribed,
+      newClient: !webPushSubscription.subscribed,
       subscription: webPushSubscription.subscription,
     };
     log.logAll("Subscribe info to be sent to the server", subscribeInfo);
