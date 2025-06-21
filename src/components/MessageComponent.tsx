@@ -16,6 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { motion } from "framer-motion";
 import React from "react";
 import { BiSolidMessageCheck } from "react-icons/bi";
 import { BsFillSendExclamationFill, BsSendCheckFill } from "react-icons/bs";
@@ -78,7 +79,7 @@ const MessageComponent = ({ message }: { message: Message }): JSX.Element => {
   return (
     <div
       className={`flex justify-center ${
-        isFromMe ? "self-end items-end" : "self-start items-start"
+        isFromMe ? "self-end items-end" : "self-end items-start"
       }`}
     >
       <p className="mr-3 whitespace-nowrap flex gap-x-2 text-xs">
@@ -117,9 +118,18 @@ const MessageComponent = ({ message }: { message: Message }): JSX.Element => {
         onContextMenu={M_HandleContextMenu}
         className={`${
           isFromMe ? "bg-tri" : "bg-secondary"
-        } rounded-lg shadow-lg text-black p-3 outline-red-400 min-w-[50%]`}
+        } rounded-lg shadow-lg relative text-black p-3 outline-red-400 min-w-[50%]`}
       >
         <p>{message.message}</p>
+        {message.read ? (
+          <motion.p
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            className="text-xs right-[-3px] bottom-[-3px]"
+          >
+            👀
+          </motion.p>
+        ) : null}
       </div>
     </div>
   );

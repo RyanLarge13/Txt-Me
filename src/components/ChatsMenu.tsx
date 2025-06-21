@@ -39,7 +39,8 @@ import { Contacts, Message, MessageSessionType } from "../types/userTypes";
 import { getInitials } from "../utils/helpers.ts";
 
 const ChatsMenu = () => {
-  const { setMessageSession, allMessages } = useContext(UserCtxt);
+  const { setMessageSession, setAllMessages, allMessages } =
+    useContext(UserCtxt);
   const { IDB_UpdateMessageSession, IDB_UpdateMessages } = useDatabase();
   const { getUserData } = useConfig();
   const { socket } = useSocket();
@@ -120,14 +121,6 @@ const ChatsMenu = () => {
         2. Send socket message to make sure sender knows message has been read
     */
 
-    const newMessages: Message[] = messages.map((m: Message) => {
-      if (m.fromnumber === fromNumber) {
-        return { ...m, read: true, readat: new Date() };
-      } else {
-        return m;
-      }
-    });
-
     log.logAll(
       "Creating a new message session from chats menu. Logging messages and contact that is involved in chats menu session click",
       "contact: ",
@@ -140,17 +133,53 @@ const ChatsMenu = () => {
       log.devLog("No contact for this message session");
     }
 
+    if (M_IsUnread(session) !== "") {
+      const currentAllMessages = allMessages;
+
+      const newMessages: Message[] = messages.map((m: Message) => {
+        if (m.fromnumber === fromNumber) {
+          return { ...m, read: true, readat: new Date() };
+        } else {
+          return m;
+        }
+      });
+
+      const newSession = {
+        number: contact?.number || fromNumber,
+        contact: contact !== null ? contact : null,
+        messages: newMessages,
+      };
+
+      if (currentAllMessages.has(fromNumber)) {
+        const messageData = currentAllMessages.get(fromNumber);
+        currentAllMessages.set(fromNumber, {
+          contact: messageData?.contact || null,
+          messages: newMessages,
+        });
+      } else {
+        log.logAll(
+          "This should not be happening. No from number in map when trying to update messages read"
+        );
+      }
+
+      // Trigger a new state update so the changes can be reflected in the UI
+      // Unfortunately this requires an entire refresh of this component
+      setAllMessages(new Map(currentAllMessages));
+
+      M_UpdateMessagesAsRead(newMessages);
+      M_StoreMessageSession(newSession);
+      M_SendAsReadThroughSocket(fromNumber);
+
+      return;
+    }
+
     const newSession = {
       number: contact?.number || fromNumber,
       contact: contact !== null ? contact : null,
-      messages: newMessages,
+      messages: messages,
     };
 
     setMessageSession(newSession);
-
-    M_UpdateMessagesAsRead(newMessages);
-    M_StoreMessageSession(newSession);
-    M_SendAsReadThroughSocket(fromNumber);
 
     navigate("/profile");
   };

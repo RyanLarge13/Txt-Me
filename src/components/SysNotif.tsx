@@ -125,7 +125,7 @@ const SysNotif = React.memo((): JSX.Element => {
   const { notifs } = useNotifState();
 
   return (
-    <div className="fixed z-50 top-0 left-3 right-0 padding-3 bg-transparent max-w-[400px]">
+    <div className="fixed z-[1000] top-0 left-3 right-0 padding-3 bg-transparent max-w-[400px]">
       <AnimatePresence mode="popLayout">
         {notifs.map((notification: SysNotifType) => (
           <Notification key={notification.id} notif={notification} />

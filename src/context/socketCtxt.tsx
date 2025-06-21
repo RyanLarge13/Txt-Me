@@ -71,6 +71,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
   // useEffects -----------------------------------------------------
   useEffect(() => {
+    log.logAll("Inside useEffect for socket");
     M_QueryPhoneNumber();
 
     // Remove socket and disconnect
@@ -172,6 +173,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       },
     });
 
+    log.logAll("Attaching event listeners to socket");
     M_AttachListeners(socketRef.current);
   };
 

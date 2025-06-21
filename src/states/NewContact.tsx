@@ -163,6 +163,15 @@ const NewContact = (): JSX.Element => {
 
     setContacts((prev) => [...prev, contactToAdd]);
 
+    /*
+      TODO:
+        IMPLEMENT:
+          1. allMEssages will need to be updated, to make sure
+          that the chats menu message session, the message session,
+          and indexedDB current stored message session reflect the new 
+          contact that was added. IF the number was already in use
+    */
+
     navigate("/profile/contacts");
 
     try {

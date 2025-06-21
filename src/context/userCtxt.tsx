@@ -60,12 +60,6 @@ export const UserProvider = ({
 
   // useEffect hooks -------------------------------------------------------------------
   useEffect(() => {
-    log.devLog(
-      "Decoy useEffect to see if this context is being rerendered unnecessarily"
-    );
-  }, []);
-
-  useEffect(() => {
     // Fetch user data and contacts to update
     if (token) {
       log.devLog(

@@ -16,7 +16,13 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import React, { FormEvent, useContext, useEffect, useRef, useState } from "react";
+import React, {
+  FormEvent,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { IoSend } from "react-icons/io5";
 import { TiMessages } from "react-icons/ti";
 import { useLocation } from "react-router-dom";
@@ -223,7 +229,7 @@ const MessageSession = () => {
           ))}
         </div>
       ) : (
-        <div className="flex flex-col justify-center items-center">
+        <div className="flex flex-col justify-center items-center h-full">
           <p className="text-gray-400 text-center mb-10">No Messages</p>
           <p className="text-primary text-9xl">
             <TiMessages />
