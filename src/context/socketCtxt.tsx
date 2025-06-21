@@ -176,6 +176,40 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
     log.logAll("Attaching event listeners to socket");
     M_AttachListeners(socketRef.current);
+
+    M_FetchLatestMessages();
+  };
+
+  const M_FetchLatestMessages = () => {
+    const currentMessageSessions = allMessagesRef.current;
+
+    const keys: string[] = Array.from(currentMessageSessions.keys());
+
+    const updates: { number: string; latestDate: Date }[] = keys.map(
+      (k: string) => {
+        const session = currentMessageSessions.get(k);
+
+        const sessionMessages = session?.messages || [];
+
+        if (sessionMessages.length < 1) {
+          return { number: k, latestDate: new Date(0) };
+        }
+
+        const message = sessionMessages[sessionMessages.length - 1];
+
+        if (!message) {
+          return { number: k, latestDate: new Date(0) };
+        }
+
+        const mostRecentMessageDate = message.sentat || new Date(0);
+
+        return { number: k, latestDate: mostRecentMessageDate };
+      }
+    );
+
+    socketRef.current
+      ? socketRef.current.emit("query-latest-messages", updates)
+      : null;
   };
 
   const M_AttachListeners = (socketRef: Socket | null): void => {
