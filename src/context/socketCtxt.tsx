@@ -51,6 +51,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     IDB_UpdateMessage,
     IDB_UpdateAppDataWebPush,
     IDB_UpdateMessages,
+    IDB_AppendMessages,
   } = useDatabase();
   const { allMessages, contacts, setAllMessages } = useContext(UserCtxt);
   const { getAppData, setAppData } = useConfig();
@@ -212,6 +213,9 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     socketRef.on("messages-read", (fromNumber: string) => {
       M_HandleMessagesRead(fromNumber);
     });
+    socketRef.on("ping-latest-messages", (updates) =>
+      M_HandleLatestMessageUpdates(updates)
+    );
   };
 
   // Socket Methods ---------------------------------------------------
@@ -473,9 +477,14 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     );
     const usersPhone = await IDB_GetPhoneNumber();
 
-    if (allMessagesRef.current.has(fromNumber)) {
+    const currentMessageSession = allMessagesRef.current;
+
+    if (currentMessageSession.has(fromNumber)) {
       log.logAll("all messages has the number you are sending messages too");
-      const messages = allMessagesRef.current.get(fromNumber)?.messages || [];
+
+      const currentSession = currentMessageSession.get(fromNumber);
+
+      const messages = currentSession?.messages || [];
 
       const newMessages = messages.map((m: Message) => {
         if (m.fromnumber === usersPhone) {
@@ -484,6 +493,15 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
           return m;
         }
       });
+
+      currentMessageSession.set(fromNumber, {
+        contact: currentSession?.contact || null,
+        messages: newMessages,
+      });
+
+      const newMap = new Map(currentMessageSession);
+
+      setAllMessages(newMap);
 
       try {
         await IDB_UpdateMessages(newMessages);
@@ -497,6 +515,56 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         );
       }
     }
+  };
+
+  const M_HandleLatestMessageUpdates = async (
+    updates: {
+      sessionNumber: string;
+      messages: Message[];
+    }[]
+  ) => {
+    const currentMessageSession = allMessagesRef.current;
+
+    /*
+      DESC:
+        Loop through all of the updates and update allMessages accordingly
+      IMPLEMENT: 
+        1. Update indexedDB.
+    */
+    updates.forEach(
+      async (update: { sessionNumber: string; messages: Message[] }) => {
+        if (currentMessageSession.has(update.sessionNumber)) {
+          const currentSession = currentMessageSession.get(
+            update.sessionNumber
+          );
+
+          const currentMessages = currentSession?.messages || [];
+
+          const updatedMessages = currentMessages.concat(update.messages);
+
+          currentMessageSession.set(update.sessionNumber, {
+            contact: currentSession?.contact || null,
+            messages: updatedMessages,
+          });
+
+          try {
+            await IDB_AppendMessages(update.messages);
+            log.logAll(
+              "IndexedDB updated successfully, added synchronized messages from server"
+            );
+          } catch (err) {
+            log.logAll(
+              "Error appending messages to indexedDB from socket 'ping-latest-messages'. M_HandleLatestMessageUpdates",
+              err
+            );
+          }
+        }
+      }
+    );
+
+    const newMessagesMap = new Map(currentMessageSession);
+
+    setAllMessages(newMessagesMap);
   };
   // Socket Methods ---------------------------------------------------
 

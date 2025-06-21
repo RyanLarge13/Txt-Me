@@ -24,7 +24,12 @@ import { createContext, useContext } from "react";
 import useLogger from "../hooks/useLogger.ts";
 import { AppData, User } from "../types/configCtxtTypes.ts";
 import {
-    ContactSettings, DBCtxtProps, DBUser, DraftType, MessageSettings, Theme
+  ContactSettings,
+  DBCtxtProps,
+  DBUser,
+  DraftType,
+  MessageSettings,
+  Theme,
 } from "../types/dbCtxtTypes.ts";
 import { Contacts, Message, MessageSessionType } from "../types/userTypes.ts";
 import { defaultAppSettings, defaultUser } from "../utils/constants.ts";
@@ -373,6 +378,14 @@ export const DatabaseProvider = ({
 
     (await IDB_GetDB()).put("messages", updatedMessages, "messages");
   };
+
+  const IDB_AppendMessages = async (newMessages: Message[]): Promise<void> => {
+    const existingMessages: Message[] = await IDB_GetMessagesData();
+
+    const updatedMessages = existingMessages.concat(newMessages);
+
+    (await IDB_GetDB()).put("messages", updatedMessages, "messages");
+  };
   // Put/Patch DB Data ----------------------------------------------------------------------------
 
   // Delete DB Methods ------------------------------------------------------------------------------
@@ -435,6 +448,7 @@ export const DatabaseProvider = ({
         IDB_UpdateMessage,
         IDB_UpdateAppDataWebPush,
         IDB_UpdateMessages,
+        IDB_AppendMessages,
       }}
     >
       {children}
