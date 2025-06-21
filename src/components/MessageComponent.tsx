@@ -22,12 +22,21 @@ import { BiSolidMessageCheck } from "react-icons/bi";
 import { BsFillSendExclamationFill, BsSendCheckFill } from "react-icons/bs";
 import { MdFace, MdOutlineScheduleSend } from "react-icons/md";
 
+import EyeEmojiRead from "../assets/svg-animations/read.svg";
 import useContextMenu from "../hooks/useContextMenu";
 import useUserData from "../hooks/useUserData";
 import { ContextMenuShowType } from "../types/interactiveCtxtTypes";
 import { Message } from "../types/userTypes";
 
-const MessageComponent = ({ message }: { message: Message }): JSX.Element => {
+const MessageComponent = ({
+  message,
+  length,
+  index,
+}: {
+  message: Message;
+  length: number;
+  index: number;
+}): JSX.Element => {
   const contextMenu = useContextMenu();
 
   /*
@@ -121,14 +130,14 @@ const MessageComponent = ({ message }: { message: Message }): JSX.Element => {
         } rounded-lg shadow-lg relative text-black p-3 outline-red-400 min-w-[50%]`}
       >
         <p>{message.message}</p>
-        {message.read ? (
-          <motion.p
+        {index + 1 === length && message.read ? (
+          <motion.img
+            src={EyeEmojiRead}
+            alt="👀"
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            className="text-xs right-[-3px] bottom-[-3px]"
-          >
-            👀
-          </motion.p>
+            className="w-[15px] h-[15px] right-[-5px] bottom-[-5px]"
+          />
         ) : null}
       </div>
     </div>

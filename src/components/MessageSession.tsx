@@ -225,7 +225,12 @@ const MessageSession = () => {
       {sessionMessages.length > 0 ? (
         <div className="flex flex-col justify-start px-10 py-20 gap-y-16 min-h-full">
           {sessionMessages.map((message: Message, index) => (
-            <MessageComponent key={index} message={message} />
+            <MessageComponent
+              key={index}
+              message={message}
+              length={sessionMessages.length}
+              index={index}
+            />
           ))}
         </div>
       ) : (

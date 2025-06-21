@@ -1,0 +1,46 @@
+<svg width="15" height="15" viewBox="0 0 15 15" xmlns="http://www.w3.org/2000/svg">
+  <!-- Left eye outline -->
+  <circle cx="5" cy="7.5" r="3" fill="white" stroke="black" stroke-width="0.5"/>
+  <!-- Right eye outline -->
+  <circle cx="10" cy="7.5" r="3" fill="white" stroke="black" stroke-width="0.5"/>
+
+  <!-- Left pupil -->
+  <circle cx="5" cy="7.5" r="1" fill="black">
+    <animate 
+      attributeName="cx"
+      values="4.2;4.2;4.2;5.8;5.8"
+      keyTimes="0;0.1;0.6;0.7;1"
+      dur="4s"
+      fill="freeze"
+      calcMode="spline"
+      keySplines=".4 0 .6 1; .4 0 1 1; .4 0 .6 1; 0 0 1 1"/>
+    <animate 
+      attributeName="cy"
+      values="7.5;6.2;8.8;7.5;7.5"
+      keyTimes="0;0.1;0.6;0.7;1"
+      dur="4s"
+      fill="freeze"
+      calcMode="spline"
+      keySplines=".4 0 .6 1; .4 0 1 1; .4 0 .6 1; 0 0 1 1"/>
+  </circle>
+
+  <!-- Right pupil -->
+  <circle cx="10" cy="7.5" r="1" fill="black">
+    <animate 
+      attributeName="cx"
+      values="9.2;9.2;9.2;10.8;10.8"
+      keyTimes="0;0.1;0.6;0.7;1"
+      dur="4s"
+      fill="freeze"
+      calcMode="spline"
+      keySplines=".4 0 .6 1; .4 0 1 1; .4 0 .6 1; 0 0 1 1"/>
+    <animate 
+      attributeName="cy"
+      values="7.5;6.2;8.8;7.5;7.5"
+      keyTimes="0;0.1;0.6;0.7;1"
+      dur="4s"
+      fill="freeze"
+      calcMode="spline"
+      keySplines=".4 0 .6 1; .4 0 1 1; .4 0 .6 1; 0 0 1 1"/>
+  </circle>
+</svg>
