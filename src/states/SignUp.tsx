@@ -87,7 +87,9 @@ const SignUp = React.memo((): JSX.Element => {
       const newUser = { username, email, phone, password };
       const response = await API_SignUp(newUser);
 
-      const newToken = response.data?.token || "";
+      log.devLog(response);
+
+      const newToken = response.data?.data.token || "";
 
       if (!newToken) {
         log.logAllError(

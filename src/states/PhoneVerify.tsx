@@ -227,8 +227,10 @@ const PhoneVerify = (): JSX.Element => {
 
   return (
     <div>
-      <MdOutlinePermPhoneMsg className="text-6xl text-secondary" />
-      <p className="font-semibold text-[#fff]">One Time Pass Code</p>
+      <MdOutlinePermPhoneMsg className="text-6xl text-secondary mx-auto" />
+      <p className="font-semibold text-[#fff] text-center mt-3 mb-2">
+        One Time Pass Code
+      </p>
       <p className="text-[#aaa] text-center px-2">
         Verify your phone number with the pin sent to your phone via sms
       </p>
