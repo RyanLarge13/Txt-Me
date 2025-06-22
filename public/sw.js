@@ -2,18 +2,33 @@ const CACHE_NAME = "static-cache-v1";
 const STATIC_ASSETS = [
   "/",
   "/index.html",
-  "/styles.css",
-  "/app.js",
   "/manifest.json",
-  "/icons/icon-192.png",
-  "/icons/icon-512.png",
+  "/assets/Txt-Me-Logo.jpg",
+  "/assets/favicon.jpg",
+  "/assets/screenshot-profile.PNG",
+  "/assets/icons/new-contact.png",
+  "/assets/icons/new-message.png",
+  "/assets/icons/Txt-Me-Logo_192x192.png",
+  "/assets/icons/Txt-Me-Logo_512x512.png",
+  "/assets/icons/Txt-Me-Logo_1024x1024.png",
+  "/assets/badges/txt-me-mail-badge_1024x1024.png",
+  "/assets/screenshots/screenshot-landscape.PNG",
+  "/assets/screenshots/screenshot-profile.PNG",
 ];
 
 // === INSTALL ===
 self.addEventListener("install", (event) => {
   console.log("SW Installing...");
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
+    caches.open(CACHE_NAME).then((cache) => {
+      return Promise.all(
+        STATIC_ASSETS.map((url) =>
+          cache.add(url).catch((err) => {
+            console.error(`Failed to cache ${url}:`, err);
+          })
+        )
+      );
+    })
   );
   self.skipWaiting();
 });
