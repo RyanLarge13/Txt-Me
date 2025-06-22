@@ -116,7 +116,7 @@ const SignUp = React.memo((): JSX.Element => {
         log.logAllError("Error saving authToken to localStorage. Error: ", err);
       }
 
-      navigate("/verify/phone/verify");
+      navigate("/verify/email/verify");
     } catch (err) {
       handleAPIErrorNotif(err);
       setLoading(false);
