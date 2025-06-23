@@ -96,7 +96,7 @@ export interface DBCtxtProps {
   IDB_UpdateContactInDraft: (contact: DraftType["contact"]) => Promise<void>;
   IDB_AddContact: (newContact: Contacts) => Promise<void>;
   IDB_UpdateMessageSession: (
-    newSession: MessageSessionType
+    newSession: MessageSessionType | null
   ) => Promise<IDBValidKey>;
   IDB_GetLastMessageSession: () => Promise<MessageSessionType>;
   IDB_AddMessage: (newMessage: Message) => Promise<IDBValidKey>;
@@ -110,4 +110,5 @@ export interface DBCtxtProps {
   ) => Promise<void>;
   IDB_UpdateMessages: (newMessages: Message[]) => Promise<void>;
   IDB_AppendMessages: (newMessages: Message[]) => Promise<void>;
+  IDB_DeleteMessages: (messages: Message[]) => Promise<void>;
 }

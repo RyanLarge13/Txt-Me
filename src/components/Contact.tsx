@@ -34,7 +34,7 @@ const Contact = ({
   const { addSuccessNotif } = useNotifActions();
   const { IDB_DeleteContact } = useDatabase();
   const { getUserData } = useConfig();
-  const { setContacts } = useContext(UserCtxt);
+  const { setContacts, setAllMessages } = useContext(UserCtxt);
   const contextMenu = useContextMenu();
 
   const [expand, setExpand] = useState(false);
@@ -58,6 +58,9 @@ const Contact = ({
 
           return newCs;
         });
+
+        // Update messages map
+        M_RemoveContactFromMessageSession();
       } catch (err) {
         log.logAllError("Error when removing contact from IndexedDB", err);
       }
@@ -80,6 +83,28 @@ const Contact = ({
     );
   };
   // CONTEXT_MENU_METHODS ----------------------------------------------------------------
+
+  const M_RemoveContactFromMessageSession = () => {
+    setAllMessages((prev) => {
+      const currentMap = prev;
+
+      if (!currentMap.has(contact.number)) {
+        log.devLog(
+          "Deleted contact and no message session is stored. Returning"
+        );
+        return prev;
+      } else {
+        const session = currentMap.get(contact.number);
+
+        currentMap.set(contact.number, {
+          contact: null,
+          messages: session?.messages || [],
+        });
+
+        return new Map(currentMap);
+      }
+    });
+  };
 
   const M_HandleContextMenu = (
     e: React.MouseEvent<HTMLButtonElement>

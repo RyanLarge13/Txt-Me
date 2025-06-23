@@ -41,7 +41,8 @@ import { getInitials } from "../utils/helpers.ts";
 const ChatsMenu = () => {
   const { setMessageSession, setAllMessages, allMessages } =
     useContext(UserCtxt);
-  const { IDB_UpdateMessageSession, IDB_UpdateMessages } = useDatabase();
+  const { IDB_UpdateMessageSession, IDB_UpdateMessages, IDB_DeleteMessages } =
+    useDatabase();
   const { getUserData } = useConfig();
   const { socket } = useSocket();
 
@@ -205,6 +206,53 @@ const ChatsMenu = () => {
     }
   };
 
+  // CONTEXT MENU METHODS ------------------------------------------------------------------
+  const M_DeleteMessageSession = async (messageSession: MessageSessionType) => {
+    /*
+      TODO:
+        IMPLEMENT
+          1. Remove messages from the server???? There are many things to consider
+          Like if another client has the messages we don't want to make server messages unaccessible 
+          to that client?? Maybe. I'm not sure
+    */
+
+    setAllMessages((prev) => {
+      if (prev.has(messageSession.number)) {
+        const currentMessages = prev;
+        currentMessages.delete(messageSession.number);
+
+        return new Map(currentMessages);
+      } else {
+        return prev;
+      }
+    });
+
+    try {
+      /*
+        TODO:
+          IMPLEMENT:
+            1. Make sure that when puling this value from indexedDB
+            on load that I check for null-ness
+      */
+      await IDB_UpdateMessageSession(null);
+    } catch (err) {
+      log.devLog(
+        "Error removing message session from indexedDB when deleting messageSession. Error: ",
+        err
+      );
+    }
+
+    try {
+      await IDB_DeleteMessages(messageSession.messages);
+    } catch (err) {
+      log.devLog(
+        "Error removing messages from indexedDB when deleting messageSession. Error: ",
+        err
+      );
+    }
+  };
+  // CONTEXT MENU METHODS ------------------------------------------------------------------
+
   const M_HandleContextMenu = (
     e:
       | React.MouseEvent<HTMLDivElement, MouseEvent>
@@ -225,7 +273,11 @@ const ChatsMenu = () => {
         { txt: "Message", icon: <FaMessage />, func: () => {} },
         { txt: "Contact", icon: <FaPerson />, func: () => {} },
         { txt: "Mark Unread", icon: <FaMailchimp />, func: () => {} },
-        { txt: "Delete", icon: <FaTrash />, func: () => {} },
+        {
+          txt: "Delete",
+          icon: <FaTrash />,
+          func: () => M_DeleteMessageSession(messageSession),
+        },
       ],
       options: [
         { txt: "New Message", icon: <FaMessage />, func: () => {} },

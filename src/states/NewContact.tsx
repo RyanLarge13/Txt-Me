@@ -59,7 +59,7 @@ const NewContact = (): JSX.Element => {
     IDB_GetDrafts,
     IDB_AddContact,
   } = useDatabase();
-  const { setContacts, contacts } = useContext(UserCtxt);
+  const { setContacts, setAllMessages, contacts } = useContext(UserCtxt);
   const { addErrorNotif } = useNotifActions();
   const { getUserData } = useConfig();
 
@@ -115,6 +115,56 @@ const NewContact = (): JSX.Element => {
     return () => window.removeEventListener("popstate", M_SaveContactInDraft);
   }, []);
 
+  const M_AddContactToIndexedDB = async (
+    contactToAdd: Contacts
+  ): Promise<void> => {
+    try {
+      await IDB_AddContact(contactToAdd);
+    } catch (err) {
+      log.logAllError("Error adding new contact to IndexedDB. Error: ", err);
+    }
+
+    // No longer want to keep a draft stored in memory
+    try {
+      await IDB_ClearContactDraft();
+    } catch (err) {
+      log.logAllError(
+        "Error clearing the contact draft in IndexedDB. Error: ",
+        err
+      );
+    }
+
+    setAllMessages((prev) => {
+      const messageSessions = prev;
+
+      if (messageSessions.has(contactToAdd.number)) {
+        const currentSession = messageSessions.get(contactToAdd.number);
+
+        messageSessions.set(contactToAdd.number, {
+          contact: contactToAdd,
+          messages: currentSession?.messages || [],
+        });
+
+        return messageSessions;
+      } else {
+        return prev;
+      }
+    });
+  };
+
+  const M_AddContactToServer = async (
+    contactToAdd: Contacts
+  ): Promise<void> => {
+    try {
+      await API_AddContact(token, contactToAdd);
+
+      contactToAdd.synced = true;
+      await IDB_UpdateContactInDraft(contactToAdd);
+    } catch (err) {
+      log.logAllError("Error saving contact to server", err);
+    }
+  };
+
   /*
     DESC:
       This function handles adding a new contact to state an indexedDB
@@ -156,32 +206,12 @@ const NewContact = (): JSX.Element => {
       synced: false,
     };
 
-    await IDB_AddContact(contactToAdd);
-
-    // No longer want to keep a draft stored in memory
-    await IDB_ClearContactDraft();
-
     setContacts((prev) => [...prev, contactToAdd]);
 
-    /*
-      TODO:
-        IMPLEMENT:
-          1. allMEssages will need to be updated, to make sure
-          that the chats menu message session, the message session,
-          and indexedDB current stored message session reflect the new 
-          contact that was added. IF the number was already in use
-    */
+    M_AddContactToIndexedDB(contactToAdd);
+    M_AddContactToServer(contactToAdd);
 
     navigate("/profile/contacts");
-
-    try {
-      await API_AddContact(token, contactToAdd);
-
-      contactToAdd.synced = true;
-      await IDB_UpdateContactInDraft(contactToAdd);
-    } catch (err) {
-      log.logAllError("Error saving contact to server", err);
-    }
   };
 
   const M_LoadContactDraft = async (): Promise<void> => {

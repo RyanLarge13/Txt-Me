@@ -288,7 +288,7 @@ export const DatabaseProvider = ({
   };
 
   const IDB_UpdateMessageSession = async (
-    newSession: MessageSessionType
+    newSession: MessageSessionType | null
   ): Promise<IDBValidKey> =>
     (await IDB_GetDB()).put("messageSession", newSession, "messageSession");
 
@@ -402,6 +402,29 @@ export const DatabaseProvider = ({
 
     M_UpdateContactsInDB(newContacts);
   };
+
+  const IDB_DeleteMessages = async (messages: Message[]): Promise<void> => {
+    if (messages.length < 1) {
+      return;
+    }
+
+    const existingMessages: Message[] = (await IDB_GetMessagesData()) || [];
+
+    if (existingMessages.length < 1) {
+      IDB_UpdateMessages([]);
+      return;
+    }
+
+    let updatedMessages: Message[] = existingMessages;
+
+    messages.forEach((m: Message) => {
+      updatedMessages = updatedMessages.filter(
+        (_m: Message) => _m.messageid !== m.messageid
+      );
+    });
+
+    await IDB_UpdateMessages(updatedMessages);
+  };
   // Delete DB Methods ------------------------------------------------------------------------------
 
   // Reset to default values ------------------------------------------------------------------------
@@ -449,6 +472,7 @@ export const DatabaseProvider = ({
         IDB_UpdateAppDataWebPush,
         IDB_UpdateMessages,
         IDB_AppendMessages,
+        IDB_DeleteMessages,
       }}
     >
       {children}
