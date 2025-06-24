@@ -33,6 +33,7 @@ import {
 } from "../types/dbCtxtTypes.ts";
 import { Contacts, Message, MessageSessionType } from "../types/userTypes.ts";
 import { defaultAppSettings, defaultUser } from "../utils/constants.ts";
+import { Crypto_GenRSAKeyPair } from "../utils/crypto.ts";
 import { messageFoundIn } from "../utils/helpers.ts";
 
 const DatabaseContext = createContext({} as DBCtxtProps);
@@ -45,6 +46,21 @@ const DatabaseContext = createContext({} as DBCtxtProps);
       1. Remove all try catch blocks from this file that make 
       more sense to be handled from inside the caller of the method
 */
+
+const M_GenRSAKeys = async (): Promise<{
+  publicKey: CryptoKey;
+  privateKey: CryptoKey;
+}> => {
+  try {
+    const RSAKeyPair = await Crypto_GenRSAKeyPair();
+    return RSAKeyPair;
+  } catch (err) {
+    // Throw, this should not fail
+    throw new Error(
+      "Error generating RSA key pairs. Check Crypto_GenRSAKeyPair function in utils"
+    );
+  }
+};
 
 export const DatabaseProvider = ({
   children,
@@ -66,6 +82,8 @@ export const DatabaseProvider = ({
       },
     };
 
+    const { publicKey, privateKey } = await M_GenRSAKeys();
+
     const appUser = {
       userId: "",
       authToken: "",
@@ -73,8 +91,8 @@ export const DatabaseProvider = ({
       email: "",
       phoneNumber: "",
       RSAKeyPair: {
-        private: null,
-        public: null,
+        private: privateKey,
+        public: publicKey,
       },
     };
 
@@ -215,18 +233,17 @@ export const DatabaseProvider = ({
   };
 
   const IDB_InitDatabase = async (db: IDBPDatabase) => {
-    const userInitialized =
-      (await db.get("app", "settings")) || defaultAppSettings;
+    const storedUser = (await db.get("app", "settings")) || defaultAppSettings;
 
-    log.devLog(`User from indexedDB`, userInitialized);
+    log.devLog(`User from indexedDB`, storedUser);
 
-    if (userInitialized && userInitialized?.initialized) {
-      return userInitialized;
+    if (storedUser && storedUser?.initialized) {
+      return storedUser;
     }
 
     await addDefaultConfiguration(db);
 
-    return userInitialized;
+    return storedUser;
   };
 
   // Get DB Data --------------------------------------------------------------------------------
