@@ -72,7 +72,7 @@ export type DraftType = {
   } | null;
   messages: {
     messageid: string;
-    message: string;
+    message: string | ArrayBuffer;
     sent: boolean;
     sentat: Date;
     delivered: boolean;

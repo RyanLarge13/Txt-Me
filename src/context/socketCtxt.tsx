@@ -26,6 +26,7 @@ import React, {
   useRef,
 } from "react";
 import io, { Socket } from "socket.io-client";
+import { Crypto_GenAESKey, Crypto_GetPlainText } from "utils/crypto";
 
 import UserCtxt from "../context/userCtxt";
 import useLogger from "../hooks/useLogger";
@@ -34,6 +35,7 @@ import { AppData } from "../types/configCtxtTypes";
 import {
   MessageDeliveryErrorType,
   MessageUpdateType,
+  SocketMessage,
   SocketProps,
 } from "../types/socketTypes";
 import { Contacts, Message } from "../types/userTypes";
@@ -275,12 +277,23 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const M_HandleTextMessage = useCallback(
-    async (socketMessage: Message): Promise<void> => {
+    async (socketMessage: SocketMessage): Promise<void> => {
       /*
     TODO:
       DEBUG:
         1. When setting up a new message session from a socket message where the session does not currently exist, I seem to be incorrectly setting the contact information for the message session when pushing to allMessages. Inspect how you are retrieving contact information on new message session creations
     */
+      try {
+        const decryptedSocketMessage: string = await Crypto_GetPlainText(
+          socketMessage.message
+        );
+        socketMessage = { ...socketMessage, message: decryptedSocketMessage };
+      } catch (err) {
+        throw new Error(
+          `Error decrypting message from server. Check crypto.ts Crypto_GetPlainText. Error: ${err}`
+        );
+      }
+
       const currentAllMessages = allMessagesRef.current;
       const contactReference =
         contacts.find((c: Contacts) => c.number === socketMessage.fromnumber) ||
@@ -305,9 +318,19 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
             currentAllMessages
           );
 
+          let newAESKey: CryptoKey | null = null;
+          try {
+            newAESKey = await Crypto_GenAESKey();
+          } catch (err) {
+            throw new Error(
+              `Error generating AES key. Check Crypto_GenAESKey in crypto.ts. Error: ${err}`
+            );
+          }
+
           currentAllMessages.set(socketMessage.fromnumber, {
             contact: contactReference,
             messages: [socketMessage],
+            AESKey: newAESKey,
           });
         } else {
           log.devLog(
@@ -333,7 +356,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
         addSuccessNotif(
           contactReference?.name || socketMessage.fromnumber,
-          socketMessage.message,
+          socketMessage.message, // Must be decrypted first !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
           true,
           []
         );
@@ -531,6 +554,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       currentMessageSession.set(fromNumber, {
         contact: currentSession?.contact || null,
         messages: newMessages,
+        AESKey: currentSession?.AESKey,
       });
 
       const newMap = new Map(currentMessageSession);
@@ -579,6 +603,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
           currentMessageSession.set(update.sessionNumber, {
             contact: currentSession?.contact || null,
             messages: updatedMessages,
+            AESKey: currentSession?.AESKey,
           });
 
           try {

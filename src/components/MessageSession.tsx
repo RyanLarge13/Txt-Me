@@ -16,13 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import React, {
-  FormEvent,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { FormEvent, useContext, useEffect, useRef, useState } from "react";
 import { IoSend } from "react-icons/io5";
 import { TiMessages } from "react-icons/ti";
 import { useLocation } from "react-router-dom";
@@ -36,6 +30,7 @@ import useSocket from "../hooks/useSocket";
 import useUserData from "../hooks/useUserData";
 import { Message, MessageSessionType } from "../types/userTypes";
 import { defaultMessage } from "../utils/constants";
+import { Crypto_EncryptMessageWithAES } from "../utils/crypto";
 import { valPhoneNumber } from "../utils/validator";
 import MessageComponent from "./MessageComponent";
 import MessageInfoTopBar from "./MessageInfoTopBar";
@@ -140,7 +135,7 @@ const MessageSession = () => {
     }
   };
 
-  const M_SendMessage = (
+  const M_SendMessage = async (
     e: FormEvent<HTMLFormElement>,
     messageSession: MessageSessionType
   ) => {
@@ -171,6 +166,19 @@ const MessageSession = () => {
 
     const validPhone = valPhoneNumber(phoneNumber);
 
+    let encryptedMessage: ArrayBuffer | null = null;
+
+    try {
+      /*
+        TODO:
+          IMPLEMENT:
+            1. Left off here!!!!!!!!!!!!!!!!!
+      */
+      encryptedMessage = await Crypto_EncryptMessageWithAES();
+    } catch (err) {
+      throw new Error(`Error encrypting message before sending to server. Check Crypto_. Error: ${err}`);
+    }
+
     if (!validPhone.valid) {
       /*
       TODO:
@@ -183,7 +191,7 @@ const MessageSession = () => {
       return;
     }
 
-    const newMessage = {
+    const newMessage: Message = {
       ...defaultMessage,
       messageid: uuidv4(),
       toname: messageSession.contact?.name || messageSession.number,
@@ -193,7 +201,8 @@ const MessageSession = () => {
       sentat: new Date(),
       synced: false,
     };
-    socket ? socket.emit("text-message", newMessage) : null;
+
+    socket ? socket.emit("text-message", { ...newMessage, message:  }) : null;
 
     // Check first to see if the allMessages map has the key?? For safety
     if (!allMessages.has(messageSession.number)) {

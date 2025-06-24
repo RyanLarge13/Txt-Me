@@ -47,8 +47,10 @@ export type Message = {
   read: boolean;
   readat: Date | null;
   fromnumber: string;
+  toname?: string;
   tonumber: string;
   error: boolean;
+  synced: boolean;
 };
 
 export type MessageSessionType = {

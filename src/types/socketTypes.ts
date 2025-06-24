@@ -19,10 +19,18 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 import { Socket } from "socket.io-client";
 
 export type SocketMessage = {
-  fromid: string;
-  message: string;
-  time: string;
-} | null;
+  messageid: string;
+  message: ArrayBuffer;
+  sent: boolean;
+  sentat: Date;
+  delivered: boolean;
+  deliveredat: Date | null;
+  read: boolean;
+  readat: Date | null;
+  fromnumber: string;
+  tonumber: string;
+  error: boolean;
+};
 
 export type MessageUpdateType = {
   id: string;
