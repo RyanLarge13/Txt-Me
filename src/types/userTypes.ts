@@ -20,7 +20,7 @@ import { Dispatch, SetStateAction } from "react";
 
 export type AllMessages = Map<
   string,
-  { contact: Contacts | null; messages: Message[] }
+  { contact: Contacts | null; messages: Message[]; AESKey: null | CryptoKey }
 >;
 
 export type Contacts = {

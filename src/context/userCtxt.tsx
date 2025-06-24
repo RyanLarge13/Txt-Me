@@ -28,6 +28,7 @@ import {
   UserCtxtProps,
 } from "../types/userTypes.ts";
 import { API_FetchUserData, API_GetContacts } from "../utils/api.ts";
+import { Crypto_GenAESKey } from "../utils/crypto.ts";
 import { valPhoneNumber } from "../utils/validator.ts";
 import { useConfig } from "./configContext.tsx";
 import { useDatabase } from "./dbContext.tsx";
@@ -49,11 +50,11 @@ export const UserProvider = ({
   const { getUserData } = useConfig();
   const log = useLogger();
 
-  const token = getUserData("authToken");
-  const myPhoneNumber = getUserData("phoneNumber");
+  const token: string = getUserData("authToken");
+  const myPhoneNumber: string = getUserData("phoneNumber");
 
   const [contacts, setContacts] = useState<Contacts[]>([]);
-  const [allMessages, setAllMessages] = useState(new Map());
+  const [allMessages, setAllMessages] = useState<AllMessages>(new Map());
   const [messageSession, setMessageSession] =
     useState<MessageSessionType | null>(null);
   // State and state hooks --------------------------------------------------------------
@@ -90,7 +91,7 @@ export const UserProvider = ({
       dbContacts
     );
 
-    messages.forEach((m: Message) => {
+    messages.forEach(async (m: Message) => {
       // Look for both to and from number. Incase the way the message was stored?? Not sure if this is necessary
       const contact = dbContacts.find(
         (c) => c.number === m.fromnumber || c.number === m.tonumber
@@ -125,10 +126,21 @@ export const UserProvider = ({
       const targetNumber =
         m.fromnumber === myPhoneNumber ? m.tonumber : m.fromnumber;
 
+      let newAESKey: CryptoKey | null = null;
+
+      try {
+        newAESKey = await Crypto_GenAESKey();
+      } catch (err) {
+        throw new Error(
+          "Error generating AES key! Check method and caller of the method Crypto_GenAESKey"
+        );
+      }
+
       if (!newMap.has(targetNumber)) {
         newMap.set(targetNumber, {
           contact: contact || null,
           messages: [m],
+          AESKey: newAESKey,
         });
       } else {
         newMap.get(targetNumber)?.messages.push(m);

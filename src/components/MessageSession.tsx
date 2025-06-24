@@ -200,6 +200,7 @@ const MessageSession = () => {
       allMessages.set(messageSession.number, {
         contact: messageSession.contact,
         messages: [newMessage],
+        AESKey: messageSession.AESKey,
       });
     } else {
       allMessages.get(messageSession.number)?.messages.push(newMessage);

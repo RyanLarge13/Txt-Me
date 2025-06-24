@@ -149,17 +149,28 @@ const ChatsMenu = () => {
         number: contact?.number || fromNumber,
         contact: contact !== null ? contact : null,
         messages: newMessages,
+        AESKey: null, // CHANGE!!!!!!!!!!!!!!!!!!!!!!!!!!!
       };
 
       if (currentAllMessages.has(fromNumber)) {
         const messageData = currentAllMessages.get(fromNumber);
+
+        /*
+          NOTE:
+            Added to satisfy typescript
+        */
+        if (!messageData) {
+          return;
+        }
+
         currentAllMessages.set(fromNumber, {
-          contact: messageData?.contact || null,
+          contact: messageData.contact || null,
           messages: newMessages,
+          AESKey: messageData.AESKey,
         });
       } else {
-        log.logAll(
-          "This should not be happening. No from number in map when trying to update messages read"
+        log.logAllError(
+          "allMEssages does not carry message session data as expected. Check ChatsMenu.tsx M_CreateMessageSession"
         );
       }
 
@@ -178,6 +189,7 @@ const ChatsMenu = () => {
       number: contact?.number || fromNumber,
       contact: contact !== null ? contact : null,
       messages: messages,
+      AESKey: null, // CHANGE!!!!!!!!!!!!!!!!!!!!!!!!!!!
     };
 
     setMessageSession(newSession);
@@ -329,6 +341,7 @@ const ChatsMenu = () => {
                 number: fromNumber,
                 contact: messageSession.contact,
                 messages: messageSession.messages,
+                AESKey: null,
               })
             }
             onClick={() => M_CreateMessageSession(fromNumber, messageSession)}
@@ -390,6 +403,7 @@ const ChatsMenu = () => {
                   number: fromNumber,
                   contact: messageSession.contact,
                   messages: messageSession.messages,
+                  AESKey: null,
                 })
               }
             >
