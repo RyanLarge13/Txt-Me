@@ -21,6 +21,10 @@ export type DBUser = {
   email: string;
   phoneNumber: string;
   authToken: string;
+  RSAKeyPair: {
+    private: null | CryptoKey;
+    public: null | CryptoKey;
+  };
 };
 
 export type Theme = {

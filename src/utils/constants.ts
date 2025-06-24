@@ -25,6 +25,10 @@ export const defaultUser: DBUser = {
   username: "",
   email: "",
   phoneNumber: "",
+  RSAKeyPair: {
+    private: null,
+    public: null,
+  },
 };
 
 export const defaultTheme: Theme = {

@@ -43,6 +43,10 @@ export type User = {
   username: string;
   email: string;
   phoneNumber: string;
+  RSAKeyPair: {
+    private: null | CryptoKey;
+    public: null | CryptoKey;
+  };
 };
 
 export type ConfigContextType = {

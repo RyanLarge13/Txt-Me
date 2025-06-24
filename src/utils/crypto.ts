@@ -29,7 +29,7 @@ export const base64ToArrayBuffer = (base64: string) => {
   NOTE:
     AES key generation
 */
-export const Crypto_AESKey = async (): Promise<CryptoKey> =>
+export const Crypto_GenAESKey = async (): Promise<CryptoKey> =>
   await window.crypto.subtle.generateKey(
     {
       name: "AES-GCM", // or "AES-CBC", "AES-CTR"
@@ -43,7 +43,7 @@ export const Crypto_AESKey = async (): Promise<CryptoKey> =>
   NOTE:
     RSA key generation
 */
-export const Crypto_RSAKeyPair = async (): Promise<{
+export const Crypto_GenRSAKeyPair = async (): Promise<{
   publicKey: CryptoKey;
   privateKey: CryptoKey;
 }> =>
@@ -62,18 +62,22 @@ export const Crypto_RSAKeyPair = async (): Promise<{
   NOTE:
     IV
 */
-export const Crypto_GetIV = (): BufferSource =>
+export const Crypto_GenIV = (): BufferSource =>
   crypto.getRandomValues(new Uint8Array(12));
 
 /*
   NOTE:
     AES key encryption
 */
-export const Crypto_EncryptAES = async (iv: BufferSource, aesKey: CryptoKey) =>
+export const Crypto_EncryptMessageWithAES = async (
+  iv: BufferSource,
+  aesKey: CryptoKey,
+  message: string
+) =>
   await crypto.subtle.encrypt(
     { name: "AES-GCM", iv },
     aesKey,
-    new TextEncoder().encode("Hello Bob!")
+    new TextEncoder().encode(message)
   );
 
 /*
@@ -88,7 +92,7 @@ export const Crypto_GetRawAESKey = async (
   NOTE:
     Import key from server
 */
-export const Crypto_GetReceiversPublicKey = async (
+export const Crypto_GetReceiversPublicRSAKey = async (
   receiversPublicKey_Base64: string
 ): Promise<CryptoKey> =>
   await crypto.subtle.importKey(
@@ -104,7 +108,7 @@ export const Crypto_GetReceiversPublicKey = async (
       Encrypt AES key with receivers public RSA key
   */
 
-export const Crypto_EncryptedAESKey = async (
+export const Crypto_EncryptAESKeyWithReceiversRSAKey = async (
   receiversRSAPublicKey: CryptoKey,
   rawAESKey: BufferSource
 ) =>
@@ -132,12 +136,12 @@ export const Crypto_EncryptedAESKey = async (
   NOTE:
     Receiving end decrypts the AES key with their private and public RSA key
 */
-export const Crypto_Decrypt_AESKeyRaw = async (
+export const Crypto_DecryptRawAESKeyFromSenderWithRSAPrivateKey = async (
   myPrivateRSAKey: CryptoKey,
   aesKey: BufferSource
 ) => await crypto.subtle.decrypt({ name: "RSA-OAEP" }, myPrivateRSAKey, aesKey);
 
-export const Crypto_ImportAESKey = async (rawAESKey: BufferSource) =>
+export const Crypto_ImportAESKeyFromSender = async (rawAESKey: BufferSource) =>
   await crypto.subtle.importKey("raw", rawAESKey, { name: "AES-GCM" }, false, [
     "decrypt",
   ]);

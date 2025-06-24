@@ -55,6 +55,7 @@ export type MessageSessionType = {
   number: string;
   messages: Message[];
   contact: Contacts | null;
+  AESKey: null | CryptoKey;
 };
 
 export interface UserCtxtProps {

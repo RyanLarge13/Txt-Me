@@ -72,6 +72,10 @@ export const DatabaseProvider = ({
       username: "",
       email: "",
       phoneNumber: "",
+      RSAKeyPair: {
+        private: null,
+        public: null,
+      },
     };
 
     await db.put("app", appSettings, "settings");
@@ -132,6 +136,7 @@ export const DatabaseProvider = ({
       number: "-1",
       messages: [],
       contact: null,
+      AESKey: null,
     };
 
     await db.put("messageSession", lastSession, "messageSession");
