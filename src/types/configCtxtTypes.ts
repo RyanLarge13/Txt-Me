@@ -46,6 +46,7 @@ export type User = {
   RSAKeyPair: {
     private: null | CryptoKey;
     public: null | CryptoKey;
+    expiresAt: Date;
   };
 };
 

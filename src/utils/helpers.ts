@@ -80,3 +80,18 @@ export const messageFoundIn = (m: Message, newMessages: Message[]): Message => {
   });
   return m;
 };
+
+export const tryCatch = async <D>(
+  method: () => Promise<D> | D,
+  message = "Error: "
+): Promise<{
+  data: D | null;
+  error: string;
+}> => {
+  try {
+    const data = await method();
+    return { data: data, error: "" };
+  } catch (err) {
+    return { data: null, error: `${message}. Error: ${err}` };
+  }
+};

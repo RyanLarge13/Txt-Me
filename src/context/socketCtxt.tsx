@@ -18,28 +18,19 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 /// <reference types="vite/client" />
 
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-} from "react";
+import React, { createContext, useCallback, useContext, useEffect, useRef } from "react";
 import io, { Socket } from "socket.io-client";
-import { Crypto_GenAESKey, Crypto_GetPlainText } from "utils/crypto";
 
 import UserCtxt from "../context/userCtxt";
 import useLogger from "../hooks/useLogger";
 import useNotifActions from "../hooks/useNotifActions";
 import { AppData } from "../types/configCtxtTypes";
 import {
-  MessageDeliveryErrorType,
-  MessageUpdateType,
-  SocketMessage,
-  SocketProps,
+    MessageDeliveryErrorType, MessageUpdateType, SocketMessage, SocketProps
 } from "../types/socketTypes";
 import { Contacts, Message } from "../types/userTypes";
 import { defaultMessage } from "../utils/constants";
+import { Crypto_GenAESKey, Crypto_GetPlainText } from "../utils/crypto";
 import { urlBase64ToUint8Array } from "../utils/helpers";
 import { useConfig } from "./configContext";
 import { useDatabase } from "./dbContext";
@@ -283,38 +274,47 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       DEBUG:
         1. When setting up a new message session from a socket message where the session does not currently exist, I seem to be incorrectly setting the contact information for the message session when pushing to allMessages. Inspect how you are retrieving contact information on new message session creations
     */
-      try {
-        const decryptedSocketMessage: string = await Crypto_GetPlainText(
-          socketMessage.message
-        );
-        socketMessage = { ...socketMessage, message: decryptedSocketMessage };
-      } catch (err) {
-        throw new Error(
-          `Error decrypting message from server. Check crypto.ts Crypto_GetPlainText. Error: ${err}`
-        );
-      }
-
-      const currentAllMessages = allMessagesRef.current;
-      const contactReference =
-        contacts.find((c: Contacts) => c.number === socketMessage.fromnumber) ||
-        null;
-
       if (socketMessage) {
-        log.devLog("Message from socket", socketMessage);
+        const messageToStore: Message = { ...socketMessage, message: "" };
+
+        try {
+          const decryptedSocketMessageArrayBuffer = await Crypto_GetPlainText(
+            // IV,
+            // AESKey
+            messageToStore.message
+          );
+
+          const decryptedSocketMessage = new TextDecoder().decode(
+            decryptedSocketMessageArrayBuffer
+          );
+          messageToStore.message = decryptedSocketMessage;
+        } catch (err) {
+          throw new Error(
+            `Error decrypting message from server. Check crypto.ts Crypto_GetPlainText. Error: ${err}`
+          );
+        }
+
+        const currentAllMessages = allMessagesRef.current;
+        const contactReference =
+          contacts.find(
+            (c: Contacts) => c.number === messageToStore.fromnumber
+          ) || null;
+
+        log.devLog("Message from socket", messageToStore);
 
         /*
           NOTE:
             Update local delivered at state immediately on messages from others
         */
-        socketMessage.delivered = true;
-        socketMessage.deliveredat = new Date();
+        messageToStore.delivered = true;
+        messageToStore.deliveredat = new Date();
 
         // Call getter to ensure fresh allMessages map out of state
 
-        if (!currentAllMessages.has(socketMessage.fromnumber)) {
+        if (!currentAllMessages.has(messageToStore.fromnumber)) {
           log.devLog(
             "allMessages map does not contain the phone number for some reason",
-            socketMessage.fromnumber,
+            messageToStore.fromnumber,
             currentAllMessages
           );
 
@@ -327,9 +327,9 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
             );
           }
 
-          currentAllMessages.set(socketMessage.fromnumber, {
+          currentAllMessages.set(messageToStore.fromnumber, {
             contact: contactReference,
-            messages: [socketMessage],
+            messages: [messageToStore],
             AESKey: newAESKey,
           });
         } else {
@@ -337,12 +337,12 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
             "newAllMessages does contain from number. Pushing message to array"
           );
 
-          const session = currentAllMessages.get(socketMessage.fromnumber);
+          const session = currentAllMessages.get(messageToStore.fromnumber);
           if (session) {
             // Create a new array instead of mutating the old one
-            const updatedMessages = [...session.messages, socketMessage];
+            const updatedMessages = [...session.messages, messageToStore];
 
-            currentAllMessages.set(socketMessage.fromnumber, {
+            currentAllMessages.set(messageToStore.fromnumber, {
               ...session,
               messages: updatedMessages,
             });
@@ -355,14 +355,14 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         setAllMessages(newMap);
 
         addSuccessNotif(
-          contactReference?.name || socketMessage.fromnumber,
-          socketMessage.message, // Must be decrypted first !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+          contactReference?.name || messageToStore.fromnumber,
+          messageToStore.message, // Must be decrypted first !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
           true,
           []
         );
 
         try {
-          await IDB_AddMessage(socketMessage);
+          await IDB_AddMessage(messageToStore);
         } catch (err) {
           log.logAllError(
             "Error adding message to indexedDB sending from client",
@@ -541,6 +541,10 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
       const currentSession = currentMessageSession.get(fromNumber);
 
+      if (!currentSession) {
+        return;
+      }
+
       const messages = currentSession?.messages || [];
 
       const newMessages = messages.map((m: Message) => {
@@ -552,9 +556,9 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       });
 
       currentMessageSession.set(fromNumber, {
-        contact: currentSession?.contact || null,
+        contact: currentSession.contact || null,
         messages: newMessages,
-        AESKey: currentSession?.AESKey,
+        AESKey: currentSession.AESKey,
       });
 
       const newMap = new Map(currentMessageSession);
@@ -595,6 +599,10 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
           const currentSession = currentMessageSession.get(
             update.sessionNumber
           );
+
+          if (!currentSession) {
+            return;
+          }
 
           const currentMessages = currentSession?.messages || [];
 

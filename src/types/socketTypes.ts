@@ -30,6 +30,8 @@ export type SocketMessage = {
   fromnumber: string;
   tonumber: string;
   error: boolean;
+  synced: false;
+  iv: BufferSource;
 };
 
 export type MessageUpdateType = {

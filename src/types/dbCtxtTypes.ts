@@ -24,6 +24,7 @@ export type DBUser = {
   RSAKeyPair: {
     private: null | CryptoKey;
     public: null | CryptoKey;
+    expiresAt: Date;
   };
 };
 
@@ -72,7 +73,7 @@ export type DraftType = {
   } | null;
   messages: {
     messageid: string;
-    message: string | ArrayBuffer;
+    message: string;
     sent: boolean;
     sentat: Date;
     delivered: boolean;
@@ -81,10 +82,12 @@ export type DraftType = {
     readat: Date | null;
     fromnumber: string;
     tonumber: string;
+    synced: boolean;
   }[];
 };
 
 export interface DBCtxtProps {
+  IDB_GetMessageSessions: () => Promise<[string, MessageSessionType][]>;
   IDB_GetDB: () => Promise<IDBPDatabase>;
   IDB_GetDrafts: () => Promise<DraftType>;
   IDB_InitDatabase: (db: IDBPDatabase) => Promise<AppSettings>;

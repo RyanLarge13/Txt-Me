@@ -24,12 +24,7 @@ import { createContext, useContext } from "react";
 import useLogger from "../hooks/useLogger.ts";
 import { AppData, User } from "../types/configCtxtTypes.ts";
 import {
-  ContactSettings,
-  DBCtxtProps,
-  DBUser,
-  DraftType,
-  MessageSettings,
-  Theme,
+    ContactSettings, DBCtxtProps, DBUser, DraftType, MessageSettings, Theme
 } from "../types/dbCtxtTypes.ts";
 import { Contacts, Message, MessageSessionType } from "../types/userTypes.ts";
 import { defaultAppSettings, defaultUser } from "../utils/constants.ts";
@@ -93,6 +88,7 @@ export const DatabaseProvider = ({
       RSAKeyPair: {
         private: privateKey,
         public: publicKey,
+        expiresAt: new Date(new Date().getDate() + 7),
       },
     };
 
@@ -169,6 +165,12 @@ export const DatabaseProvider = ({
     await db.put("drafts", drafts, "drafts");
   };
 
+  const buildMessageSessions = async (db: IDBPDatabase): Promise<void> => {
+    const messageSessions: MessageSessionType[] = [];
+
+    await db.put("message-sessions", messageSessions, "message-sessions");
+  };
+
   const addDefaultConfiguration = async (db: IDBPDatabase) => {
     try {
       await buildAppConfig(db);
@@ -210,6 +212,15 @@ export const DatabaseProvider = ({
     } catch (err) {
       log.logAllError("Building drafts table default config. Error: ", err);
     }
+
+    try {
+      await buildMessageSessions(db);
+    } catch (err) {
+      log.logAllError(
+        "Building message sessions table default config. Error: ",
+        err
+      );
+    }
   };
 
   const IDB_GetDB = async () => {
@@ -226,6 +237,7 @@ export const DatabaseProvider = ({
           db.createObjectStore("contactSettings");
           db.createObjectStore("messageSession");
           db.createObjectStore("drafts");
+          db.createObjectStore("message-sessions");
         },
       }
     );
@@ -250,6 +262,8 @@ export const DatabaseProvider = ({
   const IDB_GetAppData = async () => (await IDB_GetDB()).get("app", "settings");
   const IDB_GetDrafts = async (): Promise<DraftType> =>
     (await IDB_GetDB()).get("drafts", "drafts");
+  const IDB_GetMessageSessions = async (): Promise<MessageSessionType> =>
+    (await IDB_GetDB()).get("message-sessions", "message-sessions");
   const IDB_GetAppUserData = async () => (await IDB_GetDB()).get("app", "user");
   const IDB_GetThemeData = async (): Promise<Theme[]> =>
     (await IDB_GetDB()).getAll("theme");
@@ -478,6 +492,7 @@ export const DatabaseProvider = ({
         IDB_GetContactSettingsData,
         IDB_GetPhoneNumber,
         IDB_GetLastMessageSession,
+        IDB_GetMessageSessions,
         // Getters ------------------------------
 
         // Setters ------------------------------

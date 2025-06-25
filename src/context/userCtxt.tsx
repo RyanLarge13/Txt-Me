@@ -21,14 +21,10 @@ import { createContext, ReactNode, useEffect, useState } from "react";
 
 import useLogger from "../hooks/useLogger.ts";
 import {
-  AllMessages,
-  Contacts,
-  Message,
-  MessageSessionType,
-  UserCtxtProps,
+    AllMessages, Contacts, Message, MessageSessionType, UserCtxtProps
 } from "../types/userTypes.ts";
 import { API_FetchUserData, API_GetContacts } from "../utils/api.ts";
-import { Crypto_GenAESKey } from "../utils/crypto.ts";
+import { tryCatch } from "../utils/helpers.ts";
 import { valPhoneNumber } from "../utils/validator.ts";
 import { useConfig } from "./configContext.tsx";
 import { useDatabase } from "./dbContext.tsx";
@@ -44,6 +40,7 @@ export const UserProvider = ({
   const {
     IDB_GetContactsData,
     IDB_GetMessagesData,
+    IDB_GetMessageSessions,
     IDB_AddContact,
     IDB_GetLastMessageSession,
   } = useDatabase();
@@ -51,7 +48,13 @@ export const UserProvider = ({
   const log = useLogger();
 
   const token: string = getUserData("authToken");
-  const myPhoneNumber: string = getUserData("phoneNumber");
+
+  /*
+    NOTE:
+      Commented out below because it was part of the old build messages
+      map method
+  */
+  // const myPhoneNumber: string = getUserData("phoneNumber");
 
   const [contacts, setContacts] = useState<Contacts[]>([]);
   const [allMessages, setAllMessages] = useState<AllMessages>(new Map());
@@ -78,77 +81,115 @@ export const UserProvider = ({
 
   // Local Scope Context Functions ---------------------------------------------------
 
-  const M_BuildMessagesMap = (
-    messages: Message[],
-    dbContacts: Contacts[]
-  ): void => {
-    const newMap: AllMessages = new Map();
+  /*
+      NOTE:
+        Commenting out build messages map method for now to try the new map build method
+    */
+  // const M_BuildMessagesMap = (
+  //   messages: Message[],
+  //   dbContacts: Contacts[]
+  // ): void => {
+  //   const newMap: AllMessages = new Map();
 
-    log.devLog(
-      "In build message map. User Context. Messages: ",
-      messages,
-      "Contacts: ",
-      dbContacts
-    );
+  //   log.devLog(
+  //     "In build message map. User Context. Messages: ",
+  //     messages,
+  //     "Contacts: ",
+  //     dbContacts
+  //   );
 
-    messages.forEach(async (m: Message) => {
-      // Look for both to and from number. Incase the way the message was stored?? Not sure if this is necessary
-      const contact = dbContacts.find(
-        (c) => c.number === m.fromnumber || c.number === m.tonumber
+  //   messages.forEach(async (m: Message) => {
+  //     // Look for both to and from number. Incase the way the message was stored?? Not sure if this is necessary
+  //     const contact = dbContacts.find(
+  //       (c) => c.number === m.fromnumber || c.number === m.tonumber
+  //     );
+
+  //     /*
+  //       TODO:
+  //         IMPLEMENT:
+  //           1. Clean this up. Not so many if / else blocks
+  //     */
+  //     if (!contact) {
+  //       log.logAllError(
+  //         "No contact in the db from this number when building message map. Check server",
+  //         contact,
+  //         `Number: ${m.fromnumber}`
+  //       );
+  //     }
+
+  //     // Phone number for user MUST be present
+  //     if (!myPhoneNumber || myPhoneNumber === "") {
+  //       log.logAllError(
+  //         "No stored phone number present for the user, cannot compare message with stored number. Users phone number: ",
+  //         myPhoneNumber
+  //       );
+
+  //       throw new Error(
+  //         "No phone number present for user. Check server and how you are storing the phone number"
+  //       );
+  //     }
+
+  //     // Check for the phone number possibly being the current users
+  //     const targetNumber =
+  //       m.fromnumber === myPhoneNumber ? m.tonumber : m.fromnumber;
+
+  //     let newAESKey: CryptoKey | null = null;
+
+  //     try {
+  //       newAESKey = await Crypto_GenAESKey();
+  //     } catch (err) {
+  //       throw new Error(
+  //         "Error generating AES key! Check method and caller of the method Crypto_GenAESKey"
+  //       );
+  //     }
+
+  //     if (!newMap.has(targetNumber)) {
+  //       newMap.set(targetNumber, {
+  //         contact: contact || null,
+  //         messages: [m],
+  //         AESKey: newAESKey,
+  //       });
+  //     } else {
+  //       newMap.get(targetNumber)?.messages.push(m);
+  //     }
+  //   });
+
+  //   log.devLog("Map after building it with available data", newMap);
+  //   setAllMessages(newMap);
+  // };
+
+  /*
+    NOTE:
+      This is the new messages map build function for now
+  */
+  const M_BuildMessagesMap = async (): Promise<void> => {
+    const { data: dbMessageSessions, error: messageSessionQueryErr } =
+      await tryCatch<[string, MessageSessionType][]>(
+        IDB_GetMessageSessions,
+        "Error when pulling message sessions array from IndexedDB inside M_BuildMEssagesMap (new)"
       );
 
-      /*
-        TODO:
-          IMPLEMENT:
-            1. Clean this up. Not so many if / else blocks
-      */
-      if (!contact) {
-        log.logAllError(
-          "No contact in the db from this number when building message map. Check server",
-          contact,
-          `Number: ${m.fromnumber}`
-        );
-      }
+    if (messageSessionQueryErr || !dbMessageSessions) {
+      log.logAllError(messageSessionQueryErr);
+      return;
+    }
 
-      // Phone number for user MUST be present
-      if (!myPhoneNumber || myPhoneNumber === "") {
-        log.logAllError(
-          "No stored phone number present for the user, cannot compare message with stored number. Users phone number: ",
-          myPhoneNumber
-        );
+    if (dbMessageSessions.length < 1) {
+      return;
+    }
 
-        throw new Error(
-          "No phone number present for user. Check server and how you are storing the phone number"
-        );
-      }
+    const { data: newMessageSessionMap, error: mapCreationError } =
+      await tryCatch<AllMessages>(
+        () => new Map(dbMessageSessions),
+        "Error creating new map from IndexedDB fetched message session array"
+      );
 
-      // Check for the phone number possibly being the current users
-      const targetNumber =
-        m.fromnumber === myPhoneNumber ? m.tonumber : m.fromnumber;
+    if (mapCreationError || !newMessageSessionMap) {
+      log.logAllError(mapCreationError);
+      return;
+    }
 
-      let newAESKey: CryptoKey | null = null;
-
-      try {
-        newAESKey = await Crypto_GenAESKey();
-      } catch (err) {
-        throw new Error(
-          "Error generating AES key! Check method and caller of the method Crypto_GenAESKey"
-        );
-      }
-
-      if (!newMap.has(targetNumber)) {
-        newMap.set(targetNumber, {
-          contact: contact || null,
-          messages: [m],
-          AESKey: newAESKey,
-        });
-      } else {
-        newMap.get(targetNumber)?.messages.push(m);
-      }
-    });
-
-    log.devLog("Map after building it with available data", newMap);
-    setAllMessages(newMap);
+    setAllMessages(newMessageSessionMap);
   };
 
   const M_AddServerMessagesToMap = (serverMessages: Message[]) => {
@@ -254,7 +295,18 @@ export const UserProvider = ({
 
     // Add messages and contact to state
     setContacts(dbContacts);
-    M_BuildMessagesMap(messages, dbContacts);
+
+    /*
+      NOTE:
+        Commenting out build messages map method for now to try the new map build method
+    */
+    // M_BuildMessagesMap(messages, dbContacts);
+
+    /*
+      NOTE:
+        Below is the new messages map method
+    */
+    M_BuildMessagesMap();
   };
 
   const M_FetchStoredSession = async (): Promise<void> => {

@@ -150,7 +150,8 @@ export const Crypto_GetPlainText = async (
   iv: BufferSource,
   aesKey: CryptoKey,
   ciphertext: BufferSource
-) => await crypto.subtle.decrypt({ name: "AES-GCM", iv }, aesKey, ciphertext);
+): Promise<ArrayBuffer> =>
+  await crypto.subtle.decrypt({ name: "AES-GCM", iv }, aesKey, ciphertext);
 
 /*
   NOTE:
