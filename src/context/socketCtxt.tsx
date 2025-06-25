@@ -273,8 +273,14 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     TODO:
       DEBUG:
         1. When setting up a new message session from a socket message where the session does not currently exist, I seem to be incorrectly setting the contact information for the message session when pushing to allMessages. Inspect how you are retrieving contact information on new message session creations
+      IMPORTANT!!!: 
+        Left off here!!!!!!!!!!!!!!!!
     */
       if (socketMessage) {
+        const encryptedMessage: ArrayBuffer = socketMessage.message;
+        const IV: BufferSource = socketMessage.iv;
+        // const usersPrivateRSAKey = await IDB_GetRSAPrivateKey();
+
         const messageToStore: Message = { ...socketMessage, message: "" };
 
         try {

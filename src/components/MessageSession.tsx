@@ -28,9 +28,14 @@ import useLogger from "../hooks/useLogger";
 import useNotifActions from "../hooks/useNotifActions";
 import useSocket from "../hooks/useSocket";
 import useUserData from "../hooks/useUserData";
+import { SocketMessage } from "../types/socketTypes";
 import { Message, MessageSessionType } from "../types/userTypes";
 import { defaultMessage } from "../utils/constants";
-import { Crypto_EncryptMessageWithAES } from "../utils/crypto";
+import {
+    Crypto_EncryptAESKeyWithReceiversPublicRSAKey, Crypto_EncryptMessageWithAES, Crypto_GenIV,
+    Crypto_GetRawAESKey
+} from "../utils/crypto";
+import { tryCatch } from "../utils/helpers";
 import { valPhoneNumber } from "../utils/validator";
 import MessageComponent from "./MessageComponent";
 import MessageInfoTopBar from "./MessageInfoTopBar";
@@ -166,17 +171,48 @@ const MessageSession = () => {
 
     const validPhone = valPhoneNumber(phoneNumber);
 
-    let encryptedMessage: ArrayBuffer | null = null;
+    const { data: iv, error: ivGenError } = await tryCatch<BufferSource>(
+      Crypto_GenIV
+    );
 
-    try {
-      /*
-        TODO:
-          IMPLEMENT:
-            1. Left off here!!!!!!!!!!!!!!!!!
-      */
-      encryptedMessage = await Crypto_EncryptMessageWithAES();
-    } catch (err) {
-      throw new Error(`Error encrypting message before sending to server. Check Crypto_. Error: ${err}`);
+    if (ivGenError || !iv) {
+      throw new Error(`Check Gen IV method in crypto.js. ${ivGenError}`);
+    }
+
+    const { data: rawAESKey, error: rawAESKeyError } =
+      await tryCatch<BufferSource>(() =>
+        Crypto_GetRawAESKey(messageSession.AESKey)
+      );
+
+    if (rawAESKeyError || !rawAESKey) {
+      throw new Error(
+        `Check Gen RawAESKey method in crypto.js. ${rawAESKeyError}`
+      );
+    }
+
+    const { data: encryptedAESKey, error: AESKeyEncryptionError } =
+      await tryCatch<ArrayBuffer>(() =>
+        Crypto_EncryptAESKeyWithReceiversPublicRSAKey(
+          messageSession.ReceiversRSAPublicKey,
+          rawAESKey
+        )
+      );
+
+    if (AESKeyEncryptionError || !encryptedAESKey) {
+      throw new Error(
+        `Check Gen RawAESKey method in crypto.js. ${rawAESKeyError}`
+      );
+    }
+
+    const { data: encryptedMessage, error: encryptMessageError } =
+      await tryCatch<ArrayBuffer>(() =>
+        Crypto_EncryptMessageWithAES(iv, messageSession.AESKey, value)
+      );
+
+    if (encryptMessageError || !encryptedMessage) {
+      throw new Error(
+        `Error encrypting message before sending to server. Check Crypto_. Error: ${encryptMessageError}`
+      );
     }
 
     if (!validPhone.valid) {
@@ -202,7 +238,14 @@ const MessageSession = () => {
       synced: false,
     };
 
-    socket ? socket.emit("text-message", { ...newMessage, message:  }) : null;
+    const socketMessage: SocketMessage = {
+      ...newMessage,
+      message: encryptedMessage,
+      iv: iv,
+      encryptedAESKey: encryptedAESKey,
+    };
+
+    socket ? socket.emit("text-message", socketMessage) : null;
 
     // Check first to see if the allMessages map has the key?? For safety
     if (!allMessages.has(messageSession.number)) {

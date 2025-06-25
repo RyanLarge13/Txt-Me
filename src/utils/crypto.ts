@@ -108,7 +108,7 @@ export const Crypto_GetReceiversPublicRSAKey = async (
       Encrypt AES key with receivers public RSA key
   */
 
-export const Crypto_EncryptAESKeyWithReceiversRSAKey = async (
+export const Crypto_EncryptAESKeyWithReceiversPublicRSAKey = async (
   receiversRSAPublicKey: CryptoKey,
   rawAESKey: BufferSource
 ) =>
