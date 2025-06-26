@@ -80,6 +80,16 @@ export const Crypto_EncryptMessageWithAES = async (
     new TextEncoder().encode(message)
   );
 
+export const exportRSAPublicKey = async (
+  RSAKeyPair: CryptoKeyPair
+): Promise<ArrayBuffer> =>
+  await crypto.subtle.exportKey("spki", RSAKeyPair.publicKey);
+
+export const exportRSAPrivateKey = async (
+  RSAKeyPair: CryptoKeyPair
+): Promise<ArrayBuffer> =>
+  await crypto.subtle.exportKey("pkcs8", RSAKeyPair.privateKey);
+
 /*
     NOTE:
       Export key to encrypt it with public RSA
@@ -88,11 +98,22 @@ export const Crypto_GetRawAESKey = async (
   aesKey: CryptoKey
 ): Promise<BufferSource> => await crypto.subtle.exportKey("raw", aesKey);
 
+export const Crypto_ImportPrivateRSAKey = async (
+  RSAPrivateKey: ArrayBuffer
+): Promise<CryptoKey> =>
+  await crypto.subtle.importKey(
+    "pkcs8",
+    RSAPrivateKey,
+    { name: "RSA-OAEP", hash: "SHA-256" },
+    true,
+    ["decrypt"]
+  );
+
 /*
   NOTE:
     Import key retrieved from server
 */
-export const Crypto_GetReceiversPublicRSAKey = async (
+export const Crypto_ImportPublicRSAKey = async (
   receiversPublicKey_Base64: string
 ): Promise<CryptoKey> =>
   await crypto.subtle.importKey(
