@@ -24,7 +24,12 @@ import { createContext, useContext } from "react";
 import useLogger from "../hooks/useLogger.ts";
 import { AppData, User } from "../types/configCtxtTypes.ts";
 import {
-    ContactSettings, DBCtxtProps, DBUser, DraftType, MessageSettings, Theme
+  ContactSettings,
+  DBCtxtProps,
+  DBUser,
+  DraftType,
+  MessageSettings,
+  Theme,
 } from "../types/dbCtxtTypes.ts";
 import { Contacts, Message, MessageSessionType } from "../types/userTypes.ts";
 import { defaultAppSettings, defaultUser } from "../utils/constants.ts";
@@ -151,6 +156,7 @@ export const DatabaseProvider = ({
       messages: [],
       contact: null,
       AESKey: null,
+      receiversRSAPublicKey: null,
     };
 
     await db.put("messageSession", lastSession, "messageSession");
@@ -262,8 +268,9 @@ export const DatabaseProvider = ({
   const IDB_GetAppData = async () => (await IDB_GetDB()).get("app", "settings");
   const IDB_GetDrafts = async (): Promise<DraftType> =>
     (await IDB_GetDB()).get("drafts", "drafts");
-  const IDB_GetMessageSessions = async (): Promise<MessageSessionType> =>
-    (await IDB_GetDB()).get("message-sessions", "message-sessions");
+  const IDB_GetMessageSessions = async (): Promise<
+    [string, MessageSessionType][]
+  > => (await IDB_GetDB()).get("message-sessions", "message-sessions");
   const IDB_GetAppUserData = async () => (await IDB_GetDB()).get("app", "user");
   const IDB_GetThemeData = async (): Promise<Theme[]> =>
     (await IDB_GetDB()).getAll("theme");

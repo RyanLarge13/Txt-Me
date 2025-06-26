@@ -28,6 +28,7 @@ export const defaultUser: DBUser = {
   RSAKeyPair: {
     private: null,
     public: null,
+    expiresAt: new Date(new Date().getDate() + 7),
   },
 };
 
@@ -53,6 +54,7 @@ export const defaultMessage: Message = {
   fromnumber: "",
   tonumber: "",
   error: false,
+  synced: false,
 };
 
 export const defaultAppSettings: AppSettings = {

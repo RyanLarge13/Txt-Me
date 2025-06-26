@@ -18,7 +18,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 /// <reference types="vite/client" />
 
-import React, { createContext, useCallback, useContext, useEffect, useRef } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+} from "react";
 import io, { Socket } from "socket.io-client";
 
 import UserCtxt from "../context/userCtxt";
@@ -26,7 +32,10 @@ import useLogger from "../hooks/useLogger";
 import useNotifActions from "../hooks/useNotifActions";
 import { AppData } from "../types/configCtxtTypes";
 import {
-    MessageDeliveryErrorType, MessageUpdateType, SocketMessage, SocketProps
+  MessageDeliveryErrorType,
+  MessageUpdateType,
+  SocketMessage,
+  SocketProps,
 } from "../types/socketTypes";
 import { Contacts, Message } from "../types/userTypes";
 import { defaultMessage } from "../utils/constants";
@@ -45,6 +54,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     IDB_UpdateAppDataWebPush,
     IDB_UpdateMessages,
     IDB_AppendMessages,
+    IDB_GetRSAPrivateKey,
   } = useDatabase();
   const { allMessages, contacts, setAllMessages } = useContext(UserCtxt);
   const { getAppData, setAppData } = useConfig();
@@ -272,14 +282,19 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       /*
     TODO:
       DEBUG:
-        1. When setting up a new message session from a socket message where the session does not currently exist, I seem to be incorrectly setting the contact information for the message session when pushing to allMessages. Inspect how you are retrieving contact information on new message session creations
+        1. When setting up a new message session from a socket 
+        message where the session does not currently exist, 
+        I seem to be incorrectly setting the contact information 
+        for the message session when pushing to allMessages. 
+        Inspect how you are retrieving contact information on new message 
+        session creations
       IMPORTANT!!!: 
         Left off here!!!!!!!!!!!!!!!!
     */
       if (socketMessage) {
         const encryptedMessage: ArrayBuffer = socketMessage.message;
         const IV: BufferSource = socketMessage.iv;
-        // const usersPrivateRSAKey = await IDB_GetRSAPrivateKey();
+        const usersPrivateRSAKey = await IDB_GetRSAPrivateKey();
 
         const messageToStore: Message = { ...socketMessage, message: "" };
 
