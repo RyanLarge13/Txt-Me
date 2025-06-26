@@ -15,6 +15,12 @@
 
 */
 
+/*
+  NOTE:
+    When keys come via socket from the server as strings this method will turn those
+    strings back into ArrayBuffers that can be imported or exported via 
+    window.crypto.subtle
+*/
 export const Crypto_Base64ToArrayBuffer = (base64: string) => {
   const binary = window.atob(base64);
   const len = binary.length;
@@ -25,6 +31,13 @@ export const Crypto_Base64ToArrayBuffer = (base64: string) => {
   return bytes.buffer;
 };
 
+/*
+  NOTE:
+    Use this function to make ArrayBuffers deriving from CryptoKeys transferrable
+    through the network either via socket or http and keep the readability universal.
+    Not all servers, network protocols or other tech will read ArrayBuffers the same
+    unlike a more universal base64 string
+*/
 export const Crypto_ArrayBufferToBase64 = (buffer: ArrayBuffer): string => {
   return btoa(String.fromCharCode(...new Uint8Array(buffer)));
 };

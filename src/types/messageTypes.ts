@@ -5,7 +5,7 @@ export type MessageSessionMapType = Map<
   {
     contact: ContactType | null;
     messages: MessageType[];
-    AESKey: null | CryptoKey;
+    AESKey: ArrayBuffer | null;
   }
 >;
 
@@ -13,8 +13,8 @@ export type MessageSessionType = {
   number: string;
   messages: MessageType[];
   contact: ContactType | null;
-  AESKey: CryptoKey | null;
-  receiversRSAPublicKey: CryptoKey | null;
+  AESKey: ArrayBuffer | null;
+  receiversRSAPublicKey: ArrayBuffer | null;
 };
 
 export type MessageSettingsType = {
@@ -46,7 +46,7 @@ export type MessageType = {
 
 export type SocketMessageType = {
   messageid: string;
-  message: ArrayBuffer;
+  message: string; // base64;
   sent: boolean;
   sentat: Date;
   delivered: boolean;
@@ -57,8 +57,8 @@ export type SocketMessageType = {
   tonumber: string;
   error: boolean;
   synced: boolean;
-  iv: BufferSource;
-  encryptedAESKey: ArrayBuffer;
+  iv: string; // base64;
+  encryptedAESKey: string; // base64;
   toname?: string;
 };
 
