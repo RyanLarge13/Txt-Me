@@ -15,7 +15,7 @@
 
 */
 
-export const base64ToArrayBuffer = (base64: string) => {
+export const Crypto_Base64ToArrayBuffer = (base64: string) => {
   const binary = window.atob(base64);
   const len = binary.length;
   const bytes = new Uint8Array(len);
@@ -23,6 +23,10 @@ export const base64ToArrayBuffer = (base64: string) => {
     bytes[i] = binary.charCodeAt(i);
   }
   return bytes.buffer;
+};
+
+export const Crypto_ArrayBufferToBase64 = (buffer: ArrayBuffer): string => {
+  return btoa(String.fromCharCode(...new Uint8Array(buffer)));
 };
 
 /*
@@ -80,12 +84,12 @@ export const Crypto_EncryptMessageWithAES = async (
     new TextEncoder().encode(message)
   );
 
-export const exportRSAPublicKey = async (
+export const Crypto_ExportRSAPublicKey = async (
   RSAKeyPair: CryptoKeyPair
 ): Promise<ArrayBuffer> =>
   await crypto.subtle.exportKey("spki", RSAKeyPair.publicKey);
 
-export const exportRSAPrivateKey = async (
+export const Crypto_ExportRSAPrivateKey = async (
   RSAKeyPair: CryptoKeyPair
 ): Promise<ArrayBuffer> =>
   await crypto.subtle.exportKey("pkcs8", RSAKeyPair.privateKey);
@@ -118,7 +122,7 @@ export const Crypto_ImportPublicRSAKey = async (
 ): Promise<CryptoKey> =>
   await crypto.subtle.importKey(
     "spki",
-    base64ToArrayBuffer(receiversPublicKey_Base64),
+    Crypto_Base64ToArrayBuffer(receiversPublicKey_Base64),
     { name: "RSA-OAEP", hash: "SHA-256" },
     false,
     ["encrypt"]

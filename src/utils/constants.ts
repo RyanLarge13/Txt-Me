@@ -17,7 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { AppSettings, DBUser, Theme } from "../types/dbCtxtTypes";
-import { Message } from "../types/userTypes";
+import { Message } from "../types/userCtxtTypes";
 
 export const defaultUser: DBUser = {
   userId: "",

@@ -24,17 +24,15 @@ import { useDatabase } from "../context/dbContext";
 import UserCtxt from "../context/userCtxt";
 import useLogger from "../hooks/useLogger";
 import useNotifActions from "../hooks/useNotifActions";
-import {
-  Contacts as ContactType,
-  MessageSessionType,
-} from "../types/userTypes";
+import { ContactType } from "../types/contactTypes";
+import { MessageSessionType } from "../types/messageTypes";
 import { defaultContact } from "../utils/constants";
 import { Crypto_GenAESKey } from "../utils/crypto";
 import { normalizePhoneNumber as npn, tryCatch } from "../utils/helpers";
 import Contact from "./Contact";
 
 const Contacts = ({ contacts }: { contacts: ContactType[] }) => {
-  const { allMessages, setMessageSession, setAllMessages } =
+  const { messageSessionsMap, setMessageSession, setMessageSessionsMap } =
     useContext(UserCtxt);
   const { addErrorNotif } = useNotifActions();
   const { IDB_UpdateMessageSession } = useDatabase();
@@ -112,11 +110,11 @@ const Contacts = ({ contacts }: { contacts: ContactType[] }) => {
       newSessionDefault.contact = contact;
     }
 
-    if (allMessages.has(contact.number)) {
+    if (messageSessionsMap.has(contact.number)) {
       // Immediately set message session to the contact stored and messages found
       // and nothing else
       newSessionDefault.messages =
-        allMessages.get(contact.number)?.messages || [];
+        messageSessionsMap.get(contact.number)?.messages || [];
       setMessageSession(newSessionDefault);
     } else {
       // First update our map and then create the message session
@@ -129,13 +127,13 @@ const Contacts = ({ contacts }: { contacts: ContactType[] }) => {
         );
       }
 
-      allMessages.set(contact.number, {
+      messageSessionsMap.set(contact.number, {
         contact: contact.contactid ? contact : null,
         messages: [],
         AESKey: newAESKey,
       });
 
-      setAllMessages(new Map(allMessages));
+      setMessageSessionsMap(new Map(messageSessionsMap));
       setMessageSession(newSessionDefault);
     }
 

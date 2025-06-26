@@ -34,8 +34,11 @@ import useLogger from "../hooks/useLogger";
 import useNotifActions from "../hooks/useNotifActions";
 import useSocket from "../hooks/useSocket";
 import useUserData from "../hooks/useUserData";
-import { SocketMessage } from "../types/socketTypes";
-import { Message, MessageSessionType } from "../types/userTypes";
+import {
+  MessageSessionType,
+  MessageType,
+  SocketMessageType,
+} from "../types/messageTypes";
 import { defaultMessage } from "../utils/constants";
 import {
   Crypto_EncryptAESKeyWithReceiversPublicRSAKey,
@@ -49,12 +52,13 @@ import MessageComponent from "./MessageComponent";
 import MessageInfoTopBar from "./MessageInfoTopBar";
 
 const MessageSession = () => {
-  const { messageSession, allMessages, setAllMessages } = useContext(UserCtxt);
+  const { messageSession, messageSessionsMap, setMessageSessionsMap } =
+    useContext(UserCtxt);
   const { IDB_AddMessage } = useDatabase();
   const { addErrorNotif } = useNotifActions();
 
   const [value, setValue] = useState("");
-  const [sessionMessages, setSessionMessages] = useState<Message[]>(
+  const [sessionMessages, setSessionMessages] = useState<MessageType[]>(
     messageSession?.messages || []
   );
 
@@ -81,15 +85,15 @@ const MessageSession = () => {
   useEffect(() => {
     if (messageSession) {
       log.devLog(
-        "message session exists inside of useEffect being called after a change and update to allMessages map state",
+        "message session exists inside of useEffect being called after a change and update to messageSessionsMap map state",
         messageSession
       );
 
-      // Query messages from allMessages map because messageSession is not
-      // being updated on every text received or sent only allMessages is being
+      // Query messages from messageSessionsMap map because messageSession is not
+      // being updated on every text received or sent only messageSessionsMap is being
       // updated
       const newMessageList =
-        allMessages.get(messageSession?.number)?.messages || [];
+        messageSessionsMap.get(messageSession?.number)?.messages || [];
 
       log.devLog(
         "Here are the messages that are being returned from the map after fetching messages by messagesSession.number",
@@ -98,7 +102,7 @@ const MessageSession = () => {
 
       setSessionMessages(newMessageList);
     }
-  }, [allMessages, messageSession]);
+  }, [messageSessionsMap, messageSession]);
 
   /*
     DESC:
@@ -113,7 +117,7 @@ const MessageSession = () => {
       const height = rect.height;
       elem.scrollTo(0, height);
     }
-  }, [messagesRef, sessionMessages, allMessages]);
+  }, [messagesRef, sessionMessages, messageSessionsMap]);
 
   /*
     DESC:
@@ -137,7 +141,7 @@ const MessageSession = () => {
           1. Another method found in another part of code (socketCtxt) almost identical. 
           Consider consolidating
        */
-  const M_AddMessageToIndexedDB = async (newMessage: Message) => {
+  const M_AddMessageToIndexedDB = async (newMessage: MessageType) => {
     try {
       await IDB_AddMessage(newMessage);
     } catch (err) {
@@ -260,7 +264,7 @@ const MessageSession = () => {
       return;
     }
 
-    const newMessage: Message = {
+    const newMessage: MessageType = {
       ...defaultMessage,
       messageid: uuidv4(),
       toname: messageSession.contact?.name || messageSession.number,
@@ -271,7 +275,7 @@ const MessageSession = () => {
       synced: false,
     };
 
-    const socketMessage: SocketMessage = {
+    const socketMessage: SocketMessageType = {
       ...newMessage,
       message: encryptedMessage,
       iv: iv,
@@ -280,20 +284,20 @@ const MessageSession = () => {
 
     socket ? socket.emit("text-message", socketMessage) : null;
 
-    // Check first to see if the allMessages map has the key?? For safety
-    if (!allMessages.has(messageSession.number)) {
-      allMessages.set(messageSession.number, {
+    // Check first to see if the messageSessionsMap map has the key?? For safety
+    if (!messageSessionsMap.has(messageSession.number)) {
+      messageSessionsMap.set(messageSession.number, {
         contact: messageSession.contact,
         messages: [newMessage],
         AESKey: messageSession.AESKey,
       });
     } else {
-      allMessages.get(messageSession.number)?.messages.push(newMessage);
+      messageSessionsMap.get(messageSession.number)?.messages.push(newMessage);
     }
 
-    const newMap = new Map(allMessages);
+    const newMap = new Map(messageSessionsMap);
 
-    setAllMessages(newMap);
+    setMessageSessionsMap(newMap);
     setValue("");
     M_AddMessageToIndexedDB(newMessage);
   };
@@ -310,7 +314,7 @@ const MessageSession = () => {
       {/* Name and number at top of message session view */}
       {sessionMessages.length > 0 ? (
         <div className="flex flex-col justify-start px-10 py-20 gap-y-16 min-h-full">
-          {sessionMessages.map((message: Message, index) => (
+          {sessionMessages.map((message: MessageType, index) => (
             <MessageComponent
               key={index}
               message={message}

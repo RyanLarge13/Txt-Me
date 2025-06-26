@@ -18,6 +18,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import { Dispatch, SetStateAction } from "react";
 
+import { ContactType } from "./contactTypes";
+
 interface Notifhdlr {
   closeNotif: () => void;
   setNotif: (
@@ -49,20 +51,6 @@ type User = {
   phoneNumber: string;
 };
 
-type Contacts = {
-  address: string;
-  avatar: null | string;
-  contactid: string;
-  createdat: string;
-  email: string;
-  name: string;
-  nickname: string;
-  number: number;
-  space: string;
-  userid: string;
-  website: string;
-};
-
 export interface ContextProps {
   setSysNotif: Dispatch<SetStateAction<SysNotif>>;
   setUser: Dispatch<SetStateAction<User>>;
@@ -70,7 +58,7 @@ export interface ContextProps {
   setOpenChatsMenu: Dispatch<SetStateAction<boolean>>;
   setOpenUserMenu: Dispatch<SetStateAction<boolean>>;
   setNewChat: Dispatch<SetStateAction<boolean>>;
-  setContacts: Dispatch<SetStateAction<Contacts[]>>;
+  setContacts: Dispatch<SetStateAction<ContactType[]>>;
   newChat: boolean;
   openUserMenu: boolean;
   openChatsMenu: boolean;
@@ -78,5 +66,5 @@ export interface ContextProps {
   user: User | null;
   notifHdlr: Notifhdlr;
   token: string;
-  contacts: Contacts[];
+  contacts: ContactType[];
 }

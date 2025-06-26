@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Contacts, Message } from "../types/userTypes";
+import { Contacts, Message } from "../types/userCtxtTypes";
 
 // Retrieve and return the initials of a username
 export const getInitials = (name: string) => {

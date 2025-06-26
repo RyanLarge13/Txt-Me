@@ -26,14 +26,14 @@ import EyeEmojiRead from "../assets/svg-animations/read.svg";
 import useContextMenu from "../hooks/useContextMenu";
 import useUserData from "../hooks/useUserData";
 import { ContextMenuShowType } from "../types/interactiveCtxtTypes";
-import { Message } from "../types/userTypes";
+import { MessageType } from "../types/messageTypes";
 
 const MessageComponent = ({
   message,
   length,
   index,
 }: {
-  message: Message;
+  message: MessageType;
   length: number;
   index: number;
 }): JSX.Element => {

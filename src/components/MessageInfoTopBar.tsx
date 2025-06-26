@@ -23,8 +23,11 @@ import { FcContacts } from "react-icons/fc";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import useContextMenu from "../hooks/useContextMenu";
-import { ContextMenuOptions, ContextMenuShowType } from "../types/interactiveCtxtTypes";
-import { MessageSessionType } from "../types/userTypes";
+import {
+  ContextMenuOptions,
+  ContextMenuShowType,
+} from "../types/interactiveCtxtTypes";
+import { MessageSessionType } from "../types/messageTypes";
 
 const MessageInfoTopBar = ({
   messageSession,

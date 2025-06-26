@@ -18,36 +18,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import { Socket } from "socket.io-client";
 
-export type SocketMessage = {
-  messageid: string;
-  message: ArrayBuffer;
-  sent: boolean;
-  sentat: Date;
-  delivered: boolean;
-  deliveredat: Date | null;
-  read: boolean;
-  readat: Date | null;
-  fromnumber: string;
-  tonumber: string;
-  error: boolean;
-  synced: boolean;
-  iv: BufferSource;
-  encryptedAESKey: ArrayBuffer;
-  toname?: string;
-};
-
-export type MessageUpdateType = {
-  id: string;
-  sessionNumber: string;
-  delivered: boolean;
-  time: Date;
-};
-
-export type MessageDeliveryErrorType = {
-  messageid: string;
-  reason: string;
-  sessionNumber: string;
-};
 export interface SocketProps {
   socket: Socket | null;
 }

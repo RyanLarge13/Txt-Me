@@ -16,13 +16,16 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { AppSettingsType, ThemeType, UserType } from "./appDataTypes";
+import { Dispatch, SetStateAction } from "react";
 
-export type ConfigContextType = {
-  getAppData: <K extends keyof AppSettingsType>(key: K) => AppSettingsType[K];
-  setAppData: React.Dispatch<React.SetStateAction<AppSettingsType>>;
-  getThemeData: <K extends keyof ThemeType>(key: K) => ThemeType[K];
-  setTheme: React.Dispatch<React.SetStateAction<ThemeType>>;
-  setUser: React.Dispatch<React.SetStateAction<UserType>>;
-  getUserData: <K extends keyof UserType>(key: K) => UserType[K];
-};
+import { ContactType } from "./contactTypes";
+import { MessageSessionMapType, MessageSessionType } from "./messageTypes";
+
+export interface UserCtxtProps {
+  setContacts: Dispatch<SetStateAction<ContactType[] | []>>;
+  setMessageSession: Dispatch<SetStateAction<MessageSessionType | null>>;
+  setMessageSessionsMap: Dispatch<SetStateAction<MessageSessionMapType>>;
+  contacts: ContactType[] | [];
+  messageSession: MessageSessionType | null;
+  messageSessionsMap: MessageSessionMapType;
+}

@@ -59,7 +59,7 @@ const NewContact = (): JSX.Element => {
     IDB_GetDrafts,
     IDB_AddContact,
   } = useDatabase();
-  const { setContacts, setAllMessages, contacts } = useContext(UserCtxt);
+  const { setContacts, setMessageSessionsMap, contacts } = useContext(UserCtxt);
   const { addErrorNotif } = useNotifActions();
   const { getUserData } = useConfig();
 
@@ -134,7 +134,7 @@ const NewContact = (): JSX.Element => {
       );
     }
 
-    setAllMessages((prev) => {
+    setMessageSessionsMap((prev) => {
       const messageSessions = prev;
 
       if (messageSessions.has(contactToAdd.number)) {

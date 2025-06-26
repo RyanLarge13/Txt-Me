@@ -22,19 +22,21 @@ import { IDBPDatabase, openDB } from "idb";
 import { createContext, useContext } from "react";
 
 import useLogger from "../hooks/useLogger.ts";
-import { AppData, User } from "../types/configCtxtTypes.ts";
+import { AppSettingsType, ThemeType, UserType } from "../types/appDataTypes.ts";
+import { ContactSettingsType, ContactType } from "../types/contactTypes.ts";
+import { DBCtxtProps, DraftType } from "../types/dbCtxtTypes.ts";
 import {
-  ContactSettings,
-  DBCtxtProps,
-  DBUser,
-  DraftType,
-  MessageSettings,
-  Theme,
-} from "../types/dbCtxtTypes.ts";
-import { Contacts, Message, MessageSessionType } from "../types/userTypes.ts";
+  MessageSessionType,
+  MessageSettingsType,
+  MessageType,
+} from "../types/messageTypes.ts";
 import { defaultAppSettings, defaultUser } from "../utils/constants.ts";
-import { Crypto_GenRSAKeyPair } from "../utils/crypto.ts";
-import { messageFoundIn } from "../utils/helpers.ts";
+import {
+  Crypto_ExportRSAPrivateKey,
+  Crypto_ExportRSAPublicKey,
+  Crypto_GenRSAKeyPair,
+} from "../utils/crypto.ts";
+import { messageFoundIn, tryCatch } from "../utils/helpers.ts";
 
 const DatabaseContext = createContext({} as DBCtxtProps);
 
@@ -47,10 +49,7 @@ const DatabaseContext = createContext({} as DBCtxtProps);
       more sense to be handled from inside the caller of the method
 */
 
-const M_GenRSAKeys = async (): Promise<{
-  publicKey: CryptoKey;
-  privateKey: CryptoKey;
-}> => {
+const M_GenRSAKeys = async (): Promise<CryptoKeyPair> => {
   try {
     const RSAKeyPair = await Crypto_GenRSAKeyPair();
     return RSAKeyPair;
@@ -82,7 +81,23 @@ export const DatabaseProvider = ({
       },
     };
 
-    const { publicKey, privateKey } = await M_GenRSAKeys();
+    const RSAKeyPair = await M_GenRSAKeys();
+
+    const { data: exportedRSAPublicKey, error: exportRSAKeyError } =
+      await tryCatch<ArrayBuffer>(() => Crypto_ExportRSAPublicKey(RSAKeyPair));
+    const { data: exportedRSAPrivateKey, error: exportRSAKeyErrorPrivate } =
+      await tryCatch<ArrayBuffer>(() => Crypto_ExportRSAPrivateKey(RSAKeyPair));
+
+    if (
+      !exportedRSAPrivateKey ||
+      !exportedRSAPublicKey ||
+      exportRSAKeyError ||
+      exportRSAKeyErrorPrivate
+    ) {
+      throw new Error(
+        `Error generating exported RSA key pairs. ${exportRSAKeyError}... AND ${exportRSAKeyErrorPrivate}`
+      );
+    }
 
     const appUser = {
       userId: "",
@@ -91,8 +106,8 @@ export const DatabaseProvider = ({
       email: "",
       phoneNumber: "",
       RSAKeyPair: {
-        private: privateKey,
-        public: publicKey,
+        private: exportedRSAPrivateKey,
+        public: exportedRSAPublicKey,
         expiresAt: new Date(new Date().getDate() + 7),
       },
     };
@@ -116,8 +131,8 @@ export const DatabaseProvider = ({
   };
 
   const buildMessagesAndContacts = async (db: IDBPDatabase): Promise<void> => {
-    const messages: Message[] = [];
-    const contacts: Contacts[] = [];
+    const messages: MessageType[] = [];
+    const contacts: ContactType[] = [];
 
     await db.put("messages", messages, "messages");
     await db.put("contacts", contacts, "contacts");
@@ -272,35 +287,35 @@ export const DatabaseProvider = ({
     [string, MessageSessionType][]
   > => (await IDB_GetDB()).get("message-sessions", "message-sessions");
   const IDB_GetAppUserData = async () => (await IDB_GetDB()).get("app", "user");
-  const IDB_GetThemeData = async (): Promise<Theme[]> =>
+  const IDB_GetThemeData = async (): Promise<ThemeType[]> =>
     (await IDB_GetDB()).getAll("theme");
-  const IDB_GetMessagesData = async (): Promise<Message[]> =>
+  const IDB_GetMessagesData = async (): Promise<MessageType[]> =>
     (await IDB_GetDB()).get("messages", "messages");
-  const IDB_GetContactsData = async (): Promise<Contacts[]> =>
+  const IDB_GetContactsData = async (): Promise<ContactType[]> =>
     (await IDB_GetDB()).get("contacts", "contacts");
-  const IDB_GetMessageSettingsData = async (): Promise<MessageSettings[]> =>
+  const IDB_GetMessageSettingsData = async (): Promise<MessageSettingsType[]> =>
     (await IDB_GetDB()).getAll("messageSettings");
-  const IDB_GetContactSettingsData = async (): Promise<ContactSettings[]> =>
+  const IDB_GetContactSettingsData = async (): Promise<ContactSettingsType[]> =>
     (await IDB_GetDB()).getAll("contactSettings");
   const IDB_GetPhoneNumber = async (): Promise<string> =>
     (await IDB_GetDB())
       .get("app", "user")
-      .then((settings: DBUser) => settings.phoneNumber);
+      .then((settings: UserType) => settings.phoneNumber);
   const IDB_GetLastMessageSession = async (): Promise<MessageSessionType> =>
     (await IDB_GetDB()).get("messageSession", "messageSession");
   // Get DB Data --------------------------------------------------------------------------------
 
   // Put/Patch DB Data ----------------------------------------------------------------------------
-  const IDB_UpdateUserInDB = async (user: User): Promise<IDBValidKey> =>
+  const IDB_UpdateUserInDB = async (user: UserType): Promise<IDBValidKey> =>
     (await IDB_GetDB()).put("app", user, "user");
   const M_UpdateContactsInDB = async (
-    contacts: Contacts[]
+    contacts: ContactType[]
   ): Promise<IDBValidKey> =>
     (await IDB_GetDB()).put("contacts", contacts, "contacts");
-  const M_UpdateMessagesInDB = async (messages: Message[]) =>
+  const M_UpdateMessagesInDB = async (messages: MessageType[]) =>
     (await IDB_GetDB()).put("messages", messages, "messages");
 
-  const IDB_AddContact = async (newContact: Contacts): Promise<void> => {
+  const IDB_AddContact = async (newContact: ContactType): Promise<void> => {
     const currentContacts = await IDB_GetContactsData();
     log.devLog(
       "Contacts returned from IDB when adding server contacts to local database",
@@ -308,7 +323,7 @@ export const DatabaseProvider = ({
     );
 
     const newContacts = currentContacts.filter(
-      (c: Contacts) => c.contactid !== newContact.contactid
+      (c: ContactType) => c.contactid !== newContact.contactid
     );
 
     log.devLog(
@@ -335,7 +350,9 @@ export const DatabaseProvider = ({
   ): Promise<IDBValidKey> =>
     (await IDB_GetDB()).put("messageSession", newSession, "messageSession");
 
-  const IDB_AddMessage = async (newMessage: Message): Promise<IDBValidKey> => {
+  const IDB_AddMessage = async (
+    newMessage: MessageType
+  ): Promise<IDBValidKey> => {
     const storedMessages = (await IDB_GetMessagesData()) || [];
 
     const newMessages = [...storedMessages, newMessage];
@@ -355,13 +372,13 @@ export const DatabaseProvider = ({
     (await IDB_GetDB()).put("drafts", newDrafts, "drafts");
   };
 
-  const IDB_UpdateContact = async (newContact: Contacts): Promise<void> => {
-    const currentContacts: Contacts[] = (await IDB_GetContactsData()) || [];
+  const IDB_UpdateContact = async (newContact: ContactType): Promise<void> => {
+    const currentContacts: ContactType[] = (await IDB_GetContactsData()) || [];
 
     if (currentContacts.length === 0) {
       M_UpdateContactsInDB([newContact]);
     } else {
-      const updatedContacts = currentContacts.map((c: Contacts) => {
+      const updatedContacts = currentContacts.map((c: ContactType) => {
         if (c.contactid === newContact.contactid) {
           return newContact;
         } else {
@@ -384,10 +401,10 @@ export const DatabaseProvider = ({
     (await IDB_GetDB()).put("drafts", newDrafts, "drafts");
   };
 
-  const IDB_UpdateMessage = async (message: Message): Promise<void> => {
+  const IDB_UpdateMessage = async (message: MessageType): Promise<void> => {
     const messages = await IDB_GetMessagesData();
 
-    const newMessages = messages.map((m: Message) => {
+    const newMessages = messages.map((m: MessageType) => {
       if (m.messageid === message.messageid) {
         return message;
       } else {
@@ -403,27 +420,31 @@ export const DatabaseProvider = ({
   };
 
   const IDB_UpdateAppDataWebPush = async (
-    newData: AppData["webPushSubscription"]
+    newData: AppSettingsType["webPushSubscription"]
   ): Promise<void> => {
-    const currentSettings: AppData = await IDB_GetAppData();
+    const currentSettings: AppSettingsType = await IDB_GetAppData();
 
     currentSettings.webPushSubscription = newData;
 
     (await IDB_GetDB()).put("app", currentSettings, "settings");
   };
 
-  const IDB_UpdateMessages = async (newMessages: Message[]): Promise<void> => {
-    const existingMessages: Message[] = await IDB_GetMessagesData();
+  const IDB_UpdateMessages = async (
+    newMessages: MessageType[]
+  ): Promise<void> => {
+    const existingMessages: MessageType[] = await IDB_GetMessagesData();
 
-    const updatedMessages = existingMessages.map((m: Message) => {
+    const updatedMessages = existingMessages.map((m: MessageType) => {
       return messageFoundIn(m, newMessages);
     });
 
     (await IDB_GetDB()).put("messages", updatedMessages, "messages");
   };
 
-  const IDB_AppendMessages = async (newMessages: Message[]): Promise<void> => {
-    const existingMessages: Message[] = await IDB_GetMessagesData();
+  const IDB_AppendMessages = async (
+    newMessages: MessageType[]
+  ): Promise<void> => {
+    const existingMessages: MessageType[] = await IDB_GetMessagesData();
 
     const updatedMessages = existingMessages.concat(newMessages);
 
@@ -433,36 +454,36 @@ export const DatabaseProvider = ({
 
   // Delete DB Methods ------------------------------------------------------------------------------
   const IDB_DeleteContact = async (contactId: string): Promise<void> => {
-    const currentContacts: Contacts[] = (await IDB_GetContactsData()) || [];
+    const currentContacts: ContactType[] = (await IDB_GetContactsData()) || [];
 
     if (currentContacts.length < 1) {
       return;
     }
 
     const newContacts = currentContacts.filter(
-      (c: Contacts) => c.contactid !== contactId
+      (c: ContactType) => c.contactid !== contactId
     );
 
     M_UpdateContactsInDB(newContacts);
   };
 
-  const IDB_DeleteMessages = async (messages: Message[]): Promise<void> => {
+  const IDB_DeleteMessages = async (messages: MessageType[]): Promise<void> => {
     if (messages.length < 1) {
       return;
     }
 
-    const existingMessages: Message[] = (await IDB_GetMessagesData()) || [];
+    const existingMessages: MessageType[] = (await IDB_GetMessagesData()) || [];
 
     if (existingMessages.length < 1) {
       IDB_UpdateMessages([]);
       return;
     }
 
-    let updatedMessages: Message[] = existingMessages;
+    let updatedMessages: MessageType[] = existingMessages;
 
-    messages.forEach((m: Message) => {
+    messages.forEach((m: MessageType) => {
       updatedMessages = updatedMessages.filter(
-        (_m: Message) => _m.messageid !== m.messageid
+        (_m: MessageType) => _m.messageid !== m.messageid
       );
     });
 

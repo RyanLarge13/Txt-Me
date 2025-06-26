@@ -20,9 +20,13 @@ import { AxiosResponse } from "axios";
 import { createContext, ReactNode, useEffect, useState } from "react";
 
 import useLogger from "../hooks/useLogger.ts";
+import { ContactType } from "../types/contactTypes.ts";
 import {
-    AllMessages, Contacts, Message, MessageSessionType, UserCtxtProps
-} from "../types/userTypes.ts";
+  MessageSessionMapType,
+  MessageSessionType,
+  MessageType,
+} from "../types/messageTypes.ts";
+import { UserCtxtProps } from "../types/userCtxtTypes.ts";
 import { API_FetchUserData, API_GetContacts } from "../utils/api.ts";
 import { tryCatch } from "../utils/helpers.ts";
 import { valPhoneNumber } from "../utils/validator.ts";
@@ -56,8 +60,9 @@ export const UserProvider = ({
   */
   // const myPhoneNumber: string = getUserData("phoneNumber");
 
-  const [contacts, setContacts] = useState<Contacts[]>([]);
-  const [allMessages, setAllMessages] = useState<AllMessages>(new Map());
+  const [contacts, setContacts] = useState<ContactType[]>([]);
+  const [messageSessionsMap, setMessageSessionsMap] =
+    useState<MessageSessionMapType>(new Map());
   const [messageSession, setMessageSession] =
     useState<MessageSessionType | null>(null);
   // State and state hooks --------------------------------------------------------------
@@ -155,7 +160,7 @@ export const UserProvider = ({
   //   });
 
   //   log.devLog("Map after building it with available data", newMap);
-  //   setAllMessages(newMap);
+  //   setMessageSessionsMap(newMap);
   // };
 
   /*
@@ -179,7 +184,7 @@ export const UserProvider = ({
     }
 
     const { data: newMessageSessionMap, error: mapCreationError } =
-      await tryCatch<AllMessages>(
+      await tryCatch<MessageSessionMapType>(
         () => new Map(dbMessageSessions),
         "Error creating new map from IndexedDB fetched message session array"
       );
@@ -189,10 +194,10 @@ export const UserProvider = ({
       return;
     }
 
-    setAllMessages(newMessageSessionMap);
+    setMessageSessionsMap(newMessageSessionMap);
   };
 
-  const M_AddServerMessagesToMap = (serverMessages: Message[]) => {
+  const M_AddServerMessagesToMap = (serverMessages: MessageType[]) => {
     log.devLog("Messages from server: ", serverMessages);
 
     /*
@@ -234,7 +239,7 @@ export const UserProvider = ({
       // setContacts(serverContacts);
       // For now just add what contacts you get back from the server into the local DB
       try {
-        serverContacts.forEach(async (c: Contacts) => {
+        serverContacts.forEach(async (c: ContactType) => {
           log.devLog("Adding contact from server to the local IDB database");
           await IDB_AddContact(c);
         });
@@ -263,7 +268,7 @@ export const UserProvider = ({
       // const response = await API_GetMessages(token);
 
       // let serverMessages = response.data?.data?.messages;
-      let serverMessages: Message[] = [];
+      let serverMessages: MessageType[] = [];
 
       if (!serverMessages) {
         log.logAllError(
@@ -284,8 +289,8 @@ export const UserProvider = ({
   };
 
   const M_FetchLocalMessagesAndContacts = async (): Promise<void> => {
-    const messages: Message[] = (await IDB_GetMessagesData()) || [];
-    const dbContacts: Contacts[] = (await IDB_GetContactsData()) || [];
+    const messages: MessageType[] = (await IDB_GetMessagesData()) || [];
+    const dbContacts: ContactType[] = (await IDB_GetContactsData()) || [];
 
     log.devLog(
       "Messages and contacts data from IndexedDB",
@@ -374,8 +379,8 @@ export const UserProvider = ({
       value={{
         contacts,
         messageSession,
-        allMessages,
-        setAllMessages,
+        messageSessionsMap,
+        setMessageSessionsMap,
         setMessageSession,
         setContacts,
       }}

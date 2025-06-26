@@ -20,7 +20,7 @@ import UserCtxt from "../context/userCtxt";
 import useContextMenu from "../hooks/useContextMenu";
 import useLogger from "../hooks/useLogger";
 import useNotifActions from "../hooks/useNotifActions";
-import { Contacts as ContactType } from "../types/userTypes";
+import { ContactType } from "../types/contactTypes";
 import { API_DeleteContact } from "../utils/api";
 import { getInitials } from "../utils/helpers";
 
@@ -34,7 +34,7 @@ const Contact = ({
   const { addSuccessNotif } = useNotifActions();
   const { IDB_DeleteContact } = useDatabase();
   const { getUserData } = useConfig();
-  const { setContacts, setAllMessages } = useContext(UserCtxt);
+  const { setContacts, setMessageSessionsMap } = useContext(UserCtxt);
   const contextMenu = useContextMenu();
 
   const [expand, setExpand] = useState(false);
@@ -85,7 +85,7 @@ const Contact = ({
   // CONTEXT_MENU_METHODS ----------------------------------------------------------------
 
   const M_RemoveContactFromMessageSession = () => {
-    setAllMessages((prev) => {
+    setMessageSessionsMap((prev) => {
       const currentMap = prev;
 
       if (!currentMap.has(contact.number)) {

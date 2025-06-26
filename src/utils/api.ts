@@ -18,7 +18,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import Axios, { AxiosResponse } from "axios";
 
-import { Contacts } from "../types/userTypes";
+import { Contacts } from "../types/userCtxtTypes";
 
 const devUrl = import.meta.env.VITE_API_URL;
 

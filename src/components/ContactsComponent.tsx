@@ -24,7 +24,7 @@ import { Outlet } from "react-router-dom";
 import SearchIcon from "../assets/search.svg";
 import InteractiveCtxt from "../context/interactiveCtxt.tsx";
 import UserCtxt from "../context/userCtxt.tsx";
-import { Contacts as ContactType } from "../types/userTypes.ts";
+import { ContactType } from "../types/contactTypes.ts";
 import Contacts from "./Contacts.tsx";
 
 /*

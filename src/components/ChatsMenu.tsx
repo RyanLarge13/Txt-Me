@@ -34,12 +34,13 @@ import UserCtxt from "../context/userCtxt";
 import useContextMenu from "../hooks/useContextMenu.ts";
 import useLogger from "../hooks/useLogger";
 import useSocket from "../hooks/useSocket.ts";
+import { ContactType } from "../types/contactTypes.ts";
 import { ContextMenuShowType } from "../types/interactiveCtxtTypes.ts";
-import { Contacts, Message, MessageSessionType } from "../types/userTypes";
+import { MessageSessionType, MessageType } from "../types/messageTypes.ts";
 import { getInitials } from "../utils/helpers.ts";
 
 const ChatsMenu = () => {
-  const { setMessageSession, setAllMessages, allMessages } =
+  const { setMessageSession, setMessageSessionsMap, messageSessionsMap } =
     useContext(UserCtxt);
   const { IDB_UpdateMessageSession, IDB_UpdateMessages, IDB_DeleteMessages } =
     useDatabase();
@@ -72,7 +73,7 @@ const ChatsMenu = () => {
     }
   };
 
-  const M_UpdateMessagesAsRead = async (newMessages: Message[]) => {
+  const M_UpdateMessagesAsRead = async (newMessages: MessageType[]) => {
     try {
       await IDB_UpdateMessages(newMessages);
     } catch (err) {
@@ -112,8 +113,8 @@ const ChatsMenu = () => {
   const M_CreateMessageSession = (
     fromNumber: string,
     session: {
-      contact: Contacts | null;
-      messages: Message[];
+      contact: ContactType | null;
+      messages: MessageType[];
     }
   ): void => {
     const contact = session.contact;
@@ -138,9 +139,9 @@ const ChatsMenu = () => {
     }
 
     if (M_IsUnread(session) !== "") {
-      const currentAllMessages = allMessages;
+      const currentAllMessages = messageSessionsMap;
 
-      const newMessages: Message[] = messages.map((m: Message) => {
+      const newMessages: MessageType[] = messages.map((m: MessageType) => {
         if (m.fromnumber === fromNumber) {
           return { ...m, read: true, readat: new Date() };
         } else {
@@ -179,7 +180,7 @@ const ChatsMenu = () => {
 
       // Trigger a new state update so the changes can be reflected in the UI
       // Unfortunately this requires an entire refresh of this component
-      setAllMessages(new Map(currentAllMessages));
+      setMessageSessionsMap(new Map(currentAllMessages));
 
       M_UpdateMessagesAsRead(newMessages);
       M_StoreMessageSession(newSession);
@@ -201,8 +202,8 @@ const ChatsMenu = () => {
   };
 
   const M_IsUnread = (messageSession: {
-    contact: Contacts | null;
-    messages: Message[];
+    contact: ContactType | null;
+    messages: MessageType[];
   }) => {
     const lastMessage =
       messageSession.messages[messageSession.messages.length - 1] || null;
@@ -231,7 +232,7 @@ const ChatsMenu = () => {
           to that client?? Maybe. I'm not sure
     */
 
-    setAllMessages((prev) => {
+    setMessageSessionsMap((prev) => {
       if (prev.has(messageSession.number)) {
         const currentMessages = prev;
         currentMessages.delete(messageSession.number);
@@ -336,7 +337,7 @@ const ChatsMenu = () => {
         </button>
       </div>
       <div className="text-white w-full h-full mt-20">
-        {Array.from(allMessages).map(([fromNumber, messageSession]) => (
+        {Array.from(messageSessionsMap).map(([fromNumber, messageSession]) => (
           <div
             key={fromNumber}
             onContextMenu={(e) =>

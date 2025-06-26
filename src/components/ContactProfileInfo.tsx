@@ -5,19 +5,17 @@ import { useNavigate } from "react-router-dom";
 import { useDatabase } from "../context/dbContext";
 import UserCtxt from "../context/userCtxt";
 import useLogger from "../hooks/useLogger";
-import {
-  Contacts as ContactType,
-  MessageSessionType,
-} from "../types/userTypes";
+import { ContactType } from "../types/contactTypes";
+import { MessageSessionType } from "../types/messageTypes";
 
 const ContactProfileInfo = ({ contact }: { contact: ContactType }) => {
-  const { allMessages, setMessageSession } = useContext(UserCtxt);
+  const { messageSessionsMap, setMessageSession } = useContext(UserCtxt);
   const { IDB_UpdateMessageSession } = useDatabase();
 
   const log = useLogger();
   const navigate = useNavigate();
 
-  const session = allMessages.get(contact.number);
+  const session = messageSessionsMap.get(contact.number);
   const contactMessages = session?.messages || [];
   const sessionAESKey = session?.AESKey || null;
 

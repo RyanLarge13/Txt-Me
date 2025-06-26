@@ -16,10 +16,18 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from "react";
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 import useLogger from "../hooks/useLogger";
-import { AppData, ConfigContextType, Theme, User } from "../types/configCtxtTypes";
+import { AppSettingsType, ThemeType, UserType } from "../types/appDataTypes";
+import { ConfigContextType } from "../types/configCtxtTypes";
 import { useDatabase } from "./dbContext";
 
 export const ConfigContext = createContext({} as ConfigContextType);
@@ -32,7 +40,7 @@ export const ConfigProvider = ({
   const { IDB_GetDB, IDB_InitDatabase, IDB_GetThemeData, IDB_GetAppUserData } =
     useDatabase();
 
-  const [appData, setAppData] = useState<AppData>({
+  const [appData, setAppData] = useState<AppSettingsType>({
     initialized: true,
     locked: false,
     passwordType: "pin",
@@ -44,7 +52,7 @@ export const ConfigProvider = ({
     },
   });
 
-  const [theme, setTheme] = useState<Theme>({
+  const [theme, setTheme] = useState<ThemeType>({
     darkMode: true,
     accent: "#fff",
     background: "none",
@@ -54,7 +62,7 @@ export const ConfigProvider = ({
     },
   });
 
-  const [user, setUser] = useState<User>({
+  const [user, setUser] = useState<UserType>({
     userId: "",
     authToken: "",
     username: "",
@@ -110,9 +118,9 @@ export const ConfigProvider = ({
 
   const contextValue = useMemo(() => {
     return {
-      getAppData: <K extends keyof AppData>(key: K) => appData[key],
-      getThemeData: <K extends keyof Theme>(key: K) => theme[key],
-      getUserData: <K extends keyof User>(key: K) => user[key],
+      getAppData: <K extends keyof AppSettingsType>(key: K) => appData[key],
+      getThemeData: <K extends keyof ThemeType>(key: K) => theme[key],
+      getUserData: <K extends keyof UserType>(key: K) => user[key],
       setUser,
       setAppData,
       setTheme,

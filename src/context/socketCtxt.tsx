@@ -30,14 +30,15 @@ import io, { Socket } from "socket.io-client";
 import UserCtxt from "../context/userCtxt";
 import useLogger from "../hooks/useLogger";
 import useNotifActions from "../hooks/useNotifActions";
-import { AppData } from "../types/configCtxtTypes";
+import { AppSettingsType } from "../types/appDataTypes";
+import { ContactType } from "../types/contactTypes";
 import {
   MessageDeliveryErrorType,
+  MessageType,
   MessageUpdateType,
-  SocketMessage,
-  SocketProps,
-} from "../types/socketTypes";
-import { Contacts, Message } from "../types/userTypes";
+  SocketMessageType,
+} from "../types/messageTypes";
+import { SocketProps } from "../types/socketTypes";
 import { defaultMessage } from "../utils/constants";
 import {
   Crypto_DecryptRawAESKeyFromSenderWithRSAPrivateKey,
@@ -58,7 +59,8 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     IDB_UpdateMessages,
     IDB_AppendMessages,
   } = useDatabase();
-  const { allMessages, contacts, setAllMessages } = useContext(UserCtxt);
+  const { messageSessionsMap, contacts, setMessageSessionsMap } =
+    useContext(UserCtxt);
   const { getAppData, setAppData, getUserData } = useConfig();
   const { addSuccessNotif } = useNotifActions();
 
@@ -72,8 +74,8 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
   // UseRef for socket to avoid unwanted rerenders
   const socketRef = useRef<Socket | null>(null);
-  // Freshers allMessages data made available for M_HandleTextMessage
-  const allMessagesRef = useRef(allMessages);
+  // Freshers messageSessionsMap data made available for M_HandleTextMessage
+  const messageSessionsMapRef = useRef(messageSessionsMap);
 
   // useEffects -----------------------------------------------------
   useEffect(() => {
@@ -89,10 +91,10 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     };
   }, [socketRef]);
 
-  // Make sure we always have the freshest allMessages data from UserCtxt inside of the attached socket listener M_HandleTextMessage
+  // Make sure we always have the freshest messageSessionsMap data from UserCtxt inside of the attached socket listener M_HandleTextMessage
   useEffect(() => {
-    allMessagesRef.current = allMessages;
-  }, [allMessages]);
+    messageSessionsMapRef.current = messageSessionsMap;
+  }, [messageSessionsMap]);
   // useEffects -------------------------------------------------------
 
   // Local Scop Context Methods ---------------------------------------
@@ -146,7 +148,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
   const M_SetUpSocket = async (
     number: string,
-    webPushSubscription: AppData["webPushSubscription"]
+    webPushSubscription: AppSettingsType["webPushSubscription"]
   ): Promise<void> => {
     const socketURL = import.meta.env.VITE_API_SOCKET_URL || "";
     if (!socketURL) {
@@ -186,7 +188,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const M_FetchLatestMessages = () => {
-    const currentMessageSessions = allMessagesRef.current;
+    const currentMessageSessions = messageSessionsMapRef.current;
 
     const keys: string[] = Array.from(currentMessageSessions.keys());
 
@@ -280,14 +282,14 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const M_HandleTextMessage = useCallback(
-    async (socketMessage: SocketMessage): Promise<void> => {
+    async (socketMessage: SocketMessageType): Promise<void> => {
       /*
     TODO:
       DEBUG:
         1. When setting up a new message session from a socket 
         message where the session does not currently exist, 
         I seem to be incorrectly setting the contact information 
-        for the message session when pushing to allMessages. 
+        for the message session when pushing to messageSessionsMap. 
         Inspect how you are retrieving contact information on new message 
         session creations
       IMPORTANT!!!: 
@@ -314,7 +316,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
           return;
         }
 
-        const messageToStore: Message = { ...socketMessage, message: "" };
+        const messageToStore: MessageType = { ...socketMessage, message: "" };
 
         const { data: decryptedSendersAESKey, error: AESKeyDecryptionError } =
           await tryCatch<ArrayBuffer>(() =>
@@ -347,10 +349,10 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         //   );
         // }
 
-        const currentAllMessages = allMessagesRef.current;
+        const currentAllMessages = messageSessionsMapRef.current;
         const contactReference =
           contacts.find(
-            (c: Contacts) => c.number === messageToStore.fromnumber
+            (c: ContactType) => c.number === messageToStore.fromnumber
           ) || null;
 
         log.devLog("Message from socket", messageToStore);
@@ -362,11 +364,11 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         messageToStore.delivered = true;
         messageToStore.deliveredat = new Date();
 
-        // Call getter to ensure fresh allMessages map out of state
+        // Call getter to ensure fresh messageSessionsMap map out of state
 
         if (!currentAllMessages.has(messageToStore.fromnumber)) {
           log.devLog(
-            "allMessages map does not contain the phone number for some reason",
+            "messageSessionsMap map does not contain the phone number for some reason",
             messageToStore.fromnumber,
             currentAllMessages
           );
@@ -405,7 +407,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         // Trigger rerender. But for who? The entire <Profile /> component? Sounds a bit much
         const newMap = new Map(currentAllMessages);
 
-        setAllMessages(newMap);
+        setMessageSessionsMap(newMap);
 
         addSuccessNotif(
           contactReference?.name || messageToStore.fromnumber,
@@ -444,14 +446,14 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       "Ping update from server about message being delivered to other client",
       update
     );
-    const currentMessages = allMessagesRef.current;
+    const currentMessages = messageSessionsMapRef.current;
 
-    let idbUpdate: Message = defaultMessage;
+    let idbUpdate: MessageType = defaultMessage;
 
-    const messages: Message[] =
+    const messages: MessageType[] =
       currentMessages.get(update.sessionNumber)?.messages || [];
 
-    const updatedMessages: Message[] = messages.map((m: Message) => {
+    const updatedMessages: MessageType[] = messages.map((m: MessageType) => {
       if (m.messageid === update.id) {
         const updatedMessage = {
           ...m,
@@ -479,7 +481,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
     const newAllMessages = new Map(currentMessages);
 
-    setAllMessages(newAllMessages);
+    setMessageSessionsMap(newAllMessages);
 
     try {
       await IDB_UpdateMessage(idbUpdate);
@@ -500,14 +502,14 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       error
     );
 
-    const currentMessages = allMessagesRef.current;
+    const currentMessages = messageSessionsMapRef.current;
 
-    let idbUpdate: Message = defaultMessage;
+    let idbUpdate: MessageType = defaultMessage;
 
-    const messages: Message[] =
+    const messages: MessageType[] =
       currentMessages.get(error.sessionNumber)?.messages || [];
 
-    const updatedMessages: Message[] = messages.map((m: Message) => {
+    const updatedMessages: MessageType[] = messages.map((m: MessageType) => {
       if (m.messageid === error.messageid) {
         const updatedMessage = {
           ...m,
@@ -538,7 +540,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
     const newAllMessages = new Map(currentMessages);
 
-    setAllMessages(newAllMessages);
+    setMessageSessionsMap(newAllMessages);
 
     try {
       await IDB_UpdateMessage(idbUpdate);
@@ -587,7 +589,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     );
     const usersPhone = await IDB_GetPhoneNumber();
 
-    const currentMessageSession = allMessagesRef.current;
+    const currentMessageSession = messageSessionsMapRef.current;
 
     if (currentMessageSession.has(fromNumber)) {
       log.logAll("all messages has the number you are sending messages too");
@@ -600,7 +602,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
       const messages = currentSession?.messages || [];
 
-      const newMessages = messages.map((m: Message) => {
+      const newMessages = messages.map((m: MessageType) => {
         if (m.fromnumber === usersPhone) {
           return { ...m, read: true, readat: new Date() };
         } else {
@@ -616,7 +618,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
       const newMap = new Map(currentMessageSession);
 
-      setAllMessages(newMap);
+      setMessageSessionsMap(newMap);
 
       try {
         await IDB_UpdateMessages(newMessages);
@@ -635,19 +637,19 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const M_HandleLatestMessageUpdates = async (
     updates: {
       sessionNumber: string;
-      messages: Message[];
+      messages: MessageType[];
     }[]
   ) => {
-    const currentMessageSession = allMessagesRef.current;
+    const currentMessageSession = messageSessionsMapRef.current;
 
     /*
       DESC:
-        Loop through all of the updates and update allMessages accordingly
+        Loop through all of the updates and update messageSessionsMap accordingly
       IMPLEMENT: 
         1. Update indexedDB.
     */
     updates.forEach(
-      async (update: { sessionNumber: string; messages: Message[] }) => {
+      async (update: { sessionNumber: string; messages: MessageType[] }) => {
         if (currentMessageSession.has(update.sessionNumber)) {
           const currentSession = currentMessageSession.get(
             update.sessionNumber
@@ -684,7 +686,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
     const newMessagesMap = new Map(currentMessageSession);
 
-    setAllMessages(newMessagesMap);
+    setMessageSessionsMap(newMessagesMap);
   };
   // Socket Methods ---------------------------------------------------
 
