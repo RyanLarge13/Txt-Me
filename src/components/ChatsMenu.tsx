@@ -55,6 +55,9 @@ const ChatsMenu = () => {
         You have the same member function in/for Contacts.tsx
         and also found in ContactProfileInfo.
         Consider adding it to a common utils file or helper
+    FIX:
+        Need to make sure the rsaPublic key and AES keys for the session
+        exist and are set the way they should be set
   */
   const M_StoreMessageSession = async (
     newSession: MessageSessionType
@@ -342,6 +345,7 @@ const ChatsMenu = () => {
                 contact: messageSession.contact,
                 messages: messageSession.messages,
                 AESKey: null,
+                receiversRSAPublicKey: null,
               })
             }
             onClick={() => M_CreateMessageSession(fromNumber, messageSession)}
@@ -404,6 +408,7 @@ const ChatsMenu = () => {
                   contact: messageSession.contact,
                   messages: messageSession.messages,
                   AESKey: null,
+                  receiversRSAPublicKey: null,
                 })
               }
             >

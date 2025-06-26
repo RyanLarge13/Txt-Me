@@ -29,7 +29,8 @@ import {
   MessageSessionType,
 } from "../types/userTypes";
 import { defaultContact } from "../utils/constants";
-import { normalizePhoneNumber as npn } from "../utils/helpers";
+import { Crypto_GenAESKey } from "../utils/crypto";
+import { normalizePhoneNumber as npn, tryCatch } from "../utils/helpers";
 import Contact from "./Contact";
 
 const Contacts = ({ contacts }: { contacts: ContactType[] }) => {
@@ -73,11 +74,13 @@ const Contacts = ({ contacts }: { contacts: ContactType[] }) => {
     }
   };
 
-  const M_StartMessage = (contact: ContactType) => {
+  const M_StartMessage = async (contact: ContactType) => {
     const newSessionDefault: MessageSessionType = {
       number: "",
       contact: null,
       messages: [],
+      AESKey: null,
+      receiversRSAPublicKey: null,
     };
 
     // Default contact id from constants provides a default contactid of ""
@@ -117,9 +120,19 @@ const Contacts = ({ contacts }: { contacts: ContactType[] }) => {
       setMessageSession(newSessionDefault);
     } else {
       // First update our map and then create the message session
+      const { data: newAESKey, error: AESKeyGenError } =
+        await tryCatch<CryptoKey>(Crypto_GenAESKey);
+
+      if (AESKeyGenError || !newAESKey) {
+        throw new Error(
+          `Error generating new AES key. Check crypto.ts. ${AESKeyGenError}`
+        );
+      }
+
       allMessages.set(contact.number, {
         contact: contact.contactid ? contact : null,
         messages: [],
+        AESKey: newAESKey,
       });
 
       setAllMessages(new Map(allMessages));

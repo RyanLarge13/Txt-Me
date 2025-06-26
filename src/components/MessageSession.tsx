@@ -16,7 +16,13 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import React, { FormEvent, useContext, useEffect, useRef, useState } from "react";
+import React, {
+  FormEvent,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { IoSend } from "react-icons/io5";
 import { TiMessages } from "react-icons/ti";
 import { useLocation } from "react-router-dom";
@@ -32,8 +38,10 @@ import { SocketMessage } from "../types/socketTypes";
 import { Message, MessageSessionType } from "../types/userTypes";
 import { defaultMessage } from "../utils/constants";
 import {
-    Crypto_EncryptAESKeyWithReceiversPublicRSAKey, Crypto_EncryptMessageWithAES, Crypto_GenIV,
-    Crypto_GetRawAESKey
+  Crypto_EncryptAESKeyWithReceiversPublicRSAKey,
+  Crypto_EncryptMessageWithAES,
+  Crypto_GenIV,
+  Crypto_GetRawAESKey,
 } from "../utils/crypto";
 import { tryCatch } from "../utils/helpers";
 import { valPhoneNumber } from "../utils/validator";
@@ -179,9 +187,18 @@ const MessageSession = () => {
       throw new Error(`Check Gen IV method in crypto.js. ${ivGenError}`);
     }
 
+    /*
+      CONSIDER: 
+        Possibly remove non-null assertion and replace with an update function that
+        provides a fresh AES Key for the message session. This problem should not arise 
+        at this point in the program, but now that I have said that out loud we know 
+        somehow there is a way for the bug to come to life
+      NOTE:
+        NON-NULL ASSERTION FOR AES KEY
+    */
     const { data: rawAESKey, error: rawAESKeyError } =
       await tryCatch<BufferSource>(() =>
-        Crypto_GetRawAESKey(messageSession.AESKey)
+        Crypto_GetRawAESKey(messageSession.AESKey!)
       );
 
     if (rawAESKeyError || !rawAESKey) {
@@ -190,10 +207,17 @@ const MessageSession = () => {
       );
     }
 
+    /*
+      IMPLEMENT: 
+        Should query for key if it does not exist and remove 
+        non-null assertion. Potential for the key to be unavailable is too high.
+      NOTE:
+        NON-NULL ASSERTION FOR RSA KEY PAIR
+    */
     const { data: encryptedAESKey, error: AESKeyEncryptionError } =
       await tryCatch<ArrayBuffer>(() =>
         Crypto_EncryptAESKeyWithReceiversPublicRSAKey(
-          messageSession.ReceiversRSAPublicKey,
+          messageSession.receiversRSAPublicKey!,
           rawAESKey
         )
       );
@@ -204,9 +228,18 @@ const MessageSession = () => {
       );
     }
 
+    /*
+      CONSIDER: 
+        Possibly remove non-null assertion and replace with an update function that
+        provides a fresh AES Key for the message session. This problem should not arise 
+        at this point in the program, but now that I have said that out loud we know 
+        somehow there is a way for the bug to come to life
+      NOTE:
+        NON-NULL ASSERTION FOR AES KEY
+    */
     const { data: encryptedMessage, error: encryptMessageError } =
       await tryCatch<ArrayBuffer>(() =>
-        Crypto_EncryptMessageWithAES(iv, messageSession.AESKey, value)
+        Crypto_EncryptMessageWithAES(iv, messageSession.AESKey!, value)
       );
 
     if (encryptMessageError || !encryptedMessage) {

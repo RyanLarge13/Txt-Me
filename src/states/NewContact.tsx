@@ -143,6 +143,7 @@ const NewContact = (): JSX.Element => {
         messageSessions.set(contactToAdd.number, {
           contact: contactToAdd,
           messages: currentSession?.messages || [],
+          AESKey: currentSession?.AESKey || null,
         });
 
         return messageSessions;

@@ -39,8 +39,11 @@ import {
 } from "../types/socketTypes";
 import { Contacts, Message } from "../types/userTypes";
 import { defaultMessage } from "../utils/constants";
-import { Crypto_GenAESKey, Crypto_GetPlainText } from "../utils/crypto";
-import { urlBase64ToUint8Array } from "../utils/helpers";
+import {
+  Crypto_DecryptRawAESKeyFromSenderWithRSAPrivateKey,
+  Crypto_GenAESKey,
+} from "../utils/crypto";
+import { tryCatch, urlBase64ToUint8Array } from "../utils/helpers";
 import { useConfig } from "./configContext";
 import { useDatabase } from "./dbContext";
 
@@ -54,10 +57,9 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     IDB_UpdateAppDataWebPush,
     IDB_UpdateMessages,
     IDB_AppendMessages,
-    IDB_GetRSAPrivateKey,
   } = useDatabase();
   const { allMessages, contacts, setAllMessages } = useContext(UserCtxt);
-  const { getAppData, setAppData } = useConfig();
+  const { getAppData, setAppData, getUserData } = useConfig();
   const { addSuccessNotif } = useNotifActions();
 
   /*
@@ -294,26 +296,56 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       if (socketMessage) {
         const encryptedMessage: ArrayBuffer = socketMessage.message;
         const IV: BufferSource = socketMessage.iv;
-        const usersPrivateRSAKey = await IDB_GetRSAPrivateKey();
+        const sendersAESKey: ArrayBuffer = socketMessage.encryptedAESKey;
+
+        const usersPrivateRSAKey: CryptoKey | null =
+          getUserData("RSAKeyPair").private;
+
+        if (
+          !usersPrivateRSAKey ||
+          !IV ||
+          !encryptedMessage ||
+          !usersPrivateRSAKey ||
+          !sendersAESKey
+        ) {
+          log.logAllError(
+            `Error in socket message, missing values. IV: ${IV}. encryptedMessage: ${encryptedMessage}. userPrivateRSAKey: ${usersPrivateRSAKey}`
+          );
+          return;
+        }
 
         const messageToStore: Message = { ...socketMessage, message: "" };
 
-        try {
-          const decryptedSocketMessageArrayBuffer = await Crypto_GetPlainText(
-            // IV,
-            // AESKey
-            messageToStore.message
+        const { data: decryptedSendersAESKey, error: AESKeyDecryptionError } =
+          await tryCatch<ArrayBuffer>(() =>
+            Crypto_DecryptRawAESKeyFromSenderWithRSAPrivateKey(
+              usersPrivateRSAKey,
+              sendersAESKey
+            )
           );
 
-          const decryptedSocketMessage = new TextDecoder().decode(
-            decryptedSocketMessageArrayBuffer
-          );
-          messageToStore.message = decryptedSocketMessage;
-        } catch (err) {
+        if (AESKeyDecryptionError || !decryptedSendersAESKey) {
           throw new Error(
-            `Error decrypting message from server. Check crypto.ts Crypto_GetPlainText. Error: ${err}`
+            `Error decrypting aes key form sender. Check crypto.js. ${AESKeyDecryptionError}`
           );
         }
+
+        // try {
+        //   const decryptedSocketMessageArrayBuffer = await Crypto_GetPlainText(
+        //     IV,
+        //     AESKey,
+        //     messageToStore.message
+        //   );
+
+        //   const decryptedSocketMessage = new TextDecoder().decode(
+        //     decryptedSocketMessageArrayBuffer
+        //   );
+        //   messageToStore.message = decryptedSocketMessage;
+        // } catch (err) {
+        //   throw new Error(
+        //     `Error decrypting message from server. Check crypto.ts Crypto_GetPlainText. Error: ${err}`
+        //   );
+        // }
 
         const currentAllMessages = allMessagesRef.current;
         const contactReference =

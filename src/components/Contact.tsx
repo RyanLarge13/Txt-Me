@@ -99,6 +99,7 @@ const Contact = ({
         currentMap.set(contact.number, {
           contact: null,
           messages: session?.messages || [],
+          AESKey: session?.AESKey || null,
         });
 
         return new Map(currentMap);

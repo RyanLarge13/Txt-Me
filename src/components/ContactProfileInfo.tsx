@@ -17,7 +17,9 @@ const ContactProfileInfo = ({ contact }: { contact: ContactType }) => {
   const log = useLogger();
   const navigate = useNavigate();
 
-  const contactMessages = allMessages.get(contact.number)?.messages || [];
+  const session = allMessages.get(contact.number);
+  const contactMessages = session?.messages || [];
+  const sessionAESKey = session?.AESKey || null;
 
   const lastMessage =
     contactMessages.length > 0
@@ -42,10 +44,12 @@ const ContactProfileInfo = ({ contact }: { contact: ContactType }) => {
       log.devLog("No contact for this message session");
     }
 
-    const newSession = {
+    const newSession: MessageSessionType = {
       number: contact?.number || "unknown", // Default for no known number
       contact: contact !== null ? contact : null,
       messages: contactMessages,
+      AESKey: sessionAESKey,
+      receiversRSAPublicKey: null, // FIX THIS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     };
 
     setMessageSession(newSession);
