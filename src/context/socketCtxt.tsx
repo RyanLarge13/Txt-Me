@@ -18,13 +18,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 /// <reference types="vite/client" />
 
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-} from "react";
+import React, { createContext, useCallback, useContext, useEffect, useRef } from "react";
 import io, { Socket } from "socket.io-client";
 
 import UserCtxt from "../context/userCtxt";
@@ -32,17 +26,15 @@ import useLogger from "../hooks/useLogger";
 import useNotifActions from "../hooks/useNotifActions";
 import { AppSettingsType } from "../types/appDataTypes";
 import { ContactType } from "../types/contactTypes";
+import { NewMessageArrayBuffersType } from "../types/cryptoTypes";
 import {
-  MessageDeliveryErrorType,
-  MessageType,
-  MessageUpdateType,
-  SocketMessageType,
+    Base64StringType, MessageDeliveryErrorType, MessageType, MessageUpdateType, SocketMessageType
 } from "../types/messageTypes";
 import { SocketProps } from "../types/socketTypes";
 import { defaultMessage } from "../utils/constants";
 import {
-  Crypto_DecryptRawAESKeyFromSenderWithRSAPrivateKey,
-  Crypto_GenAESKey,
+    Crypto_DecryptRawAESKeyFromSenderWithRSAPrivateKey, Crypto_GenAESKey,
+    Crypto_ImportPrivateRSAKey, Crypto_NewMessageToArrayBuffers
 } from "../utils/crypto";
 import { tryCatch, urlBase64ToUint8Array } from "../utils/helpers";
 import { useConfig } from "./configContext";
@@ -286,35 +278,41 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       /*
     TODO:
       DEBUG:
-        1. When setting up a new message session from a socket 
-        message where the session does not currently exist, 
-        I seem to be incorrectly setting the contact information 
-        for the message session when pushing to messageSessionsMap. 
-        Inspect how you are retrieving contact information on new message 
-        session creations
+        1. Inspect how you are retrieving contact information on new message 
+           session creations and update data accordingly
       IMPORTANT!!!: 
         Left off here!!!!!!!!!!!!!!!!
     */
       if (socketMessage) {
-        const encryptedMessage: ArrayBuffer = socketMessage.message;
-        const IV: BufferSource = socketMessage.iv;
-        const sendersAESKey: ArrayBuffer = socketMessage.encryptedAESKey;
+        const encryptedMessage: Base64StringType = socketMessage.message;
+        const IV: Base64StringType = socketMessage.iv;
+        const sendersAESKey: Base64StringType = socketMessage.encryptedAESKey;
 
-        const usersPrivateRSAKey: CryptoKey | null =
+        const usersPrivateRSAKeyBuffer: ArrayBuffer =
           getUserData("RSAKeyPair").private;
 
         if (
-          !usersPrivateRSAKey ||
+          !usersPrivateRSAKeyBuffer ||
           !IV ||
           !encryptedMessage ||
-          !usersPrivateRSAKey ||
+          !usersPrivateRSAKeyBuffer ||
           !sendersAESKey
         ) {
           log.logAllError(
-            `Error in socket message, missing values. IV: ${IV}. encryptedMessage: ${encryptedMessage}. userPrivateRSAKey: ${usersPrivateRSAKey}`
+            `Error in socket message, missing values. IV: ${IV}. encryptedMessage: ${encryptedMessage}. userPrivateRSAKey: ${usersPrivateRSAKeyBuffer}`
           );
           return;
         }
+
+        // turn Base64Strings into ArrayBuffers so they can be imported/exported/decrypted
+        const newMessageArrayBuffers: NewMessageArrayBuffersType =
+          Crypto_NewMessageToArrayBuffers(encryptedMessage, IV, sendersAESKey);
+
+        // Import users private key as CryptoKey
+        const { data: usersPrivateRSAKey, error: RSAPrivateKeyImportError } =
+          await tryCatch<CryptoKey>(() =>
+            Crypto_ImportPrivateRSAKey(usersPrivateRSAKeyBuffer)
+          );
 
         const messageToStore: MessageType = { ...socketMessage, message: "" };
 

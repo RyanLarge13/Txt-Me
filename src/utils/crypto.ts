@@ -15,6 +15,8 @@
 
 */
 
+import { NewMessageArrayBuffersType } from "../types/cryptoTypes";
+import { Base64StringType } from "../types/messageTypes";
 import { tryCatch } from "./helpers";
 
 /*
@@ -262,3 +264,19 @@ export const Crypto_GenAESKeyAndExportAsArrayBuffer =
 
     return AESKeyExported;
   };
+
+export const Crypto_NewMessageToArrayBuffers = (
+  encryptedMessage: Base64StringType,
+  IV: Base64StringType,
+  sendersAESKey: Base64StringType
+): NewMessageArrayBuffersType => {
+  const bufferMessage = Crypto_Base64ToArrayBuffer(encryptedMessage);
+  const bufferIv = Crypto_Base64ToArrayBuffer(IV);
+  const bufferSendersAESKey = Crypto_Base64ToArrayBuffer(sendersAESKey);
+
+  return {
+    encryptedMessage: bufferMessage,
+    IV: bufferIv,
+    senderAESKey: bufferSendersAESKey,
+  };
+};

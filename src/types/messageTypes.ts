@@ -1,5 +1,7 @@
 import { ContactType } from "./contactTypes";
 
+export type Base64StringType = string;
+
 export type MessageSessionMapType = Map<
   string,
   {
@@ -46,7 +48,7 @@ export type MessageType = {
 
 export type SocketMessageType = {
   messageid: string;
-  message: string; // base64;
+  message: Base64StringType;
   sent: boolean;
   sentat: Date;
   delivered: boolean;
@@ -57,8 +59,8 @@ export type SocketMessageType = {
   tonumber: string;
   error: boolean;
   synced: boolean;
-  iv: string; // base64;
-  encryptedAESKey: string; // base64;
+  iv: Base64StringType;
+  encryptedAESKey: Base64StringType;
   toname?: string;
 };
 
