@@ -16,23 +16,26 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { AppSettings, DBUser, Theme } from "../types/dbCtxtTypes";
-import { Message } from "../types/userCtxtTypes";
+import { AppSettingsType, ThemeType, UserType } from "../types/appDataTypes";
+import { MessageType } from "../types/messageTypes";
+import { Crypto_GenRSAKeyPairAndExportAsArrayBuffers } from "./crypto";
 
-export const defaultUser: DBUser = {
+const defaultRSAKeyPair = await Crypto_GenRSAKeyPairAndExportAsArrayBuffers();
+
+export const defaultUser: UserType = {
   userId: "",
   authToken: "",
   username: "",
   email: "",
   phoneNumber: "",
   RSAKeyPair: {
-    private: null,
-    public: null,
+    private: defaultRSAKeyPair.private,
+    public: defaultRSAKeyPair.public,
     expiresAt: new Date(new Date().getDate() + 7),
   },
 };
 
-export const defaultTheme: Theme = {
+export const defaultTheme: ThemeType = {
   darkMode: true,
   accent: "#fff",
   background: "none",
@@ -42,7 +45,7 @@ export const defaultTheme: Theme = {
   },
 };
 
-export const defaultMessage: Message = {
+export const defaultMessage: MessageType = {
   messageid: "",
   message: "",
   sent: true,
@@ -57,7 +60,7 @@ export const defaultMessage: Message = {
   synced: false,
 };
 
-export const defaultAppSettings: AppSettings = {
+export const defaultAppSettings: AppSettingsType = {
   initialized: false,
   authToken: "",
   locked: false,

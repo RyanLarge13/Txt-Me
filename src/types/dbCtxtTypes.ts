@@ -1,12 +1,8 @@
 import { IDBPDatabase } from "idb";
 
 import { AppSettingsType, ThemeType, UserType } from "./appDataTypes";
-import { ContactSettings, ContactType } from "./contactTypes";
-import {
-  MessageSessionType,
-  MessageSettingsType,
-  MessageType,
-} from "./messageTypes";
+import { ContactSettingsType, ContactType } from "./contactTypes";
+import { MessageSessionType, MessageSettingsType, MessageType } from "./messageTypes";
 
 export type DraftType = {
   contact: ContactType | null;
@@ -24,7 +20,7 @@ export interface DBCtxtProps {
   IDB_GetMessagesData: () => Promise<MessageType[]>;
   IDB_GetContactsData: () => Promise<ContactType[]>;
   IDB_GetMessageSettingsData: () => Promise<MessageSettingsType[]>;
-  IDB_GetContactSettingsData: () => Promise<ContactSettings[]>;
+  IDB_GetContactSettingsData: () => Promise<ContactSettingsType[]>;
   IDB_GetPhoneNumber: () => Promise<string>;
   IDB_UpdateUserInDB: (user: UserType) => Promise<IDBValidKey>;
   IDB_UpdateContactInDraft: (contact: DraftType["contact"]) => Promise<void>;

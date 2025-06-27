@@ -13,7 +13,7 @@ export type MessageSessionType = {
   number: string;
   messages: MessageType[];
   contact: ContactType | null;
-  AESKey: ArrayBuffer | null;
+  AESKey: ArrayBuffer;
   receiversRSAPublicKey: ArrayBuffer | null;
 };
 

@@ -25,18 +25,12 @@ import useLogger from "../hooks/useLogger.ts";
 import { AppSettingsType, ThemeType, UserType } from "../types/appDataTypes.ts";
 import { ContactSettingsType, ContactType } from "../types/contactTypes.ts";
 import { DBCtxtProps, DraftType } from "../types/dbCtxtTypes.ts";
-import {
-  MessageSessionType,
-  MessageSettingsType,
-  MessageType,
-} from "../types/messageTypes.ts";
+import { MessageSessionType, MessageSettingsType, MessageType } from "../types/messageTypes.ts";
 import { defaultAppSettings, defaultUser } from "../utils/constants.ts";
 import {
-  Crypto_ExportRSAPrivateKey,
-  Crypto_ExportRSAPublicKey,
-  Crypto_GenRSAKeyPair,
+    Crypto_GenAESKeyAndExportAsArrayBuffer, Crypto_GenRSAKeyPairAndExportAsArrayBuffers
 } from "../utils/crypto.ts";
-import { messageFoundIn, tryCatch } from "../utils/helpers.ts";
+import { messageFoundIn } from "../utils/helpers.ts";
 
 const DatabaseContext = createContext({} as DBCtxtProps);
 
@@ -48,18 +42,6 @@ const DatabaseContext = createContext({} as DBCtxtProps);
       1. Remove all try catch blocks from this file that make 
       more sense to be handled from inside the caller of the method
 */
-
-const M_GenRSAKeys = async (): Promise<CryptoKeyPair> => {
-  try {
-    const RSAKeyPair = await Crypto_GenRSAKeyPair();
-    return RSAKeyPair;
-  } catch (err) {
-    // Throw, this should not fail
-    throw new Error(
-      "Error generating RSA key pairs. Check Crypto_GenRSAKeyPair function in utils"
-    );
-  }
-};
 
 export const DatabaseProvider = ({
   children,
@@ -81,23 +63,8 @@ export const DatabaseProvider = ({
       },
     };
 
-    const RSAKeyPair = await M_GenRSAKeys();
-
-    const { data: exportedRSAPublicKey, error: exportRSAKeyError } =
-      await tryCatch<ArrayBuffer>(() => Crypto_ExportRSAPublicKey(RSAKeyPair));
-    const { data: exportedRSAPrivateKey, error: exportRSAKeyErrorPrivate } =
-      await tryCatch<ArrayBuffer>(() => Crypto_ExportRSAPrivateKey(RSAKeyPair));
-
-    if (
-      !exportedRSAPrivateKey ||
-      !exportedRSAPublicKey ||
-      exportRSAKeyError ||
-      exportRSAKeyErrorPrivate
-    ) {
-      throw new Error(
-        `Error generating exported RSA key pairs. ${exportRSAKeyError}... AND ${exportRSAKeyErrorPrivate}`
-      );
-    }
+    const exportedRSAKeyPair =
+      await Crypto_GenRSAKeyPairAndExportAsArrayBuffers();
 
     const appUser = {
       userId: "",
@@ -106,8 +73,8 @@ export const DatabaseProvider = ({
       email: "",
       phoneNumber: "",
       RSAKeyPair: {
-        private: exportedRSAPrivateKey,
-        public: exportedRSAPublicKey,
+        private: exportedRSAKeyPair.private,
+        public: exportedRSAKeyPair.public,
         expiresAt: new Date(new Date().getDate() + 7),
       },
     };
@@ -166,11 +133,13 @@ export const DatabaseProvider = ({
   };
 
   const buildMessageSession = async (db: IDBPDatabase): Promise<void> => {
+    const AESKey = await Crypto_GenAESKeyAndExportAsArrayBuffer();
+
     const lastSession: MessageSessionType = {
       number: "-1",
       messages: [],
       contact: null,
-      AESKey: null,
+      AESKey: AESKey,
       receiversRSAPublicKey: null,
     };
 

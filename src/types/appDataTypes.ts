@@ -27,8 +27,8 @@ export type UserType = {
   email: string;
   phoneNumber: string;
   RSAKeyPair: {
-    private: null | ArrayBuffer;
-    public: null | ArrayBuffer;
+    private: ArrayBuffer;
+    public: ArrayBuffer;
     expiresAt: Date;
   };
 };

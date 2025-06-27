@@ -15,6 +15,8 @@
 
 */
 
+import { tryCatch } from "./helpers";
+
 /*
   NOTE:
     When keys come via socket from the server as strings this method will turn those
@@ -113,7 +115,7 @@ export const Crypto_ExportRSAPrivateKey = async (
   */
 export const Crypto_GetRawAESKey = async (
   aesKey: CryptoKey
-): Promise<BufferSource> => await crypto.subtle.exportKey("raw", aesKey);
+): Promise<ArrayBuffer> => await crypto.subtle.exportKey("raw", aesKey);
 
 export const Crypto_ImportPrivateRSAKey = async (
   RSAPrivateKey: ArrayBuffer
@@ -187,6 +189,12 @@ export const Crypto_ImportAESKeyFromSender = async (
     "decrypt",
   ]);
 
+/*
+    NOTE:
+      Use it!
+          
+          const message = new TextDecoder().decode(Crypto_GetPlainText(...));
+  */
 export const Crypto_GetPlainText = async (
   iv: BufferSource,
   aesKey: CryptoKey,
@@ -196,7 +204,61 @@ export const Crypto_GetPlainText = async (
 
 /*
   NOTE:
-    Use it!
-        
-        const message = new TextDecoder().decode(Crypto_GetPlainText(...));
+    High level method to generate RSA keys and export them as ArrayBuffers in a single call
+    while still handling errors
 */
+export const Crypto_GenRSAKeyPairAndExportAsArrayBuffers = async (): Promise<{
+  private: ArrayBuffer;
+  public: ArrayBuffer;
+}> => {
+  const { data: RSAKeyPair, error: keyPairGenError } = await tryCatch(
+    Crypto_GenRSAKeyPair
+  );
+
+  if (keyPairGenError || !RSAKeyPair) {
+    throw new Error(
+      `Error generating RSA key pair in constants. ${keyPairGenError}`
+    );
+  }
+
+  const { data: exportedRSAPublicKey, error: exportRSAKeyError } =
+    await tryCatch<ArrayBuffer>(() => Crypto_ExportRSAPublicKey(RSAKeyPair));
+  const { data: exportedRSAPrivateKey, error: exportRSAKeyErrorPrivate } =
+    await tryCatch<ArrayBuffer>(() => Crypto_ExportRSAPrivateKey(RSAKeyPair));
+
+  if (
+    !exportedRSAPrivateKey ||
+    !exportedRSAPublicKey ||
+    exportRSAKeyError ||
+    exportRSAKeyErrorPrivate
+  ) {
+    throw new Error(
+      `Error generating exported RSA key pairs. ${exportRSAKeyError}... AND ${exportRSAKeyErrorPrivate}`
+    );
+  }
+
+  return {
+    private: exportedRSAPrivateKey,
+    public: exportedRSAPublicKey,
+  };
+};
+
+export const Crypto_GenAESKeyAndExportAsArrayBuffer =
+  async (): Promise<ArrayBuffer> => {
+    const { data: AESKey, error: AESKeyGenError } = await tryCatch<CryptoKey>(
+      Crypto_GenAESKey
+    );
+
+    if (AESKeyGenError || !AESKey) {
+      throw new Error(`Error generating AES key. ${AESKeyGenError}`);
+    }
+
+    const { data: AESKeyExported, error: errorExportingAESKey } =
+      await tryCatch<ArrayBuffer>(() => Crypto_GetRawAESKey(AESKey));
+
+    if (errorExportingAESKey || !AESKeyExported) {
+      throw new Error(`Error exporting raw AES key. ${errorExportingAESKey}`);
+    }
+
+    return AESKeyExported;
+  };

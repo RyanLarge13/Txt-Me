@@ -16,18 +16,12 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {
-  createContext,
-  ReactNode,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from "react";
 
 import useLogger from "../hooks/useLogger";
 import { AppSettingsType, ThemeType, UserType } from "../types/appDataTypes";
 import { ConfigContextType } from "../types/configCtxtTypes";
+import { defaultAppSettings, defaultTheme, defaultUser } from "../utils/constants";
 import { useDatabase } from "./dbContext";
 
 export const ConfigContext = createContext({} as ConfigContextType);
@@ -40,40 +34,11 @@ export const ConfigProvider = ({
   const { IDB_GetDB, IDB_InitDatabase, IDB_GetThemeData, IDB_GetAppUserData } =
     useDatabase();
 
-  const [appData, setAppData] = useState<AppSettingsType>({
-    initialized: true,
-    locked: false,
-    passwordType: "pin",
-    authToken: "",
-    showOnline: false,
-    webPushSubscription: {
-      subscription: null,
-      subscribed: false,
-    },
-  });
+  const [appData, setAppData] = useState<AppSettingsType>(defaultAppSettings);
 
-  const [theme, setTheme] = useState<ThemeType>({
-    darkMode: true,
-    accent: "#fff",
-    background: "none",
-    animations: {
-      speed: 0.25,
-      spring: true,
-    },
-  });
+  const [theme, setTheme] = useState<ThemeType>(defaultTheme);
 
-  const [user, setUser] = useState<UserType>({
-    userId: "",
-    authToken: "",
-    username: "",
-    email: "",
-    phoneNumber: "",
-    RSAKeyPair: {
-      private: null,
-      public: null,
-      expiresAt: new Date(new Date().getDate() + 7),
-    },
-  });
+  const [user, setUser] = useState<UserType>(defaultUser);
 
   const log = useLogger();
 
