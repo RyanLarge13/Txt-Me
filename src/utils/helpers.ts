@@ -99,3 +99,61 @@ export const tryCatch = async <D>(
     return { data: null, error: `${message}. Error: ${err}` };
   }
 };
+
+/*
+  makeFresh -------------------------------------
+  
+  NOTE:
+    Why use this method??? this method removes the need for 
+    extra lines of code trying to accommodate block scope 
+    if statements.
+  EG: 
+    We need a value that might possibly be null, we need it to
+    be there no matter what so we assert with an if else 
+
+        const valueWeNeed: ArrayBuffer | null = session.neededValue;
+
+        let updatedValue: ArrayBuffer = valueNeeded;
+        if (!valueNeeded) {
+          updatedValue = makeArrayBuffer();
+        }
+        
+        const myObject = {
+          ...session,
+          valueNeeded: updateValue
+        }
+    
+    We do not like this. It is messy and the added code is unnecessary. Instead of
+    creating scopes and getting trapped in if else statement branching
+    lets call....
+
+        const valueWeNeed: ArrayBuffer | null = session.neededValue;
+
+        const newSessionAESKey = await makeFresh<ArrayBuffer>(
+          sessionAESKey,
+          makeArrayBuffer
+        );
+
+        const myObject = {
+          ...session,
+          valueNeeded: newSessionAESKey
+        }
+        
+    This gives us a bit more scope control and erases the need for
+    if else block scope handling
+*/
+export const makeFresh = async <K>(
+  existing: null | K,
+  callback: () => Promise<K>
+) => {
+  if (!existing) {
+    const { data, error } = await tryCatch<K>(callback);
+
+    if (error || !data) {
+      throw new Error(`Error making data fresh. ${error}`);
+    }
+    return data;
+  } else {
+    return existing;
+  }
+};

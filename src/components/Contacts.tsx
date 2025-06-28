@@ -26,8 +26,8 @@ import useLogger from "../hooks/useLogger";
 import useNotifActions from "../hooks/useNotifActions";
 import { ContactType } from "../types/contactTypes";
 import { MessageSessionType } from "../types/messageTypes";
-import { defaultContact } from "../utils/constants";
-import { Crypto_GenAESKey } from "../utils/crypto";
+import { defaultContact, messageSessionDefault } from "../utils/constants";
+import { Crypto_GenAESKeyAndExportAsArrayBuffer } from "../utils/crypto";
 import { normalizePhoneNumber as npn, tryCatch } from "../utils/helpers";
 import Contact from "./Contact";
 
@@ -73,13 +73,19 @@ const Contacts = ({ contacts }: { contacts: ContactType[] }) => {
   };
 
   const M_StartMessage = async (contact: ContactType) => {
-    const newSessionDefault: MessageSessionType = {
-      number: "",
-      contact: null,
-      messages: [],
-      AESKey: null,
-      receiversRSAPublicKey: null,
-    };
+    const newSessionDefault: MessageSessionType = messageSessionDefault;
+
+    // Immediately update the AESKey
+    const { data: newAESKey, error: AESKeyGenError } =
+      await tryCatch<ArrayBuffer>(Crypto_GenAESKeyAndExportAsArrayBuffer);
+
+    if (AESKeyGenError || !newAESKey) {
+      throw new Error(
+        `Error generating new AES key. Check crypto.ts. ${AESKeyGenError}`
+      );
+    }
+
+    newSessionDefault.AESKey = newAESKey;
 
     // Default contact id from constants provides a default contactid of ""
     if (!contact.contactid && phoneNumberSearchText === "") {
@@ -118,19 +124,11 @@ const Contacts = ({ contacts }: { contacts: ContactType[] }) => {
       setMessageSession(newSessionDefault);
     } else {
       // First update our map and then create the message session
-      const { data: newAESKey, error: AESKeyGenError } =
-        await tryCatch<CryptoKey>(Crypto_GenAESKey);
-
-      if (AESKeyGenError || !newAESKey) {
-        throw new Error(
-          `Error generating new AES key. Check crypto.ts. ${AESKeyGenError}`
-        );
-      }
-
       messageSessionsMap.set(contact.number, {
         contact: contact.contactid ? contact : null,
         messages: [],
         AESKey: newAESKey,
+        receiversRSAPublicKey: null,
       });
 
       setMessageSessionsMap(new Map(messageSessionsMap));

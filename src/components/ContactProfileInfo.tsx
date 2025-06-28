@@ -7,6 +7,8 @@ import UserCtxt from "../context/userCtxt";
 import useLogger from "../hooks/useLogger";
 import { ContactType } from "../types/contactTypes";
 import { MessageSessionType } from "../types/messageTypes";
+import { Crypto_GenAESKeyAndExportAsArrayBuffer } from "../utils/crypto";
+import { makeFresh } from "../utils/helpers";
 
 const ContactProfileInfo = ({ contact }: { contact: ContactType }) => {
   const { messageSessionsMap, setMessageSession } = useContext(UserCtxt);
@@ -17,7 +19,7 @@ const ContactProfileInfo = ({ contact }: { contact: ContactType }) => {
 
   const session = messageSessionsMap.get(contact.number);
   const contactMessages = session?.messages || [];
-  const sessionAESKey = session?.AESKey;
+  const sessionAESKey = session?.AESKey || null;
 
   const lastMessage =
     contactMessages.length > 0
@@ -29,7 +31,7 @@ const ContactProfileInfo = ({ contact }: { contact: ContactType }) => {
     1. Open message session function below could be reused
     this same function is used inside of ChatsMenu component
 */
-  const M_CreateMessageSession = () => {
+  const M_CreateMessageSession = async () => {
     log.devLog(
       "Creating a new message session from ContactProfileInfo.tsx. Logging messages and contact that is involved for creating session from click",
       "contact: ",
@@ -42,11 +44,16 @@ const ContactProfileInfo = ({ contact }: { contact: ContactType }) => {
       log.devLog("No contact for this message session");
     }
 
+    const newSessionAESKey = await makeFresh<ArrayBuffer>(
+      sessionAESKey,
+      Crypto_GenAESKeyAndExportAsArrayBuffer
+    );
+
     const newSession: MessageSessionType = {
       number: contact?.number || "unknown", // Default for no known number
       contact: contact !== null ? contact : null,
       messages: contactMessages,
-      AESKey: sessionAESKey,
+      AESKey: newSessionAESKey,
       receiversRSAPublicKey: null, // FIX THIS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     };
 
