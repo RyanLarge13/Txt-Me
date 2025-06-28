@@ -180,12 +180,12 @@ export const Crypto_EncryptAESKeyWithReceiversPublicRSAKey = async (
 */
 export const Crypto_DecryptRawAESKeyFromSenderWithRSAPrivateKey = async (
   myPrivateRSAKey: CryptoKey,
-  aesKey: BufferSource
+  aesKey: ArrayBuffer
 ): Promise<ArrayBuffer> =>
   await crypto.subtle.decrypt({ name: "RSA-OAEP" }, myPrivateRSAKey, aesKey);
 
 export const Crypto_ImportAESKeyFromSender = async (
-  rawAESKey: BufferSource
+  rawAESKey: ArrayBuffer
 ): Promise<CryptoKey> =>
   await crypto.subtle.importKey("raw", rawAESKey, { name: "AES-GCM" }, false, [
     "decrypt",
@@ -198,9 +198,9 @@ export const Crypto_ImportAESKeyFromSender = async (
           const message = new TextDecoder().decode(Crypto_GetPlainText(...));
   */
 export const Crypto_GetPlainText = async (
-  iv: BufferSource,
+  iv: ArrayBuffer,
   aesKey: CryptoKey,
-  ciphertext: BufferSource
+  ciphertext: ArrayBuffer
 ): Promise<ArrayBuffer> =>
   await crypto.subtle.decrypt({ name: "AES-GCM", iv }, aesKey, ciphertext);
 

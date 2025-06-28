@@ -18,7 +18,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 /// <reference types="vite/client" />
 
-import React, { createContext, useCallback, useContext, useEffect, useRef } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+} from "react";
 import io, { Socket } from "socket.io-client";
 
 import UserCtxt from "../context/userCtxt";
@@ -28,13 +34,21 @@ import { AppSettingsType } from "../types/appDataTypes";
 import { ContactType } from "../types/contactTypes";
 import { NewMessageArrayBuffersType } from "../types/cryptoTypes";
 import {
-    Base64StringType, MessageDeliveryErrorType, MessageType, MessageUpdateType, SocketMessageType
+  Base64StringType,
+  MessageDeliveryErrorType,
+  MessageType,
+  MessageUpdateType,
+  SocketMessageType,
 } from "../types/messageTypes";
 import { SocketProps } from "../types/socketTypes";
 import { defaultMessage } from "../utils/constants";
 import {
-    Crypto_DecryptRawAESKeyFromSenderWithRSAPrivateKey, Crypto_GenAESKey,
-    Crypto_ImportPrivateRSAKey, Crypto_NewMessageToArrayBuffers
+  Crypto_DecryptRawAESKeyFromSenderWithRSAPrivateKey,
+  Crypto_GenAESKey,
+  Crypto_GetPlainText,
+  Crypto_ImportAESKeyFromSender,
+  Crypto_ImportPrivateRSAKey,
+  Crypto_NewMessageToArrayBuffers,
 } from "../utils/crypto";
 import { tryCatch, urlBase64ToUint8Array } from "../utils/helpers";
 import { useConfig } from "./configContext";
@@ -304,7 +318,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
           return;
         }
 
-        // turn Base64Strings into ArrayBuffers so they can be imported/exported/decrypted
+        // Turn Base64Strings into ArrayBuffers so they can be imported/exported/decrypted
         const newMessageArrayBuffers: NewMessageArrayBuffersType =
           Crypto_NewMessageToArrayBuffers(encryptedMessage, IV, sendersAESKey);
 
@@ -314,13 +328,17 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
             Crypto_ImportPrivateRSAKey(usersPrivateRSAKeyBuffer)
           );
 
-        const messageToStore: MessageType = { ...socketMessage, message: "" };
+        if (RSAPrivateKeyImportError || !usersPrivateRSAKey) {
+          throw new Error(
+            `Error importing personal RSA key. ${RSAPrivateKeyImportError}`
+          );
+        }
 
         const { data: decryptedSendersAESKey, error: AESKeyDecryptionError } =
           await tryCatch<ArrayBuffer>(() =>
             Crypto_DecryptRawAESKeyFromSenderWithRSAPrivateKey(
               usersPrivateRSAKey,
-              sendersAESKey
+              newMessageArrayBuffers.senderAESKey
             )
           );
 
@@ -330,22 +348,48 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
           );
         }
 
-        // try {
-        //   const decryptedSocketMessageArrayBuffer = await Crypto_GetPlainText(
-        //     IV,
-        //     AESKey,
-        //     messageToStore.message
-        //   );
+        const { data: AESCryptoKeyFromSender, error: AESKeyImportError } =
+          await tryCatch(() =>
+            Crypto_ImportAESKeyFromSender(decryptedSendersAESKey)
+          );
 
-        //   const decryptedSocketMessage = new TextDecoder().decode(
-        //     decryptedSocketMessageArrayBuffer
-        //   );
-        //   messageToStore.message = decryptedSocketMessage;
-        // } catch (err) {
-        //   throw new Error(
-        //     `Error decrypting message from server. Check crypto.ts Crypto_GetPlainText. Error: ${err}`
-        //   );
-        // }
+        if (AESKeyImportError || !AESCryptoKeyFromSender) {
+          throw new Error(
+            `Error importing AES key as crypto key. ${AESKeyImportError}`
+          );
+        }
+
+        const { data: decryptedMessage, error: decryptingMessageError } =
+          await tryCatch(() =>
+            Crypto_GetPlainText(
+              newMessageArrayBuffers.IV,
+              AESCryptoKeyFromSender,
+              newMessageArrayBuffers.encryptedMessage
+            )
+          );
+
+        if (decryptingMessageError || !decryptedMessage) {
+          throw new Error(
+            `Error decrypting message from sender. ${decryptingMessageError}`
+          );
+        }
+
+        const decodedMessageText = new TextDecoder().decode(decryptedMessage);
+
+        const messageToStore: MessageType = {
+          messageid: socketMessage.messageid,
+          message: decodedMessageText,
+          sent: true,
+          sentat: socketMessage.sentat,
+          delivered: true,
+          deliveredat: new Date(),
+          read: socketMessage.read,
+          readat: socketMessage.readat,
+          fromnumber: socketMessage.fromnumber,
+          tonumber: socketMessage.tonumber,
+          error: false,
+          synced: socketMessage.synced,
+        };
 
         const currentAllMessages = messageSessionsMapRef.current;
         const contactReference =
