@@ -44,7 +44,7 @@ import { SocketProps } from "../types/socketTypes";
 import { defaultMessage } from "../utils/constants";
 import {
   Crypto_DecryptRawAESKeyFromSenderWithRSAPrivateKey,
-  Crypto_GenAESKey,
+  Crypto_GenAESKeyAndExportAsArrayBuffer,
   Crypto_GetPlainText,
   Crypto_ImportAESKeyFromSender,
   Crypto_ImportPrivateRSAKey,
@@ -415,12 +415,13 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
             currentAllMessages
           );
 
-          let newAESKey: CryptoKey | null = null;
-          try {
-            newAESKey = await Crypto_GenAESKey();
-          } catch (err) {
+          const { data: newAESKey, error: AESExportError } = await tryCatch(
+            Crypto_GenAESKeyAndExportAsArrayBuffer
+          );
+
+          if (AESExportError || !newAESKey) {
             throw new Error(
-              `Error generating AES key. Check Crypto_GenAESKey in crypto.ts. Error: ${err}`
+              `Error generating AES key. Check Crypto_GenAESKey in crypto.ts. Error: ${AESExportError}`
             );
           }
 
