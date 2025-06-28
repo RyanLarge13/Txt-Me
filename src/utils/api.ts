@@ -18,7 +18,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import Axios, { AxiosResponse } from "axios";
 
-import { Contacts } from "../types/userCtxtTypes";
+import { ContactType } from "../types/contactTypes";
 
 const devUrl = import.meta.env.VITE_API_URL;
 
@@ -119,7 +119,7 @@ export const API_GetContacts = (token: string): Promise<AxiosResponse> => {
 // Contact related requests --------------------------------------
 export const API_AddContact = (
   token: string,
-  contact: Contacts
+  contact: ContactType
 ): Promise<AxiosResponse> => {
   const res = Axios.post(
     `${devUrl}/user/contacts/new`,
@@ -131,7 +131,7 @@ export const API_AddContact = (
 
 export const API_UpdateContact = (
   token: string,
-  contact: Contacts
+  contact: ContactType
 ): Promise<AxiosResponse> => {
   const res = Axios.put(
     `${devUrl}/user/contacts/update`,

@@ -42,8 +42,8 @@ import { useDatabase } from "../context/dbContext";
 import UserCtxt from "../context/userCtxt";
 import useLogger from "../hooks/useLogger";
 import useNotifActions from "../hooks/useNotifActions";
+import { ContactType } from "../types/contactTypes";
 import { DraftType } from "../types/dbCtxtTypes";
-import { Contacts } from "../types/userTypes";
 import { API_AddContact } from "../utils/api";
 
 /*
@@ -116,7 +116,7 @@ const NewContact = (): JSX.Element => {
   }, []);
 
   const M_AddContactToIndexedDB = async (
-    contactToAdd: Contacts
+    contactToAdd: ContactType
   ): Promise<void> => {
     try {
       await IDB_AddContact(contactToAdd);
@@ -137,13 +137,14 @@ const NewContact = (): JSX.Element => {
     setMessageSessionsMap((prev) => {
       const messageSessions = prev;
 
-      if (messageSessions.has(contactToAdd.number)) {
-        const currentSession = messageSessions.get(contactToAdd.number);
+      const currentSession = messageSessions.get(contactToAdd.number);
 
+      if (currentSession) {
         messageSessions.set(contactToAdd.number, {
           contact: contactToAdd,
-          messages: currentSession?.messages || [],
-          AESKey: currentSession?.AESKey || null,
+          messages: currentSession.messages || [],
+          AESKey: currentSession.AESKey,
+          receiversRSAPublicKey: currentSession.receiversRSAPublicKey,
         });
 
         return messageSessions;
@@ -154,7 +155,7 @@ const NewContact = (): JSX.Element => {
   };
 
   const M_AddContactToServer = async (
-    contactToAdd: Contacts
+    contactToAdd: ContactType
   ): Promise<void> => {
     try {
       await API_AddContact(token, contactToAdd);
@@ -180,7 +181,7 @@ const NewContact = (): JSX.Element => {
         1. Cannot add two contacts with the same phone number
     */
     const phoneNumberExits = contacts.find(
-      (c: Contacts) => c.number === phoneNumber
+      (c: ContactType) => c.number === phoneNumber
     );
 
     if (phoneNumberExits) {

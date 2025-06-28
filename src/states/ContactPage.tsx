@@ -36,7 +36,7 @@ import { useDatabase } from "../context/dbContext";
 import UserCtxt from "../context/userCtxt";
 import useLogger from "../hooks/useLogger";
 import useNotifActions from "../hooks/useNotifActions";
-import { Contacts } from "../types/userTypes";
+import { ContactType } from "../types/contactTypes";
 import { API_UpdateContact } from "../utils/api";
 import { contactFromFormState, getInitials } from "../utils/helpers";
 
@@ -46,7 +46,7 @@ const ContactPage = () => {
   const { IDB_UpdateContact } = useDatabase();
   const { getUserData } = useConfig();
 
-  const [formState, setFormState] = useState<Contacts>({
+  const [formState, setFormState] = useState<ContactType>({
     contactid: "",
     createdat: new Date(),
     name: "",
@@ -72,8 +72,8 @@ const ContactPage = () => {
 
   const contactId = params.id;
 
-  const contact: Contacts | undefined = contacts.find(
-    (c: Contacts) => c.contactid === contactId
+  const contact: ContactType | undefined = contacts.find(
+    (c: ContactType) => c.contactid === contactId
   );
 
   useEffect(() => {
@@ -116,7 +116,7 @@ const ContactPage = () => {
         IMPLEMENT:
           1. Validate this new contact below
     */
-    const newContact: Contacts = contactFromFormState(formState, contact);
+    const newContact: ContactType = contactFromFormState(formState, contact);
 
     try {
       await IDB_UpdateContact(newContact);

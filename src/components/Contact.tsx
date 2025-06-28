@@ -96,11 +96,18 @@ const Contact = ({
       } else {
         const session = currentMap.get(contact.number);
 
-        currentMap.set(contact.number, {
-          contact: null,
-          messages: session?.messages || [],
-          AESKey: session?.AESKey || null,
-        });
+        if (session) {
+          currentMap.set(contact.number, {
+            contact: null,
+            messages: session.messages || [],
+            AESKey: session.AESKey,
+            receiversRSAPublicKey: session.receiversRSAPublicKey,
+          });
+        } else {
+          throw new Error(
+            `Data should exist that does not. Session is missing a value. Session: ${session}`
+          );
+        }
 
         return new Map(currentMap);
       }

@@ -17,7 +17,7 @@ const ContactProfileInfo = ({ contact }: { contact: ContactType }) => {
 
   const session = messageSessionsMap.get(contact.number);
   const contactMessages = session?.messages || [];
-  const sessionAESKey = session?.AESKey || null;
+  const sessionAESKey = session?.AESKey;
 
   const lastMessage =
     contactMessages.length > 0

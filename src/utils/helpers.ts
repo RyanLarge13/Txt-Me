@@ -16,7 +16,8 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Contacts, Message } from "../types/userCtxtTypes";
+import { ContactType } from "../types/contactTypes";
+import { MessageType } from "../types/messageTypes";
 
 // Retrieve and return the initials of a username
 export const getInitials = (name: string) => {
@@ -41,14 +42,14 @@ export const normalizePhoneNumber = (phoneNumber: string): string => {
     oc: Original contact
 */
 export const contactFromFormState = (
-  nc: Contacts,
-  oc: Contacts | undefined
-): Contacts => {
+  nc: ContactType,
+  oc: ContactType | undefined
+): ContactType => {
   if (oc === undefined) {
     return nc;
   }
 
-  const uc: Contacts = {
+  const uc: ContactType = {
     ...oc,
   };
 
@@ -72,8 +73,11 @@ export const urlBase64ToUint8Array = (base64String: string) => {
   return Uint8Array.from([...rawData].map((c) => c.charCodeAt(0)));
 };
 
-export const messageFoundIn = (m: Message, newMessages: Message[]): Message => {
-  newMessages.forEach((_m: Message) => {
+export const messageFoundIn = (
+  m: MessageType,
+  newMessages: MessageType[]
+): MessageType => {
+  newMessages.forEach((_m: MessageType) => {
     if (_m.messageid === m.messageid) {
       return _m;
     }

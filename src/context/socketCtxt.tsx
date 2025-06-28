@@ -74,6 +74,8 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     TODO:
       IMPLEMENT:
         1. Add a reusable method for sending a new subscription to the server
+        2. Go through and make sure that where ever we are updating the allMessageMap we are
+        correctly setting the users rsaPublic key for the message session
   */
 
   const log = useLogger();
@@ -429,6 +431,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
             contact: contactReference,
             messages: [messageToStore],
             AESKey: newAESKey,
+            receiversRSAPublicKey: null,
           });
         } else {
           log.devLog(
@@ -657,6 +660,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         contact: currentSession.contact || null,
         messages: newMessages,
         AESKey: currentSession.AESKey,
+        receiversRSAPublicKey: currentSession.receiversRSAPublicKey,
       });
 
       const newMap = new Map(currentMessageSession);
@@ -710,6 +714,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
             contact: currentSession?.contact || null,
             messages: updatedMessages,
             AESKey: currentSession?.AESKey,
+            receiversRSAPublicKey: currentSession.receiversRSAPublicKey,
           });
 
           try {

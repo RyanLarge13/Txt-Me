@@ -112,10 +112,7 @@ const ChatsMenu = () => {
 */
   const M_CreateMessageSession = (
     fromNumber: string,
-    session: {
-      contact: ContactType | null;
-      messages: MessageType[];
-    }
+    session: MessageSessionType
   ): void => {
     const contact = session.contact;
     const messages = session.messages;
@@ -149,11 +146,12 @@ const ChatsMenu = () => {
         }
       });
 
-      const newSession = {
+      const newSession: MessageSessionType = {
         number: contact?.number || fromNumber,
         contact: contact !== null ? contact : null,
         messages: newMessages,
-        AESKey: null, // CHANGE!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        AESKey: session.AESKey,
+        receiversRSAPublicKey: session.receiversRSAPublicKey,
       };
 
       if (currentAllMessages.has(fromNumber)) {
@@ -171,6 +169,7 @@ const ChatsMenu = () => {
           contact: messageData.contact || null,
           messages: newMessages,
           AESKey: messageData.AESKey,
+          receiversRSAPublicKey: session.receiversRSAPublicKey,
         });
       } else {
         log.logAllError(
@@ -189,11 +188,12 @@ const ChatsMenu = () => {
       return;
     }
 
-    const newSession = {
+    const newSession: MessageSessionType = {
       number: contact?.number || fromNumber,
       contact: contact !== null ? contact : null,
       messages: messages,
-      AESKey: null, // CHANGE!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      AESKey: session.AESKey,
+      receiversRSAPublicKey: session.receiversRSAPublicKey,
     };
 
     setMessageSession(newSession);
@@ -341,15 +341,14 @@ const ChatsMenu = () => {
           <div
             key={fromNumber}
             onContextMenu={(e) =>
-              M_HandleContextMenu(e, {
+              M_HandleContextMenu(e, { number: fromNumber, ...messageSession })
+            }
+            onClick={() =>
+              M_CreateMessageSession(fromNumber, {
                 number: fromNumber,
-                contact: messageSession.contact,
-                messages: messageSession.messages,
-                AESKey: null,
-                receiversRSAPublicKey: null,
+                ...messageSession,
               })
             }
-            onClick={() => M_CreateMessageSession(fromNumber, messageSession)}
             className={`flex justify-between items-center relative bg-[#222] border-b-black border-b h-[80px] max-w-full duration-200 hover:bg-[#333] ${
               // If the last message is not sent by the user and is
               // unread call this member method and change the top border color
@@ -408,7 +407,7 @@ const ChatsMenu = () => {
                   number: fromNumber,
                   contact: messageSession.contact,
                   messages: messageSession.messages,
-                  AESKey: null,
+                  AESKey: messageSession.AESKey,
                   receiversRSAPublicKey: null,
                 })
               }

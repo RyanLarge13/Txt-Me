@@ -7,7 +7,8 @@ export type MessageSessionMapType = Map<
   {
     contact: ContactType | null;
     messages: MessageType[];
-    AESKey: ArrayBuffer | null;
+    AESKey: ArrayBuffer;
+    receiversRSAPublicKey: ArrayBuffer | null;
   }
 >;
 
