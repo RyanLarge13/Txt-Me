@@ -73,8 +73,6 @@ const Contacts = ({ contacts }: { contacts: ContactType[] }) => {
   };
 
   const M_StartMessage = async (contact: ContactType) => {
-    const newSessionDefault: MessageSessionType = messageSessionDefault;
-
     // Immediately update the AESKey
     const { data: newAESKey, error: AESKeyGenError } =
       await tryCatch<ArrayBuffer>(Crypto_GenAESKeyAndExportAsArrayBuffer);
@@ -85,7 +83,10 @@ const Contacts = ({ contacts }: { contacts: ContactType[] }) => {
       );
     }
 
-    newSessionDefault.AESKey = newAESKey;
+    const newSessionDefault: MessageSessionType = {
+      ...messageSessionDefault,
+      AESKey: newAESKey,
+    };
 
     // Default contact id from constants provides a default contactid of ""
     if (!contact.contactid && phoneNumberSearchText === "") {

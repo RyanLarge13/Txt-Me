@@ -16,37 +16,35 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { AppSettingsType, ThemeType, UserType } from "../types/appDataTypes";
-import { MessageSessionType, MessageType } from "../types/messageTypes";
 import {
-  Crypto_GenAESKeyAndExportAsArrayBuffer,
-  Crypto_GenRSAKeyPairAndExportAsArrayBuffers,
-} from "./crypto";
-
-const defaultRSAKeyPair = await Crypto_GenRSAKeyPairAndExportAsArrayBuffers();
+  AppSettingsType,
+  DefaultUserType,
+  ThemeType,
+} from "../types/appDataTypes";
+import { DefaultMessageSessionType, MessageType } from "../types/messageTypes";
 
 /*
   NOTE:
     Be careful using this object. It must be updated to the 
     point that a new AESKey is generated when used no exceptions
 */
-export const messageSessionDefault: MessageSessionType = {
+export const messageSessionDefault: DefaultMessageSessionType = {
   number: "",
   messages: [],
   contact: null,
-  AESKey: await Crypto_GenAESKeyAndExportAsArrayBuffer(),
+  AESKey: null,
   receiversRSAPublicKey: null,
 };
 
-export const defaultUser: UserType = {
+export const defaultUser: DefaultUserType = {
   userId: "",
   authToken: "",
   username: "",
   email: "",
   phoneNumber: "",
   RSAKeyPair: {
-    private: defaultRSAKeyPair.private,
-    public: defaultRSAKeyPair.public,
+    private: null,
+    public: null,
     expiresAt: new Date(new Date().getDate() + 7),
   },
 };

@@ -83,7 +83,7 @@ export const Crypto_GenRSAKeyPair = async (): Promise<{
   NOTE:
     IV
 */
-export const Crypto_GenIV = (): BufferSource =>
+export const Crypto_GenIV = (): ArrayBuffer =>
   crypto.getRandomValues(new Uint8Array(12));
 
 /*
@@ -135,11 +135,11 @@ export const Crypto_ImportPrivateRSAKey = async (
     Import key retrieved from server
 */
 export const Crypto_ImportPublicRSAKey = async (
-  receiversPublicKey_Base64: string
+  receiversPublicKey: ArrayBuffer
 ): Promise<CryptoKey> =>
   await crypto.subtle.importKey(
     "spki",
-    Crypto_Base64ToArrayBuffer(receiversPublicKey_Base64),
+    receiversPublicKey,
     { name: "RSA-OAEP", hash: "SHA-256" },
     false,
     ["encrypt"]
@@ -152,7 +152,7 @@ export const Crypto_ImportPublicRSAKey = async (
 
 export const Crypto_EncryptAESKeyWithReceiversPublicRSAKey = async (
   receiversRSAPublicKey: CryptoKey,
-  rawAESKey: BufferSource
+  rawAESKey: ArrayBuffer
 ) =>
   await crypto.subtle.encrypt(
     { name: "RSA-OAEP" },
@@ -184,7 +184,7 @@ export const Crypto_DecryptRawAESKeyFromSenderWithRSAPrivateKey = async (
 ): Promise<ArrayBuffer> =>
   await crypto.subtle.decrypt({ name: "RSA-OAEP" }, myPrivateRSAKey, aesKey);
 
-export const Crypto_ImportAESKeyFromSender = async (
+export const Crypto_ImportAESKey = async (
   rawAESKey: ArrayBuffer
 ): Promise<CryptoKey> =>
   await crypto.subtle.importKey("raw", rawAESKey, { name: "AES-GCM" }, false, [

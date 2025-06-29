@@ -20,6 +20,14 @@ export type MessageSessionType = {
   receiversRSAPublicKey: ArrayBuffer | null;
 };
 
+export type DefaultMessageSessionType = {
+  number: string;
+  messages: MessageType[];
+  contact: ContactType | null;
+  AESKey: null;
+  receiversRSAPublicKey: null;
+};
+
 export type MessageSettingsType = {
   showImg: boolean;
   showLatestMessage: boolean;

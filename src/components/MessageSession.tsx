@@ -41,10 +41,12 @@ import {
 } from "../types/messageTypes";
 import { defaultMessage } from "../utils/constants";
 import {
+  Crypto_ArrayBufferToBase64,
   Crypto_EncryptAESKeyWithReceiversPublicRSAKey,
   Crypto_EncryptMessageWithAES,
   Crypto_GenIV,
-  Crypto_GetRawAESKey,
+  Crypto_ImportAESKey,
+  Crypto_ImportPublicRSAKey,
 } from "../utils/crypto";
 import { tryCatch } from "../utils/helpers";
 import { valPhoneNumber } from "../utils/validator";
@@ -183,32 +185,12 @@ const MessageSession = () => {
 
     const validPhone = valPhoneNumber(phoneNumber);
 
-    const { data: iv, error: ivGenError } = await tryCatch<BufferSource>(
+    const { data: iv, error: ivGenError } = await tryCatch<ArrayBuffer>(
       Crypto_GenIV
     );
 
     if (ivGenError || !iv) {
       throw new Error(`Check Gen IV method in crypto.js. ${ivGenError}`);
-    }
-
-    /*
-      CONSIDER: 
-        Possibly remove non-null assertion and replace with an update function that
-        provides a fresh AES Key for the message session. This problem should not arise 
-        at this point in the program, but now that I have said that out loud we know 
-        somehow there is a way for the bug to come to life
-      NOTE:
-        NON-NULL ASSERTION FOR AES KEY
-    */
-    const { data: rawAESKey, error: rawAESKeyError } =
-      await tryCatch<BufferSource>(() =>
-        Crypto_GetRawAESKey(messageSession.AESKey!)
-      );
-
-    if (rawAESKeyError || !rawAESKey) {
-      throw new Error(
-        `Check Gen RawAESKey method in crypto.js. ${rawAESKeyError}`
-      );
     }
 
     /*
@@ -218,32 +200,54 @@ const MessageSession = () => {
       NOTE:
         NON-NULL ASSERTION FOR RSA KEY PAIR
     */
+    const receiversPublicRSAKey: ArrayBuffer | null =
+      messageSession.receiversRSAPublicKey;
+    if (!receiversPublicRSAKey) {
+      // do something
+      return;
+    }
+
+    const { data: importedReceiversPublicRSAKey, error: RSAKeyImportError } =
+      await tryCatch<CryptoKey>(() =>
+        Crypto_ImportPublicRSAKey(receiversPublicRSAKey)
+      );
+
+    if (RSAKeyImportError || !importedReceiversPublicRSAKey) {
+      /*
+        NOTE:
+          Cannot throw here. RSA key can potentially be null and a system needs to
+          be implemented to handle this.
+      */
+      throw new Error(
+        `Error importing RSA public key for receiver. ${RSAKeyImportError}`
+      );
+    }
+
     const { data: encryptedAESKey, error: AESKeyEncryptionError } =
       await tryCatch<ArrayBuffer>(() =>
         Crypto_EncryptAESKeyWithReceiversPublicRSAKey(
-          messageSession.receiversRSAPublicKey!,
-          rawAESKey
+          importedReceiversPublicRSAKey,
+          messageSession.AESKey
         )
       );
 
     if (AESKeyEncryptionError || !encryptedAESKey) {
       throw new Error(
-        `Check Gen RawAESKey method in crypto.js. ${rawAESKeyError}`
+        `Check Gen RawAESKey method in crypto.js. ${AESKeyEncryptionError}`
       );
     }
 
-    /*
-      CONSIDER: 
-        Possibly remove non-null assertion and replace with an update function that
-        provides a fresh AES Key for the message session. This problem should not arise 
-        at this point in the program, but now that I have said that out loud we know 
-        somehow there is a way for the bug to come to life
-      NOTE:
-        NON-NULL ASSERTION FOR AES KEY
-    */
+    const { data: importedAESKey, error: AESKeyImportError } = await tryCatch(
+      () => Crypto_ImportAESKey(messageSession.AESKey)
+    );
+
+    if (AESKeyImportError || !importedAESKey) {
+      throw new Error(`Error importing AES Key. ${AESKeyImportError}`);
+    }
+
     const { data: encryptedMessage, error: encryptMessageError } =
       await tryCatch<ArrayBuffer>(() =>
-        Crypto_EncryptMessageWithAES(iv, messageSession.AESKey!, value)
+        Crypto_EncryptMessageWithAES(iv, importedAESKey, value)
       );
 
     if (encryptMessageError || !encryptedMessage) {
@@ -277,9 +281,9 @@ const MessageSession = () => {
 
     const socketMessage: SocketMessageType = {
       ...newMessage,
-      message: encryptedMessage,
-      iv: iv,
-      encryptedAESKey: encryptedAESKey,
+      message: Crypto_ArrayBufferToBase64(encryptedMessage),
+      iv: Crypto_ArrayBufferToBase64(iv),
+      encryptedAESKey: Crypto_ArrayBufferToBase64(encryptedAESKey),
     };
 
     socket ? socket.emit("text-message", socketMessage) : null;
@@ -287,9 +291,8 @@ const MessageSession = () => {
     // Check first to see if the messageSessionsMap map has the key?? For safety
     if (!messageSessionsMap.has(messageSession.number)) {
       messageSessionsMap.set(messageSession.number, {
-        contact: messageSession.contact,
+        ...messageSession,
         messages: [newMessage],
-        AESKey: messageSession.AESKey,
       });
     } else {
       messageSessionsMap.get(messageSession.number)?.messages.push(newMessage);

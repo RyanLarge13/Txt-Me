@@ -46,7 +46,7 @@ import {
   Crypto_DecryptRawAESKeyFromSenderWithRSAPrivateKey,
   Crypto_GenAESKeyAndExportAsArrayBuffer,
   Crypto_GetPlainText,
-  Crypto_ImportAESKeyFromSender,
+  Crypto_ImportAESKey,
   Crypto_ImportPrivateRSAKey,
   Crypto_NewMessageToArrayBuffers,
 } from "../utils/crypto";
@@ -351,9 +351,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         }
 
         const { data: AESCryptoKeyFromSender, error: AESKeyImportError } =
-          await tryCatch(() =>
-            Crypto_ImportAESKeyFromSender(decryptedSendersAESKey)
-          );
+          await tryCatch(() => Crypto_ImportAESKey(decryptedSendersAESKey));
 
         if (AESKeyImportError || !AESCryptoKeyFromSender) {
           throw new Error(
